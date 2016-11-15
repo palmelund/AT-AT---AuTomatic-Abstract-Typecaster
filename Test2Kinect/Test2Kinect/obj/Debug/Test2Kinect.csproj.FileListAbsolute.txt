@@ -40,3 +40,6 @@ C:\Users\bogi1\Desktop\UNI\S5\Projekt\Git\p5-sorting-machine\Test2Kinect\Test2Ki
 C:\Users\bogi1\Desktop\UNI\S5\Projekt\Git\p5-sorting-machine\Test2Kinect\Test2Kinect\obj\Debug\Test2Kinect.g.resources
 C:\Users\bogi1\Desktop\UNI\S5\Projekt\Git\p5-sorting-machine\Test2Kinect\Test2Kinect\obj\Debug\Test2Kinect.Properties.Resources.resources
 C:\Users\bogi1\Desktop\UNI\S5\Projekt\Git\p5-sorting-machine\Test2Kinect\Test2Kinect\obj\Debug\Test2Kinect.csproj.GenerateResource.Cache
+C:\Users\bogi1\Desktop\UNI\S5\Projekt\Git\p5-sorting-machine\Test2Kinect\Test2Kinect\bin\Debug\WriteableBitmapEx.Wpf.dll
+C:\Users\bogi1\Desktop\UNI\S5\Projekt\Git\p5-sorting-machine\Test2Kinect\Test2Kinect\bin\Debug\WriteableBitmapEx.Wpf.pdb
+C:\Users\bogi1\Desktop\UNI\S5\Projekt\Git\p5-sorting-machine\Test2Kinect\Test2Kinect\bin\Debug\WriteableBitmapEx.Wpf.xml

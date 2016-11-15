@@ -196,33 +196,6 @@ namespace Test2Kinect
             }
         }
 
-        /// <summary>
-        /// Handles the user clicking on the screenshot button
-        /// </summary>
-        /// <param name="sender">object sending the event</param>
-        /// <param name="e">event arguments</param>
-        /* private void ButtonScreenshotClick(object sender, RoutedEventArgs e)
-         {
- 
- 
-             if (null == this.sensor)
-             {
-                 //this.statusBarText.Text = Properties.Resources.ConnectDeviceFirst;
-                 return;
-             }
- 
-             // create a png bitmap encoder which knows how to save a .png file
-             BitmapEncoder encoder = new PngBitmapEncoder();
- 
-             // create frame from the writable bitmap and add to encoder
-             //encoder.Frames.Add(BitmapFrame.Create(this.colorBitmap));
-             croppedBitmap = Crop.CopyPixelsTo(this.colorBitmap, new Int32Rect(160, 100, this.colorBitmap.PixelWidth / 2, this.colorBitmap.PixelHeight / 2), new Int32Rect(0, 0, 400, 200));
-             encoder.Frames.Add(BitmapFrame.Create(croppedBitmap));
- 
-             this.Image2.Source = encoder.Frames.ElementAt(encoder.Frames.Count - 1);
- 
-             return;
-         }*/
 
         private void portReceiveData(object sender, SerialDataReceivedEventArgs e)
         {
@@ -230,24 +203,7 @@ namespace Test2Kinect
 
             // Serial port from arduino assigned
             SerialPort portArduino = (SerialPort) sender;
-            //String builder for arduino data created
-            //StringBuilder sb = new StringBuilder();
-
-            // Read from arduino
-            //byte[] buf = new byte[portArduino.BytesToRead];
-            //portArduino.Read(buf, 0, buf.Length);
-            //foreach (Byte b in buf)
-            //{
-            //    sb.Append(b.ToString() + " ");
-            //}
-            //MessageBox.Show(sb.ToString());
-            //if (sb.ToString().StartsWith("49") || sb.ToString().StartsWith("50"))
-            //{
-            //    takePictureRAM();
-                //takePictureSAVE();
-            //}
-
-
+            
             //Read from arduino
             string input = portArduino.ReadTo("end");
             //Split input to get correct command
@@ -318,12 +274,12 @@ namespace Test2Kinect
             if (Application.Current.Dispatcher.CheckAccess())
             {
                 // create a png bitmap encoder which knows how to save a .png file
-                BitmapEncoder encoder = new PngBitmapEncoder();
+                BitmapEncoder encoder = new BmpBitmapEncoder();
                 string time = System.DateTime.Now.ToString("hh'-'mm'-'ss", CultureInfo.CurrentUICulture.DateTimeFormat);
 
-                string myPhotos = "C:/Users/bogi1/Desktop/UNI/S5/Projekt/KinectBilleder";
+                string myPhotos = "C:/Users/bogi1/Desktop/UNI/S5/Projekt/KinectTestPicturesNew";
 
-                string path = System.IO.Path.Combine(myPhotos, "KinectSnapshot-" + time + ".png");
+                string path = System.IO.Path.Combine(myPhotos, "TestSet-" + time + ".bmp");
 
 
                 if (null == this.sensor)
