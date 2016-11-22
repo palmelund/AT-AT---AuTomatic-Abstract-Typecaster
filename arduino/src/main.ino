@@ -23,9 +23,6 @@ void setup()
   DEBUG_PRINTLN("--- Calibrating...");
   distance_to_wall = calibrate_ultra_sound_sensor();
   DEBUG_PRINT("--- distance_to_wall: "); DEBUG_PRINTLN(distance_to_wall);
-  
-  DEBUG_PRINTLN("- Button...");
-  button_init(BUTTON_INT_PIN, instant_stop_interrupt);
 
   DEBUG_PRINTLN("- Motors...");
   motor_init(&motor_conveyor, 0.36, MOTOR_CONVEYOR_PIN, MOTOR_CONVEYOR_INT_PIN, 
@@ -54,12 +51,6 @@ void motor_feeder_interrupt()
 void adv_motor_separator_interrupt1() 
 {
   advanced_motor_update_degrees(&adv_motor_separator);
-}
-
-void button_init(int16_t pin, void(*func)(void))
-{
-  pinMode(pin, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(pin), func, RISING);
 }
 
 int32_t calibrate_ultra_sound_sensor()
@@ -203,17 +194,28 @@ char* get_color_name(Ball_Color color)
   }
 }
 
-void instant_stop_interrupt() 
+uint16_t background_def[3];
+uint16_t red_def[3];
+uint16_t yellow_def[3];
+uint16_t green_def[3];
+uint16_t blue_def[3];
+
+void calibrate_color()
 {
-  if (running == true && stopped == false)
-  {
-    running = false;
-    DEBUG_PRINTLN("Stopping sorting machine...");
-  }
-  else if (running == false && stopped == true)
-  {
-    running = true;
-    DEBUG_PRINTLN("Starting sorting machine...");
-    delay(1000);
-  }
+DEBUG_PRINTLN("Calibrating BACKGRROUND");
+
+DEBUG_PRINTLN("Calibrating RED");
+
+DEBUG_PRINTLN("Calibrating YELLOW");
+
+DEBUG_PRINTLN("Calibrating GREEN");
+
+DEBUG_PRINTLN("Calibrating BLUE");
+}
+
+Ball_Color get_color()
+{
+    uint16_t red = RGB_sensor.readRed();
+    uint16_t green = RGB_sensor.readGreen();
+    uint16_t blue = RGB_sensor.readBlue();
 }
