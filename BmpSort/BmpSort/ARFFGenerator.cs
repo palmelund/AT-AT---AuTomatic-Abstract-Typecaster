@@ -60,7 +60,7 @@ namespace BmpSort
                 }
                 default:
                 {
-                    label = "error";
+                    label = "ignore";
                     break;
                 }
             }

@@ -59,9 +59,7 @@ namespace BmpSort
             // Set the image we display to point to the bitmap where we'll put the image data
             Image1.Source = kinect.ColorBitmap;
             ProgressBarARFF.Value = progress;
-            
             // Add an event handler to be called whenever there is new color frame data
-            
         }
 
         /// <summary>
@@ -209,9 +207,9 @@ namespace BmpSort
                 BitmapEncoder encoder = new BmpBitmapEncoder();
                 string time = System.DateTime.Now.ToString("hh'-'mm'-'ss", CultureInfo.CurrentUICulture.DateTimeFormat);
 
-                string myPhotos = "C:/Users/bogi1/Desktop/UNI/S5/Projekt/TrainingData/Ball";
+                string myPhotos = "C:/Users/bogi1/Desktop/UNI/S5/Projekt/TrainingData/Background";
 
-                string path = System.IO.Path.Combine(myPhotos, "Ball-" + time + ".bmp");
+                string path = System.IO.Path.Combine(myPhotos, "Background-" + time + ".bmp");
 
 
                 if (null == kinect.Sensor)
@@ -249,6 +247,7 @@ namespace BmpSort
                     }
                 });
             }
+
             else
             {
                 //Other wise re-invoke the method with UI thread access
@@ -274,7 +273,5 @@ namespace BmpSort
             ARFFGenerator arff = new ARFFGenerator(M);
             arff.generate_arff_file(ref progress);
         }
-
-        
     }
 }

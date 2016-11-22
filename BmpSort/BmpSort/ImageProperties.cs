@@ -136,7 +136,7 @@ namespace BmpSort
                 running[0] = whitePixels;
                 running[1] = blobdetect(currentBitmap);
                 running[2] = cornerdetect(currentBitmap);
-                trainingOutput[arrayCounter] = 2;
+                trainingOutput[arrayCounter] = 1;
                 trainingInput[arrayCounter] = running;
                 arrayCounter++;
             }
@@ -153,7 +153,7 @@ namespace BmpSort
                 running[0] = whitePixels;
                 running[1] = blobdetect(currentBitmap);
                 running[2] = cornerdetect(currentBitmap);
-                trainingOutput[arrayCounter] = 1;
+                trainingOutput[arrayCounter] = 2;
                 trainingInput[arrayCounter] = running;
                 arrayCounter++;
             }
