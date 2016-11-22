@@ -1,14 +1,21 @@
 #include "defines.h"
 #include "motor_api.h"
 #include "distance_sensor_api.h"
-#include "main.h"
+#include "src.h"
 
+SFE_ISL29125 RGB_sensor;
 Motor motor_conveyor, motor_feeder;
 Advanced_Motor adv_motor_separator;
 Ultra_Sound_Sensor distance_sensor;
 volatile bool running = true;
 volatile bool stopped = false;
 int32_t distance_to_wall;
+
+uint16_t background_def[3];
+uint16_t red_def[3];
+uint16_t yellow_def[3];
+uint16_t green_def[3];
+uint16_t blue_def[3];
 
 void setup() 
 {
@@ -194,15 +201,17 @@ char* get_color_name(Ball_Color color)
   }
 }
 
-uint16_t background_def[3];
-uint16_t red_def[3];
-uint16_t yellow_def[3];
-uint16_t green_def[3];
-uint16_t blue_def[3];
-
 void calibrate_color()
 {
+  uint16_t reading[10][3];
+
 DEBUG_PRINTLN("Calibrating BACKGRROUND");
+  for(int i = 0; i < 10; i++)
+  {
+    reading[i][0] = RGB_sensor.readRed();
+    reading[i][1] = RGB_sensor.readGreen();
+    reading[i][2] = RGB_sensor.readBlue();
+  }
 
 DEBUG_PRINTLN("Calibrating RED");
 
