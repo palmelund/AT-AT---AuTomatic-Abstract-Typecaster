@@ -6,15 +6,15 @@
 #define _DEFINES_H_
 #include <stddef.h>
 
-#define MOTOR_CONVEYOR_PIN 6            // Power conveyor motor
-#define MOTOR_FEEDER_PIN 52             // Power feeder motor
-#define MOTOR_SEPARATOR_PIN1 22         // Control separator motor direction
-#define MOTOR_SEPARATOR_PIN2 24         // Control separator motor direction
+#define MOTOR_CONVEYOR_PIN 27            // Power conveyor motor
+#define MOTOR_FEEDER_PIN 29             // Power feeder motor
+#define MOTOR_SEPARATOR_PIN1 25         // Control separator motor direction
+#define MOTOR_SEPARATOR_PIN2 23         // Control separator motor direction
 
-#define MOTOR_CONVEYOR_INT_PIN 18       // Interrupt conveyor motor
-#define MOTOR_FEEDER_INT_PIN 3          // Interrupt feeder motor
-#define MOTOR_SEPARATOR_INT_PIN1 2      // Interrupt separator motor
-#define MOTOR_SEPARATOR_INT_PIN2 31     // Used to read direction, not an actual 
+#define MOTOR_CONVEYOR_INT_PIN 2       // Interrupt conveyor motor
+#define MOTOR_FEEDER_INT_PIN 18          // Interrupt feeder motor
+#define MOTOR_SEPARATOR_INT_PIN1 3      // Interrupt separator motor
+#define MOTOR_SEPARATOR_DATA_PIN 51     // Used to read direction, not an actual 
                                         // interrupt
 
 #define BUTTON_INT_PIN 19               // Emergency stop int port

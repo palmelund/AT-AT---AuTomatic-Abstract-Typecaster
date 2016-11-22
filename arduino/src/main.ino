@@ -31,7 +31,7 @@ void setup()
     motor_feeder_interrupt);
 
   advanced_motor_init(&adv_motor_separator, 1.0, MOTOR_SEPARATOR_PIN1, 
-    MOTOR_SEPARATOR_PIN2,MOTOR_SEPARATOR_INT_PIN1, MOTOR_SEPARATOR_INT_PIN2, 
+    MOTOR_SEPARATOR_PIN2,MOTOR_SEPARATOR_INT_PIN1, MOTOR_SEPARATOR_DATA_PIN, 
     adv_motor_separator_interrupt1);
 
   DEBUG_PRINTLN("Starting the sorting machine...");
