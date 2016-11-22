@@ -195,3 +195,29 @@ char* get_color_name(Ball_Color color)
       exit(0);
   }
 }
+
+uint16_t background_def[3];
+uint16_t red_def[3];
+uint16_t yellow_def[3];
+uint16_t green_def[3];
+uint16_t blue_def[3];
+
+void calibrate_color()
+{
+DEBUG_PRINTLN("Calibrating BACKGRROUND");
+
+DEBUG_PRINTLN("Calibrating RED");
+
+DEBUG_PRINTLN("Calibrating YELLOW");
+
+DEBUG_PRINTLN("Calibrating GREEN");
+
+DEBUG_PRINTLN("Calibrating BLUE");
+}
+
+Ball_Color get_color()
+{
+    uint16_t red = RGB_sensor.readRed();
+    uint16_t green = RGB_sensor.readGreen();
+    uint16_t blue = RGB_sensor.readBlue();
+}
