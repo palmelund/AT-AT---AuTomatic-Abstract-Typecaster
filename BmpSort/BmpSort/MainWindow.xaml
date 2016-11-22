@@ -33,6 +33,8 @@
             <Viewbox Grid.Column="1" Stretch="None" HorizontalAlignment="Right">
                 <Image Name="Image2" Width="400" Height="200"/>
             </Viewbox>
+            <Button x:Name="Trainbutton" Grid.ColumnSpan="2" Content="Learn on training set." HorizontalAlignment="Left" Margin="400,800,0,0" VerticalAlignment="Top" Width="200" Click="Trainbutton_Click"/>
+            <Button x:Name="ARFFbutton" Grid.ColumnSpan="2" Content="Train and generate ARFF." HorizontalAlignment="Left" Margin="800,800,0,0" VerticalAlignment="Top" Width="200" Click="ARFFbutton_Click"/>
         </Grid>
 
 
@@ -41,5 +43,6 @@
                 <TextBlock Name="statusBarText" Margin="-1 0 0 0">Skriv noget sjovt her!                       :D</TextBlock>
             </StatusBarItem>
         </StatusBar>
+        <ProgressBar Name="ProgressBarARFF" HorizontalAlignment="Left" Height="10" Margin="800,780,0,0" Grid.Row="1" VerticalAlignment="Top" Width="200" />
     </Grid>
 </Window>

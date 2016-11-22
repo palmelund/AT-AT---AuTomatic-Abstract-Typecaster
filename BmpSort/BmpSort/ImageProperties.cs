@@ -7,7 +7,7 @@ using Accord.Imaging;
 using System.Drawing;
 using System.IO;
 
-namespace Machinelearner
+namespace BmpSort
 {
     class ImageProperties
     {
@@ -20,12 +20,11 @@ namespace Machinelearner
         int[] properties;
 
 
-
         string[] emptyImages;
         string[] background;
         string[] ballImages;
         string[] errors;
-        List<string> stringlist = new List<string>();
+
 
         Bitmap currentBitmap;
         Accord.Imaging.Converters.ImageToArray arrayMaker = new Accord.Imaging.Converters.ImageToArray();
@@ -35,24 +34,27 @@ namespace Machinelearner
         Dictionary<int, int> backgrounds = new Dictionary<int, int>();
 
         #endregion Properties
+
         public ImageProperties(string backgroundpath)
         {
             backgrounds.Add(0, 0);
             load_background_colors(backgroundpath);
-
         }
+
         public int[] trainingOutput { get; set; }
         public int[][] trainingInput { get; set; }
         public int arrayCounter { get; set; }
+
         public int[] get_properties(System.Drawing.Image inputImage)
         {
-            int[] result = { 0, 0 };
+            int[] result = {0, 0};
             inputImage = clean_background(inputImage);
             result[0] = whitePixels;
             result[1] = blobs;
 
             return result;
         }
+
         private System.Drawing.Image clean_background(System.Drawing.Image inputImage)
         {
             int i = 0;
@@ -81,6 +83,7 @@ namespace Machinelearner
             blobs = blobdetect(currentBitmap);
             return currentBitmap;
         }
+
         private void load_background_colors(string path)
         {
             background = Directory.GetFiles(path, "*.*");
@@ -90,6 +93,7 @@ namespace Machinelearner
                 add_ignore_colors(image);
             }
         }
+
         private void add_ignore_colors(System.Drawing.Image image)
         {
             Bitmap bitmap = new Bitmap(image);
@@ -106,7 +110,7 @@ namespace Machinelearner
 
         public void load_ball_training(string path)
         {
-            int[] running = { 0, 0, 0 };
+            int[] running = {0, 0, 0};
             ballImages = Directory.GetFiles(path, "*.*");
             foreach (string fil in ballImages)
             {
@@ -120,9 +124,10 @@ namespace Machinelearner
                 arrayCounter++;
             }
         }
+
         public void load_empty_training(string path)
         {
-            int[] running = { 0, 0, 0 };
+            int[] running = {0, 0, 0};
             emptyImages = Directory.GetFiles(path, "*.*");
             foreach (string fil in emptyImages)
             {
@@ -136,9 +141,10 @@ namespace Machinelearner
                 arrayCounter++;
             }
         }
+
         public void load_error_training(string path)
         {
-            int[] running = { 0, 0 , 0};
+            int[] running = {0, 0, 0};
             errors = Directory.GetFiles(path, "*.*");
             foreach (string fil in errors)
             {
@@ -154,20 +160,23 @@ namespace Machinelearner
         }
 
 
-
-     
+        //Bliver aldrig brugt
         public void load_background_image(System.Drawing.Image inputImage)
         {
-
             add_ignore_colors(inputImage);
-
         }
+
+
+        //Bliver aldrig brugt
         public void load_image(System.Drawing.Image input)
         {
             whitePixels = 0;
             properties = new int[5];
             counter++;
         }
+
+
+        //Bliver aldrig brugt
         public void load_files()
         {
             emptyImages = Directory.GetFiles("images/Empty/", "*.*");
@@ -175,11 +184,16 @@ namespace Machinelearner
             errors = Directory.GetFiles("images/Error/", "*.*");
             background = Directory.GetFiles("images/Background/", "*.*");
         }
+
+
+        //Bliver aldrig brugt 
         public void get_properties()
         {
-            properties[0] = blobdetect(currentBitmap);  //no of blobs detected
-            properties[1] = whitePixels;                //no of white pixels in image
+            properties[0] = blobdetect(currentBitmap); //no of blobs detected
+            properties[1] = whitePixels; //no of white pixels in image
+            properties[2] = cornerdetect(currentBitmap); //no of corners detected
         }
+
         public int blobdetect(Bitmap input)
         {
             Accord.Imaging.BlobCounter blobs = new BlobCounter();
@@ -200,4 +214,4 @@ namespace Machinelearner
             return points.Count;
         }
     }
-} 
+}
