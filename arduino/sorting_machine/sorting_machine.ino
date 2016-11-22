@@ -25,9 +25,6 @@ void setup()
   distance_to_wall = calibrate_ultra_sound_sensor();
   DEBUG_PRINT("--- distance_to_wall: "); DEBUG_PRINTLN(distance_to_wall);
   
-  DEBUG_PRINTLN("- Button...");
-  button_init(BUTTON_INT_PIN, instant_stop_interrupt);
-
   DEBUG_PRINTLN("- Motors...");
   motor_init(&motor_conveyor, 0.36, MOTOR_CONVEYOR_PIN, MOTOR_CONVEYOR_INT_PIN, 
     motor_conveyor_interrupt);
@@ -40,11 +37,6 @@ void setup()
 
   DEBUG_PRINTLN("Starting the sorting machine...");
   motor_turn_analog(&motor_conveyor, 255);
-
-//  while (running){
-//    DEBUG_PRINTLN(get_range(RANGE_TRIG, RANGE_ECHO));
-//    delay(250);
-//  }
 }
 
 void motor_conveyor_interrupt() 
@@ -61,12 +53,6 @@ void adv_motor_separator_interrupt1()
 {
   advanced_motor_update_degrees(&adv_motor_separator);
   //DEBUG_PRINTLN("int");
-}
-
-void button_init(int16_t pin, void(*func)(void))
-{
-  pinMode(pin, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(pin), func, RISING);
 }
 
 int32_t calibrate_ultra_sound_sensor()
@@ -207,20 +193,5 @@ char* get_color_name(Ball_Color color)
       DEBUG_PRINT("Error in get_color_name");
       delay(1000);
       exit(0);
-  }
-}
-
-void instant_stop_interrupt() 
-{
-  if (running == true && stopped == false)
-  {
-    running = false;
-    DEBUG_PRINTLN("Stopping sorting machine...");
-  }
-  else if (running == false && stopped == true)
-  {
-    running = true;
-    DEBUG_PRINTLN("Starting sorting machine...");
-    delay(1000);
   }
 }
