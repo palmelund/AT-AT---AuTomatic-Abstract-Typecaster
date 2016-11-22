@@ -19,8 +19,8 @@
 
 #define BUTTON_INT_PIN 19               // Emergency stop int port
 
-#define RANGE_ECHO 32                   // Read distance
-#define RANGE_TRIG 33                   // Start the sensor
+#define RANGE_ECHO 53                   // Read distance
+#define RANGE_TRIG 31                   // Start the sensor
 
 #define QUEUE_SIZE 6                    // Size of the conveyor queue
 

@@ -29,7 +29,7 @@ void setup()
 
   DEBUG_PRINTLN("--- Calibrating...");
   distance_to_wall = calibrate_ultra_sound_sensor();
-  DEBUG_PRINT("--- distance_to_wall: "); DEBUG_PRINTLN(distance_to_wall);
+  DEBUG_PRINT("---"); DEBUG_PRINTLN_VAR(distance_to_wall);
 
   DEBUG_PRINTLN("- Motors...");
   motor_init(&motor_conveyor, 0.36, MOTOR_CONVEYOR_PIN, MOTOR_CONVEYOR_INT_PIN, 
@@ -79,59 +79,45 @@ int32_t calibrate_ultra_sound_sensor()
 // ----- Loop -----
 void loop() 
 {
-  if (running) 
+  static int16_t bucket_pos [5] = { 0, 50, 100, 260, 310 };
+  static Segment_Queue segment_queue;
+  static Ball_Color last_ball = EMPTY;
+  static int32_t conveyor_target = 90;
+
+  Ball_Color read_color = EMPTY;
+  int32_t test_dist = distance_sensor_measure_distance(&distance_sensor);
+
+  DEBUG_PRINT_VAR(test_dist);
+  DEBUG_PRINT(" ");
+  DEBUG_PRINTLN_VAR(distance_to_wall);
+
+  // Tests if a ball is in front of sensor
+  if (test_dist < distance_to_wall)
   {
-    static int16_t bucket_pos [5] = { 0, 50, 100, 260, 310 };
-    static Segment_Queue segment_queue;
-    static Ball_Color last_ball = EMPTY;
-    static int32_t conveyor_target = 90;
-
-    Ball_Color read_color = EMPTY;
-    int32_t test_dist = distance_sensor_measure_distance(&distance_sensor);
-
-    DEBUG_PRINT_VAR(test_dist);
-    DEBUG_PRINT(" ");
-    DEBUG_PRINTLN_VAR(distance_to_wall);
-
-    // Tests if a ball is in front of sensor
-    if (test_dist < distance_to_wall)
-    {
-      read_color = read_color_sensor();
-      DEBUG_PRINT("ball found: ");
-      DEBUG_PRINTLN(get_color_name(read_color));
-    }
-    
-    enqueue_segment(&segment_queue, read_color);
-    feed_ball();
-
-    Ball_Color current_ball = peek_segment(&segment_queue);
-
-    // We only wonna move the buckets, if a ball was found, and that ball is
-    // different from the last ball
-    if (current_ball != EMPTY && current_ball != last_ball)
-    {
-      DEBUG_PRINT("ejecting: ");
-      DEBUG_PRINTLN(get_color_name(current_ball));
-      advanced_motor_turn_to_degree(&adv_motor_separator, 
-        bucket_pos[current_ball]);
-
-      last_ball = current_ball; 
-    }
-
-    while(motor_get_degrees(&motor_conveyor) < conveyor_target);
-    conveyor_target += 90;
+    read_color = read_color_sensor();
+    DEBUG_PRINT("ball found: ");
+    DEBUG_PRINTLN(get_color_name(read_color));
   }
-  else
+  
+  enqueue_segment(&segment_queue, read_color);
+  feed_ball();
+
+  Ball_Color current_ball = peek_segment(&segment_queue);
+
+  // We only wonna move the buckets, if a ball was found, and that ball is
+  // different from the last ball
+  if (current_ball != EMPTY && current_ball != last_ball)
   {
-    motor_stop(&motor_conveyor);
-    delay(1000);
-    stopped = true;
-    DEBUG_PRINTLN("The sorting machine has stopped.");
-    while (!running);
-    motor_turn(&motor_conveyor);
-    stopped = false;
+    DEBUG_PRINT("ejecting: ");
+    DEBUG_PRINTLN(get_color_name(current_ball));
+    advanced_motor_turn_to_degree(&adv_motor_separator, 
+      bucket_pos[current_ball]);
+
+    last_ball = current_ball; 
   }
 
+  while(motor_get_degrees(&motor_conveyor) < conveyor_target);
+  conveyor_target += 90;
 }
 
 void feed_ball() 
