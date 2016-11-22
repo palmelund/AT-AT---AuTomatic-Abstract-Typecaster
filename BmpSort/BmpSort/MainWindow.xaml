@@ -1,0 +1,45 @@
+﻿<Window x:Class="BmpSort.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:BmpSort"
+        mc:Ignorable="d"
+        Title="BmpSort 1.0" Height="900" Width="1400" Loaded="WindowLoaded" Closing="WindowClosing">
+    <Window.Resources>
+        <SolidColorBrush x:Key="MediumGreyBrush" Color="#000000"/>
+        <SolidColorBrush x:Key="KinectPurpleBrush" Color="#FFA500"/>
+        <SolidColorBrush x:Key="KinectBlueBrush" Color="#ffffffff"/>
+        <Style TargetType="{x:Type Image}">
+            <Setter Property="SnapsToDevicePixels" Value="False"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Name="layoutGrid" Margin="10 0 10 0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="680"/>
+                <ColumnDefinition Width="680"/>
+            </Grid.ColumnDefinitions>
+            <Viewbox Grid.Column="0" Stretch="None" HorizontalAlignment="Left">
+                <Image Name="Image1" Width="640" Height="480"/>
+            </Viewbox>
+            <Viewbox Grid.Column="1" Stretch="None" HorizontalAlignment="Right">
+                <Image Name="Image2" Width="400" Height="200"/>
+            </Viewbox>
+        </Grid>
+
+
+        <StatusBar Grid.Row="3" HorizontalAlignment="Stretch" Name="statusBar" VerticalAlignment="Bottom" Background="White" Foreground="{StaticResource MediumGreyBrush}">
+            <StatusBarItem Padding="0 0 0 10">
+                <TextBlock Name="statusBarText" Margin="-1 0 0 0">Skriv noget sjovt her!                       :D</TextBlock>
+            </StatusBarItem>
+        </StatusBar>
+    </Grid>
+</Window>

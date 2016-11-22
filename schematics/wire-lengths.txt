@@ -1,0 +1,36 @@
+--- Red ---
+++ 1  5v -> board+1                = red 12 cm
+++ 6  board+1 -> board             = red 3 cm
+++ 1  board+1 -> board+2           = red 8 cm
+++ 1  board+2 -> ultra sound board = red 14 + 16 cm
+++ 1  board+2 -> color sensor      = red 23 + 16 cm
+TODO: Driver
+
+--- Blue ---
+++ 1  GND -> board-1               = blue 12 cm
+++ 4  board-1 -> board             = blue 3 cm
+++ 1  board-1 -> board-2           = blue 8 cm
+++ 1  board-2 -> ultra sound board = blue 14 + 16 cm
+++ 1  board-2 -> color sensor      = blue 23 + 16 cm
+TODO: Driver
+
+--- Yellow ---
+++ 1  Pin 29 -> Transistor(Right)   = yellow 8 cm
+++ 1  Pin 27 -> Transistor(Left)    = yellow 5 cm
+++ 1  Pin 31 -> ultra sound board   = yellow 19 + 16 cm
+TODO: Driver
+
+
+--- Green ---
+++ 1  Pin 53 -> ultra sound board   = green 19 + 16 cm
+++ 1  Pin 51 -> Terminal(Left)      = green 10 cm
+
+--- White ---
+++ 1  Pin 3 -> Terminal(Left)       = white 11 cm
+++ 1  Pin 2 -> Terminal(Middle)     = white 11 cm
+++ 1  Pin 18 -> Terminal(Right)     = white 13 cm
+
+
+--- Browm ---
+++ 2 Pin 20/21 -> Color sensor      = brown 28 + 16 cm
+TODO: Driver

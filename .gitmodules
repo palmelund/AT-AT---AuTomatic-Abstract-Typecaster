@@ -1,0 +1,3 @@
+[submodule "arduino/lib/SparkFun_ISL29125_Breakout_Arduino_Library"]
+	path = arduino/lib/SparkFun_ISL29125_Breakout_Arduino_Library
+	url = https://github.com/sparkfun/SparkFun_ISL29125_Breakout_Arduino_Library.git
