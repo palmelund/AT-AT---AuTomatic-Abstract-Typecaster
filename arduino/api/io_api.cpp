@@ -31,8 +31,9 @@ void io_send_message(Out_Message* sending_message)
         case OUT_MESSAGE_COLOR:
             Serial.write(OUT_SIZE_COLOR);
             Serial.write(OUT_MESSAGE_COLOR);
-            Serial.write(sending_message->color.type);
-            Serial.write(sending_message->color.value);
+
+            for (int i = 0; i < OUT_SIZE_COLOR - 1; i++) 
+                Serial.write(sending_message->data[i]);
             break;
 
         case OUT_MESSAGE_COMMAND:
@@ -44,7 +45,9 @@ void io_send_message(Out_Message* sending_message)
         case OUT_MESSAGE_DISTANCE:
             Serial.write(OUT_SIZE_DISTANCE);
             Serial.write(OUT_MESSAGE_DISTANCE);
-            Serial.write(sending_message->distance.value);
+            
+            for (int i = 0; i < OUT_SIZE_DISTANCE - 1; i++) 
+                Serial.write(sending_message->data[i]);
             break;
 
         case OUT_MESSAGE_REQUEST:

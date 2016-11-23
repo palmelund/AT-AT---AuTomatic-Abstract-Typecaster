@@ -53,30 +53,32 @@ void setup()
     In_Message message_received;
     io_await_message(&message_received);
     
+    Out_Message message;
     switch(message_received.type)
     {
       case IN_MESSAGE_COLOR:
-        Serial.print("Color: "); 
-        Serial.println(message_received.color.type);
-
-        Serial.print("Value: "); 
-        Serial.println(message_received.color.value);
+        message.type = OUT_MESSAGE_COLOR;
+        message.color.type = message_received.color.type;
+        message.color.value = message_received.color.value;
+        io_send_message(&message);
         break;
 
       case IN_MESSAGE_COMMAND:
-        Serial.print("Command: "); 
-        Serial.println(message_received.command.type);
+        message.type = OUT_MESSAGE_COMMAND;
+        message.command.type = message_received.command.type;
+        io_send_message(&message);
         break;
 
       case IN_MESSAGE_DISTANCE:
-        Serial.print("Distance: "); 
-        Serial.println(message_received.distance.value);
+        message.type = OUT_MESSAGE_DISTANCE;
+        message.distance.value = message_received.distance.value;
+        io_send_message(&message);
         break;
 
       case IN_MESSAGE_OBJECT:
-        Serial.print("Object: "); 
-        Serial.println(message_received.object.type);
-        break;
+        message.type = OUT_MESSAGE_REQUEST;
+        message.request.type = OUT_REQUEST_OBJECT_INFO;
+        io_send_message(&message);
 
       default:
         break;
