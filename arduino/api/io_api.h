@@ -7,7 +7,7 @@
 
 #define MAX_MESSAGE_SIZE 3
 
-#define BEGIN_MESSAGE 0xff
+#define BEGIN_MESSAGE 0x62
 
 // Types of messages that can be received
 #define IN_MESSAGE_COMMAND 0
