@@ -48,9 +48,41 @@ void setup()
   motor_turn_analog(&motor_conveyor, 255);
   */
 
-  In_Message message_received;
-  io_await_message(&message_received);
-  Serial.println(message_received.type);
+  for (;;)
+  {
+    In_Message message_received;
+    io_await_message(&message_received);
+    
+    switch(received_message->type)
+    {
+      case IN_MESSAGE_COLOR:
+        Serial.print("Color: "); 
+        Serial.println(received_message->.color.type);
+
+        Serial.print("Value: "); 
+        Serial.println(received_message->.color.value);
+        break;
+
+      case IN_MESSAGE_COMMAND:
+        Serial.print("Command: "); 
+        Serial.println(received_message->.command.type);
+        break;
+
+      case IN_MESSAGE_DISTANCE:
+        Serial.print("Distance: "); 
+        Serial.println(received_message->.distance.value);
+        break;
+
+      case IN_MESSAGE_OBJECT:
+        Serial.print("Object: "); 
+        Serial.println(received_message->.object.type);
+        break;
+
+      default:
+        break;
+    }
+  }
+
 }
 
 void motor_conveyor_interrupt() 

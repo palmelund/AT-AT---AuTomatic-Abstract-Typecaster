@@ -14,7 +14,6 @@
 inline uint8_t read_byte()
 {
     int read = Serial.read();
-    Serial.println(read);
     ASSERT(read != -1);
 
     return (uint8_t)read;
@@ -63,15 +62,15 @@ void io_send_message(Out_Message* sending_message)
 void io_await_message(In_Message* received_message)
 {
     // Wait until data has been received by the Arduino
-    while(Serial.available() == 0) { }
+    while(Serial.available() < 2) { }
 
     uint8_t begin_message = read_byte();
 
-    while(Serial.available() == 0) { }
     uint8_t message_size = read_byte();
 
     ASSERT(begin_message == BEGIN_MESSAGE);
     ASSERT(message_size > 0);
+    while(Serial.available() < message_size) { }
 
     received_message->type = read_byte();
 

@@ -7,22 +7,22 @@
 
 #define MAX_MESSAGE_SIZE 3
 
-#define BEGIN_MESSAGE 'a'
+#define BEGIN_MESSAGE 0xff
 
 // Types of messages that can be received
-#define IN_MESSAGE_COMMAND 'c'
+#define IN_MESSAGE_COMMAND 0
 #define IN_MESSAGE_OBJECT 1
 #define IN_MESSAGE_COLOR 2
 #define IN_MESSAGE_DISTANCE 3
 
 // Input message sizes
-#define IN_SIZE_COMMAND 'b'
+#define IN_SIZE_COMMAND 2
 #define IN_SIZE_OBJECT 2
 #define IN_SIZE_COLOR 4
 #define IN_SIZE_DISTANCE 3
 
 // Input command types
-#define IN_COMMAND_CALIBRATE_RED 'd'
+#define IN_COMMAND_CALIBRATE_RED 0
 #define IN_COMMAND_CALIBRATE_GREEN 1
 #define IN_COMMAND_CALIBRATE_BLUE 2
 #define IN_COMMAND_CALIBRATE_DISTANCE 3
