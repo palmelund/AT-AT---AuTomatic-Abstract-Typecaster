@@ -1,13 +1,13 @@
 #include "io_api.h"
 
-void io_take_image()
+void io_send(uint8_t msg)
 {
-    Serial.println(IO_COMMAND_START);
-    Serial.println('2');    // TODO: this is what we send. May need to change
-    Serial.println(IO_COMMAND_END);
+    Serial.print('b'); 
+    Serial.print(msg); 
+    Serial.print('e');
 }
 
-int io_request_result()
+uint8_t io_recieve()
 {
-    return Serial.read();
+    
 }

@@ -21,6 +21,6 @@ struct RGB
   uint16_t red;
   uint16_t green;
   uint16_t blue;
-}
+};
 
 #endif // _MAIN_

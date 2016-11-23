@@ -2,6 +2,7 @@
 #include "motor_api.h"
 #include "distance_sensor_api.h"
 #include "src.h"
+#include "SparkFunISL29125.h"
 
 SFE_ISL29125 RGB_sensor;
 Motor motor_conveyor, motor_feeder;
@@ -206,6 +207,11 @@ DEBUG_PRINTLN("Calibrating YELLOW");
 DEBUG_PRINTLN("Calibrating GREEN");
 
 DEBUG_PRINTLN("Calibrating BLUE");
+}
+
+RGB get_color_rgb()
+{
+
 }
 
 Ball_Color get_color()
