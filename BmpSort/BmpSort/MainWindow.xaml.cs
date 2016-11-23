@@ -30,6 +30,10 @@ namespace BmpSort
 
         private ImageProcessing IP;
 
+        private Machine M;
+
+        private int progress = 0;
+
         /// <summary>
         /// Initializes a new instance of the MainWindow class.
         /// </summary>
@@ -47,14 +51,15 @@ namespace BmpSort
         private void WindowLoaded(object sender, RoutedEventArgs e)
         {
             kinect = new Kinect();
+            kinect.Sensor.ColorFrameReady += SensorColorFrameReady;
             IP = new ImageProcessing();
+            //M = new Machine(System.IO.Path.GetFullPath(System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "..\\..\\", "Images\\Background")));
             kinect.Sp.DataReceived += portReceiveData; // Add DataReceived Event Handler
             kinect.Sp.Open();
             // Set the image we display to point to the bitmap where we'll put the image data
             Image1.Source = kinect.ColorBitmap;
-
+            ProgressBarARFF.Value = progress;
             // Add an event handler to be called whenever there is new color frame data
-            kinect.Sensor.ColorFrameReady += this.SensorColorFrameReady;
         }
 
         /// <summary>
@@ -202,9 +207,9 @@ namespace BmpSort
                 BitmapEncoder encoder = new BmpBitmapEncoder();
                 string time = System.DateTime.Now.ToString("hh'-'mm'-'ss", CultureInfo.CurrentUICulture.DateTimeFormat);
 
-                string myPhotos = "C:/Users/bogi1/Desktop/UNI/S5/Projekt/KinectTestPicturesNew";
+                string myPhotos = "C:/Users/bogi1/Desktop/UNI/S5/Projekt/TrainingData/Background";
 
-                string path = System.IO.Path.Combine(myPhotos, "TestSet-" + time + ".bmp");
+                string path = System.IO.Path.Combine(myPhotos, "Background-" + time + ".bmp");
 
 
                 if (null == kinect.Sensor)
@@ -242,11 +247,31 @@ namespace BmpSort
                     }
                 });
             }
+
             else
             {
                 //Other wise re-invoke the method with UI thread access
                 Application.Current.Dispatcher.Invoke(new System.Action(() => takePictureSAVE()));
             }
+        }
+
+        private void Trainbutton_Click(object sender, RoutedEventArgs e)
+        {
+            M =
+                new Machine(
+                    System.IO.Path.GetFullPath(System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory,
+                        "..\\..\\", "Images\\Background")));
+            string path =
+                System.IO.Path.GetFullPath(System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory,
+                    "..\\..\\", "Images"));
+            M.train_model(System.IO.Path.Combine(path, "Ball"), System.IO.Path.Combine(path, "Empty"),
+                System.IO.Path.Combine(path, "Error"));
+        }
+
+        private void ARFFbutton_Click(object sender, RoutedEventArgs e)
+        {
+            ARFFGenerator arff = new ARFFGenerator(M);
+            arff.generate_arff_file(ref progress);
         }
     }
 }
