@@ -5,6 +5,7 @@
 #ifndef _DEFINES_H_
 #define _DEFINES_H_
 #include <stddef.h>
+#include "Arduino.h"
 
 #define MOTOR_CONVEYOR_PIN 27            // Power conveyor motor
 #define MOTOR_FEEDER_PIN 29             // Power feeder motor
@@ -30,7 +31,7 @@
 #define LED_YELLOW_PIN
 #define LED_GREEN_PIN
 
-#define DEBUGGING 0
+#define DEBUGGING 1
 
 #if DEBUGGING
 #define DEBUG_PRINT(x) Serial.print(x)
@@ -53,6 +54,22 @@ DEBUG_PRINT(var)
 #define DEBUG_PRINTLN_VAR(var) DEBUG_PRINT_VAR(var); DEBUG_PRINTLN("")
 #else
 #define DEBUG_PRINTLN_VAR(var)
+#endif
+
+#if DEBUGGING
+#define ASSERT(logic)                           \
+if (!(logic)) {                                   \
+    Serial.println("--- Asserted ---");         \
+    Serial.println(__func__);                   \
+    Serial.println(__FILE__);                   \
+    Serial.println(__LINE__);                   \
+    Serial.println(#logic);                     \
+    Serial.flush();                             \
+    delay(1000);                                \
+    abort();                                    \
+}
+#else
+#define ASSERT(logic)
 #endif
 
 #endif // _DEFINES_H_

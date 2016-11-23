@@ -2,6 +2,7 @@
 #define _MOTOR_API_H_
 
 #include "Arduino.h"
+#include "defines.h"
 #include <stdint.h>
 
 /*

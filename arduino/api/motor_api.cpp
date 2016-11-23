@@ -57,13 +57,17 @@ void advanced_motor_init(Advanced_Motor* motor, float degree_ratio,
 void advanced_motor_turn_to_degree(Advanced_Motor* motor, uint16_t degree) {
   // Turn to degree should only accept a degree value between 
   // 0 and 359 inclusive
-  if (degree >= 360) 
+  ASSERT(degree < 360);
+
+  /*
+  if (degree >= 360); 
   {
     Serial.print("advanced_motor_turn_to_degree was supplied ");
     Serial.print("with an invalid degree: ");
     Serial.println(degree);
     return;
   }
+  */
 
   int32_t current_pos = advanced_motor_get_degrees(motor);
   int32_t turns = (current_pos / 360);
@@ -104,12 +108,16 @@ void motor_turn_to_degree(Motor* motor, uint16_t degree)
 {
   // Turn to degree should only accept a degree value between 
   // 0 and 359 inclusive
+  ASSERT(degree < 360);
+
+  /*
   if (degree >= 360) 
   {
     Serial.print("motor_turn_to_degree was supplied with an invalid degree: ");
     Serial.println(degree);
     return;
   }
+  */
 
   int32_t current_pos = motor_get_degrees(motor);
   int32_t turns = (current_pos / 360);
@@ -193,9 +201,13 @@ void advanced_motor_turn(Advanced_Motor* motor, Turning_Direction direction)
       digitalWrite(motor->pin2, HIGH);
       break;
     default:
+      ASSERT(false);
+
+      /*
       Serial.println("Not supported direction!");
       delay(1000);
       exit(0);
+      */
       break;
   }
 }
@@ -214,9 +226,12 @@ void advanced_motor_turn_analog(Advanced_Motor* motor,
       analogWrite(motor->pin2, value);
       break;
     default:
+      ASSERT(false);
+      /*
       Serial.println("Not supported direction!");
       delay(1000);
       exit(0);
+      */
       break;
   }
 }
@@ -273,7 +288,8 @@ void advanced_motor_update_degrees(Advanced_Motor* motor)
       motor->direction = BACKWARD;
       break;
     default:
-      Serial.println("Error in determin direction of motor");
+      ASSERT(false);
+      //Serial.println("Error in determin direction of motor");
       break;
   }
 

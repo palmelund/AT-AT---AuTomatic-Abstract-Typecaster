@@ -3,6 +3,7 @@
 #include "distance_sensor_api.h"
 #include "src.h"
 #include "SparkFunISL29125.h"
+#include "io_api.h"
 
 SFE_ISL29125 RGB_sensor;
 Motor motor_conveyor, motor_feeder;
@@ -20,9 +21,10 @@ RGB blue_rgb;
 
 void setup() 
 {
-  //exit(0);
-  Serial.begin(9200);
+  Serial.begin(9600);
   while (!Serial);
+  /*
+  //exit(0);
 
   DEBUG_PRINTLN("Initializing all components...");
   DEBUG_PRINTLN("- Ultra sound sensor...");
@@ -44,6 +46,11 @@ void setup()
 
   DEBUG_PRINTLN("Starting the sorting machine...");
   motor_turn_analog(&motor_conveyor, 255);
+  */
+
+  In_Message message_received;
+  io_await_message(&message_received);
+  Serial.println(message_received.type);
 }
 
 void motor_conveyor_interrupt() 

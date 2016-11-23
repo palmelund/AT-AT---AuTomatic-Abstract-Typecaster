@@ -1,7 +1,7 @@
 #include <stdio.h>
 
 #define COLORS 8
-typedef enumber 
+typedef enum 
 {
     RED     = 0,
     GREEN   = 1,
