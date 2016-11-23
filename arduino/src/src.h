@@ -16,4 +16,11 @@ struct Segment_Queue
   uint8_t index = 0;
 };
 
+struct RGB
+{
+  uint16_t red;
+  uint16_t green;
+  uint16_t blue;
+}
+
 #endif // _MAIN_

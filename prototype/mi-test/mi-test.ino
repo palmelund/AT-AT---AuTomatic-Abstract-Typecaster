@@ -50,7 +50,7 @@ void loop()
 
     uint32_t pos = motor_get_degrees(&motor_conveyor);
     // Change TARGET1 for delay before requesting image
-    while(pos + 270 > motor_get_degrees(&motor_conveyor)) {}
+    while(pos + 360 > motor_get_degrees(&motor_conveyor)) {}
     Serial.print("Command:");
     Serial.print(2);
     Serial.println("end");

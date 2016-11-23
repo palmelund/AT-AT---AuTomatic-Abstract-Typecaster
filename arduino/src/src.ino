@@ -11,11 +11,11 @@ volatile bool running = true;
 volatile bool stopped = false;
 int32_t distance_to_wall;
 
-uint16_t background_def[3];
-uint16_t red_def[3];
-uint16_t yellow_def[3];
-uint16_t green_def[3];
-uint16_t blue_def[3];
+RGB background_rgb;
+RGB red_rgb;
+RGB yellow_rgb;
+RGB green_rgb;
+RGB blue_rgb;
 
 void setup() 
 {
