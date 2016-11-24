@@ -1,5 +1,11 @@
-#ifndef _MAIN_
-#define _MAIN_
+#ifndef _SRC_H_
+#define _SRC_H_
+
+#include "defines.h"
+#include "motor_api.h"
+#include "distance_sensor_api.h"
+#include "SparkFunISL29125.h"
+#include "io_api.h"
 
 enum Ball_Color 
 {
@@ -23,4 +29,10 @@ struct RGB
   uint16_t blue;
 };
 
-#endif // _MAIN_
+struct Delta_RGB
+{
+  RGB rgb;
+  uint16_t delta;
+};
+
+#endif // _SRC_H_
