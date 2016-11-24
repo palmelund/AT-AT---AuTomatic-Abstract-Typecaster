@@ -4,22 +4,19 @@ SFE_ISL29125 RGB_sensor;
 Motor motor_conveyor, motor_feeder;
 Advanced_Motor adv_motor_separator;
 Ultra_Sound_Sensor distance_sensor;
-volatile bool running = true;
-volatile bool stopped = false;
-int32_t distance_to_wall;
 
-Delta_RGB background_rgb;
-Delta_RGB red_rgb;
-Delta_RGB yellow_rgb;
-Delta_RGB green_rgb;
-Delta_RGB blue_rgb;
+uint16_t distance_to_wall;
+Delta_RGB colors[COLOR_COUNT];
 
+// -------------------------------
+// Arduino main functions
+// -------------------------------
 void setup()
 {
-  Serial.begin(9600);
-  while (!Serial)
-    ;
-  /*
+    Serial.begin(9600);
+    while (!Serial)
+        ;
+    /*
   //exit(0);
 
   DEBUG_PRINTLN("Initializing all components...");
@@ -44,283 +41,285 @@ void setup()
   motor_turn_analog(&motor_conveyor, 255);
   */
 
-  for (;;)
-  {
-    In_Message message_received;
-    io_await_message(&message_received);
-
-    Out_Message message;
-    switch (message_received.type)
+    for (;;)
     {
-    case IN_MESSAGE_COLOR:
-      message.type = OUT_MESSAGE_COLOR;
-      message.color.type = message_received.color.type;
-      message.color.value = message_received.color.value;
-      io_send_message(&message);
-      break;
+        In_Message message_received;
+        io_await_message(&message_received);
 
-    case IN_MESSAGE_COMMAND:
-      message.type = OUT_MESSAGE_COMMAND;
-      message.command.type = message_received.command.type;
-      io_send_message(&message);
-      break;
+        Out_Message message;
+        switch (message_received.type)
+        {
+        case IN_MESSAGE_COLOR:
+            message.type = OUT_MESSAGE_COLOR;
+            message.color.type = message_received.color.type;
+            message.color.value = message_received.color.value;
+            io_send_message(&message);
+            break;
 
-    case IN_MESSAGE_DISTANCE:
-      message.type = OUT_MESSAGE_DISTANCE;
-      message.distance.value = message_received.distance.value;
-      io_send_message(&message);
-      break;
+        case IN_MESSAGE_COMMAND:
+            message.type = OUT_MESSAGE_COMMAND;
+            message.command.type = message_received.command.type;
+            io_send_message(&message);
+            break;
 
-    case IN_MESSAGE_OBJECT:
-      message.type = OUT_MESSAGE_REQUEST;
-      message.request.type = OUT_REQUEST_OBJECT_INFO;
-      io_send_message(&message);
+        case IN_MESSAGE_DISTANCE:
+            message.type = OUT_MESSAGE_DISTANCE;
+            message.distance.value = message_received.distance.value;
+            io_send_message(&message);
+            break;
 
-    default:
-      break;
+        case IN_MESSAGE_OBJECT:
+            message.type = OUT_MESSAGE_REQUEST;
+            message.request.type = OUT_REQUEST_OBJECT_INFO;
+            io_send_message(&message);
+
+        default:
+            break;
+        }
     }
-  }
 }
 
-void motor_conveyor_interrupt()
-{
-  motor_update_degrees(&motor_conveyor);
-}
-
-void motor_feeder_interrupt()
-{
-  motor_update_degrees(&motor_feeder);
-}
-
-void adv_motor_separator_interrupt1()
-{
-  advanced_motor_update_degrees(&adv_motor_separator);
-}
-
-int32_t calibrate_ultra_sound_sensor()
-{
-  int32_t min = distance_sensor_measure_distance(&distance_sensor);
-  int32_t current;
-  for (uint8_t i = 0; i < CALIBRACTION_ITERATIONS - 1; i++)
-  {
-    DEBUG_PRINTLN_VAR(min);
-    current = distance_sensor_measure_distance(&distance_sensor);
-
-    if (current < min)
-      min = current;
-  }
-
-  return min;
-}
-
-// ----- Loop -----
 void loop()
 {
-  static int16_t bucket_pos[5] = {0, 50, 100, 260, 310};
-  static Segment_Queue segment_queue;
-  static Ball_Color last_ball = EMPTY;
-  static int32_t conveyor_target = 90;
+    static int16_t bucket_pos[5] = {0, 50, 100, 260, 310};
+    static Segment_Queue segment_queue;
+    static Ball_Color last_ball = EMPTY;
+    static int32_t conveyor_target = 90;
 
-  Ball_Color read_color = EMPTY;
-  int32_t test_dist = distance_sensor_measure_distance(&distance_sensor);
+    Ball_Color read_color = EMPTY;
+    int32_t test_dist = distance_sensor_measure_distance(&distance_sensor);
 
-  DEBUG_PRINT_VAR(test_dist);
-  DEBUG_PRINT(" ");
-  DEBUG_PRINTLN_VAR(distance_to_wall);
+    DEBUG_PRINT_VAR(test_dist);
+    DEBUG_PRINT(" ");
+    DEBUG_PRINTLN_VAR(distance_to_wall);
 
-  // Tests if a ball is in front of sensor
-  if (test_dist < distance_to_wall)
-  {
-    read_color = read_color_sensor();
-    DEBUG_PRINT("ball found: ");
-    DEBUG_PRINTLN(get_color_name(read_color));
-  }
+    // Tests if a ball is in front of sensor
+    if (test_dist < distance_to_wall)
+    {
+        //read_color = read_color_sensor();
+        DEBUG_PRINT("ball found: ");
+        DEBUG_PRINTLN(get_color_name(read_color));
+    }
 
-  enqueue_segment(&segment_queue, read_color);
-  feed_ball();
+    enqueue_segment(&segment_queue, read_color);
+    feed_ball();
 
-  Ball_Color current_ball = peek_segment(&segment_queue);
+    Ball_Color current_ball = peek_segment(&segment_queue);
 
-  // We only wonna move the buckets, if a ball was found, and that ball is
-  // different from the last ball
-  if (current_ball != EMPTY && current_ball != last_ball)
-  {
-    DEBUG_PRINT("ejecting: ");
-    DEBUG_PRINTLN(get_color_name(current_ball));
-    advanced_motor_turn_to_degree(&adv_motor_separator,
-                                  bucket_pos[current_ball]);
+    // We only wonna move the buckets, if a ball was found, and that ball is
+    // different from the last ball
+    if (current_ball != EMPTY && current_ball != last_ball)
+    {
+        DEBUG_PRINT("ejecting: ");
+        DEBUG_PRINTLN(get_color_name(current_ball));
+        advanced_motor_turn_to_degree(&adv_motor_separator,
+                                      bucket_pos[current_ball]);
 
-    last_ball = current_ball;
-  }
+        last_ball = current_ball;
+    }
 
-  while (motor_get_degrees(&motor_conveyor) < conveyor_target)
-    ;
-  conveyor_target += 90;
+    while (motor_get_degrees(&motor_conveyor) < conveyor_target)
+        ;
+    conveyor_target += 90;
 }
 
 void feed_ball()
 {
-  const uint8_t feed_iteration = 8;
-  static uint8_t feed_counter = feed_iteration;
-  static int16_t deg = 90;
+    const uint8_t feed_iteration = 8;
+    static uint8_t feed_counter = feed_iteration;
+    static int16_t deg = 90;
 
-  // We only feed a ball every x iterations
-  if (feed_counter == feed_iteration)
-  {
-    motor_turn_to_degree(&motor_feeder, deg);
+    // We only feed a ball every x iterations
+    if (feed_counter == feed_iteration)
+    {
+        motor_turn_to_degree(&motor_feeder, deg);
 
-    deg += 90;
-    if (deg == 360)
-      deg = 0;
+        deg += 90;
+        if (deg == 360)
+            deg = 0;
 
-    feed_counter = 0;
-  }
+        feed_counter = 0;
+    }
 
-  feed_counter++;
+    feed_counter++;
 }
 
-Ball_Color read_color_sensor()
+// -------------------------------
+// Interrupt functions
+// -------------------------------
+void motor_conveyor_interrupt()
 {
-  static uint8_t next_ball = 0;
-  Ball_Color res = (Ball_Color)next_ball;
-  next_ball++;
-  if (next_ball > 3)
-    next_ball = 0;
-
-  return res;
+    motor_update_degrees(&motor_conveyor);
 }
 
+void motor_feeder_interrupt()
+{
+    motor_update_degrees(&motor_feeder);
+}
+
+void adv_motor_separator_interrupt1()
+{
+    advanced_motor_update_degrees(&adv_motor_separator);
+}
+
+// -------------------------------
+// Ultra sound sensor functions
+// -------------------------------
+int32_t calibrate_ultra_sound_sensor()
+{
+    int32_t min = distance_sensor_measure_distance(&distance_sensor);
+    int32_t current;
+    for (uint8_t i = 0; i < CALIBRACTION_ITERATIONS - 1; i++)
+    {
+        DEBUG_PRINTLN_VAR(min);
+        current = distance_sensor_measure_distance(&distance_sensor);
+
+        if (current < min)
+            min = current;
+    }
+
+    return min;
+}
+
+// -------------------------------
+// Queue functions
+// -------------------------------
 void enqueue_segment(Segment_Queue *segment_queue, Ball_Color segment)
 {
-  segment_queue->data[segment_queue->index] = segment;
+    segment_queue->data[segment_queue->index] = segment;
 
-  segment_queue->index++;
-  if (segment_queue->index >= QUEUE_SIZE)
-    segment_queue->index = 0;
+    segment_queue->index++;
+    if (segment_queue->index >= QUEUE_SIZE)
+        segment_queue->index = 0;
 }
 
 Ball_Color peek_segment(Segment_Queue *segment_queue)
 {
-  return segment_queue->data[segment_queue->index];
+    return segment_queue->data[segment_queue->index];
 }
 
+// -------------------------------
+// Functions for processing colors
+// -------------------------------
 char *get_color_name(Ball_Color color)
 {
-  switch (color)
-  {
-  case GREEN:
-    return (char *)"Green";
-  case YELLOW:
-    return (char *)"Yellow";
-  case RED:
-    return (char *)"Red";
-  case BLUE:
-    return (char *)"Blue";
-  case EMPTY:
-    return (char *)"Empty";
-  default:
-    DEBUG_PRINT("Error in get_color_name");
-    delay(1000);
-    exit(0);
-  }
+    switch (color)
+    {
+    case GREEN:
+        return (char *)"Green";
+    case YELLOW:
+        return (char *)"Yellow";
+    case RED:
+        return (char *)"Red";
+    case BLUE:
+        return (char *)"Blue";
+    case EMPTY:
+        return (char *)"Empty";
+    default:
+        ASSERT(false);
+    }
 }
 
-Delta_RGB calibrate_color()
+void read_color(RGB *result)
 {
-  RGB reading[CALIBRACTION_ITERATIONS];
-  for (uint8_t i = 0; i < CALIBRACTION_ITERATIONS; i++)
-  {
-    reading[i] = get_color_rgb();
-  }
+    result->red = RGB_sensor.readRed();
+    result->green = RGB_sensor.readGreen();
+    result->blue = RGB_sensor.readBlue();
+}
 
-  RGB point = reading[0];
-  uint16_t greatest_distance = 0;
-  uint8_t index = 0;
+uint16_t euclidean_distance_3d(RGB *rgb1, RGB *rgb2)
+{
+    int16_t res1 = (int16_t)rgb1->red - (int16_t)rgb2->red;
+    int16_t res2 = (int16_t)rgb1->green - (int16_t)rgb2->green;
+    int16_t res3 = (int16_t)rgb1->blue - (int16_t)rgb2->blue;
 
-  for (uint8_t i = 1; i < CALIBRACTION_ITERATIONS; i++)
-  {
-    uint16_t tmp = euclidean_distance_3d(point, reading[i]);
-    if (tmp > greatest_distance)
+    return (uint16_t)sqrt(res1 * res1 + res2 * res2 + res3 * res3);
+}
+
+void calibrate_color(Delta_RGB *result)
+{
+    RGB samples[CALIBRACTION_ITERATIONS];
+    for (uint8_t i = 0; i < CALIBRACTION_ITERATIONS; i++)
+        read_color(&samples[i]);
+
+    RGB *point1 = &samples[0];
+    RGB *point2;
+
+    uint16_t greatest_distance = 0;
+
+    // Find the point furthest away from point1
+    for (uint8_t i = 1; i < CALIBRACTION_ITERATIONS; i++)
     {
-      greatest_distance = tmp;
-      index = i;
+        uint16_t distance = euclidean_distance_3d(point1, &samples[i]);
+        if (distance > greatest_distance)
+        {
+            greatest_distance = distance;
+            point2 = &samples[i];
+        }
     }
-  }
 
-  uint16_t greatest_distance_new = 0;
-  uint8_t index_new = 0;
-  for (uint8_t i = 0; i < CALIBRACTION_ITERATIONS; i++)
-  {
-    uint16_t tmp = euclidean_distance_3d(reading[greatest_distance], reading[i]);
-    if (tmp > greatest_distance_new)
-    {
-      greatest_distance_new = tmp;
-      index_new = i;
-    }
-  }
+    greatest_distance = 0;
 
-  Delta_RGB midpoint;
-  midpoint.rgb.red = (reading[index].red + reading[index_new].red) / 2;
-  midpoint.rgb.green = (reading[index].green + reading[index_new].green) / 2;
-  midpoint.rgb.blue = (reading[index].blue + reading[index_new].blue) / 2;
-  midpoint.delta = greatest_distance_new / 2;
-
-  for (;;)
-  {
-    uint8_t index_bigger = 0;
-    bool outside = false;
-
+    // Find the point furthest away from point2
     for (uint8_t i = 0; i < CALIBRACTION_ITERATIONS; i++)
     {
-      if (euclidean_distance_3d(midpoint.rgb, reading[i]) > midpoint.delta)
-      {
-        outside = true;
-        index_bigger = i;
-        break;
-      }
+        uint16_t distance = euclidean_distance_3d(point2, &samples[i]);
+        if (distance > greatest_distance)
+        {
+            greatest_distance = distance;
+            point1 = &samples[i];
+        }
     }
 
-    if (outside == true)
+    result->rgb.red = (point1->red + point2->red) / 2;
+    result->rgb.green = (point1->green + point2->green) / 2;
+    result->rgb.blue = (point1->blue + point2->blue) / 2;
+    result->delta = greatest_distance / 2;
+
+    // Find the circle that can contain all samples
+    for (;;)
     {
+        RGB *outside_point = NULL;
 
-      uint16_t euclidean_distanceance = euclidean_distance_3d(midpoint.rgb, reading[index_bigger]);
-      uint16_t delta_red = (midpoint.rgb.red - reading[index_bigger].red) / euclidean_distanceance;
-      uint16_t delta_green = (midpoint.rgb.green - reading[index_bigger].green) / euclidean_distanceance;
-      uint16_t delta_blue = (midpoint.rgb.blue - reading[index_bigger].blue) / euclidean_distanceance;
+        for (uint8_t i = 0; i < CALIBRACTION_ITERATIONS; i++)
+        {
+            if (euclidean_distance_3d(&result->rgb, &samples[i]) > result->delta)
+            {
+                outside_point = &samples[i];
+                break;
+            }
+        }
 
-      RGB new_point;
-      new_point.red = midpoint.rgb.red + delta_red;
-      new_point.green = midpoint.rgb.green + delta_green;
-      new_point.blue = midpoint.rgb.blue + delta_blue; 
+        if (outside_point == NULL)
+            break;
 
-      midpoint.rgb = new_point;
-      midpoint.delta = (euclidean_distanceance + midpoint.delta) / 2;
-    }else{
-      break;
+        uint16_t distance = euclidean_distance_3d(&result->rgb, outside_point);
+
+        RGB delta;
+        delta.red = (result->rgb.red - outside_point->red) / distance;
+        delta.green = (result->rgb.green - outside_point->green) / distance;
+        delta.blue = (result->rgb.blue - outside_point->blue) / distance;
+
+        result->rgb.red = result->rgb.red + delta.red;
+        result->rgb.green = result->rgb.green + delta.green;
+        result->rgb.blue = result->rgb.blue + delta.blue;
+        result->delta = (distance + result->delta) / 2;
     }
-  }
-
-  return midpoint;
 }
 
-uint16_t euclidean_distance_3d(RGB rgb1, RGB rgb2)
+Ball_Color determin_color(RGB *color)
 {
-  int16_t res1 = (int16_t)rgb1.red - (int16_t)rgb2.red;
-  int16_t res2 = (int16_t)rgb1.green - (int16_t)rgb2.green;
-  int16_t res3 = (int16_t)rgb1.blue - (int16_t)rgb2.blue;
+    uint8_t closest_color = EMPTY;
+    uint16_t closest_distance = USHRT_MAX;
+    for (uint8_t i = 0; i < COLOR_COUNT; i++)
+    {
+        uint16_t distance = euclidean_distance_3d(color, &colors[i].rgb);
+        if (colors[i].delta > distance && closest_distance > distance)
+        {
+            closest_distance = distance;
+            closest_color = i;
+        }
+    }
 
-  return (uint16_t)sqrt(res1 * res1 + res2 * res2 + res3 * res3);
-}
-
-RGB get_color_rgb()
-{
-  RGB rgb = {RGB_sensor.readRed(), RGB_sensor.readGreen(), RGB_sensor.readBlue()};
-  return rgb;
-}
-
-Ball_Color get_color()
-{
-  uint16_t red = RGB_sensor.readRed();
-  uint16_t green = RGB_sensor.readGreen();
-  uint16_t blue = RGB_sensor.readBlue();
+    return closest_color;
 }
