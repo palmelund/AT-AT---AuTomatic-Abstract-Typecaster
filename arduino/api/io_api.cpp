@@ -32,8 +32,24 @@ void io_send_message(Out_Message *sending_message)
         Serial.write(OUT_SIZE_COLOR);
         Serial.write(OUT_MESSAGE_COLOR);
 
-        for (int i = 0; i < OUT_SIZE_COLOR - 1; i++)
-            Serial.write(sending_message->data[i]);
+        Serial.write(sending_message->color.type);
+        Serial.write((uint8_t)(sending_message->color.red_value & 0x00FF));
+        Serial.write((uint8_t)(sending_message->color.red_value >> 8));
+        Serial.write((uint8_t)(sending_message->color.green_value & 0x00FF));
+        Serial.write((uint8_t)(sending_message->color.green_value >> 8));
+        Serial.write((uint8_t)(sending_message->color.blue_value & 0x00FF));
+        Serial.write((uint8_t)(sending_message->color.blue_value >> 8));
+
+        /*
+        Serial.write(sending_message->color.type);
+        Serial.write(sending_message->data[2]);
+        Serial.write(sending_message->data[1]);
+        Serial.write(sending_message->data[4]);
+        Serial.write(sending_message->data[3]);
+        Serial.write(sending_message->data[6]);
+        Serial.write(sending_message->data[5]);
+  */ //for (int i = 0; i < OUT_SIZE_COLOR - 1; i++)
+        //    Serial.write(sending_message->data[i]);
         break;
 
     case OUT_MESSAGE_COMMAND:

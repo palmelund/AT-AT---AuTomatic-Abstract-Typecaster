@@ -190,13 +190,18 @@ namespace SerialIO
 		    var b = new byte[2];
 			_port.Read (b, 0, 2);
 
+			Console.WriteLine ("Startbytes: " + b [0] + " " + b [1]);
+
 		    if (b[0] != Begin)
 		    {
+				Console.WriteLine ("Byte not start byte");
 		        return false;
 		    }
 
 		    // Create a new byte array with the length of the message sent
 			var data = new byte[b [1]];
+
+			//Console.WriteLine ("Length: " + data.Length);
 
 		    // Wait for the entire message to be in the buffer.
 			while (_port.BytesToRead < data.Length)
@@ -217,10 +222,14 @@ namespace SerialIO
 				message = new RequestMessage ((ComputerRequest)data [1]);
 			    return true;
 			case IN_COLOR:
-			        Console.WriteLine("Reading color");
+				Console.Write ("Bytes recieved: ");
+				foreach (var i in data) {
+					Console.Write (i + " ");
+				}
+				Console.WriteLine ();
+
 				message = new ColorMessage ((Color)data [1], BitConverter.ToUInt16(data, 2), BitConverter.ToUInt16(data, 4), BitConverter.ToUInt16(data,6));
-			    Console.WriteLine("Read color");
-			        return true;
+				    return true;
 			    case IN_DISTANCE:
 				message = new DistanceMessage (BitConverter.ToUInt16(data, 1));
 			    return true;

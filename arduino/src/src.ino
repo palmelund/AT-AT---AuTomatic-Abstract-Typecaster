@@ -59,9 +59,20 @@ void setup()
   DEBUG_PRINTLN("Starting the sorting machine...");
   motor_turn_analog(&motor_conveyor, 255);
   */
+/*
+                calibrate_color(&colors[RED]);
 
-    //startup_helper();
+                Out_Message out;
+                out.type = OUT_MESSAGE_COLOR;
+                out.color.type = RED;
 
+                out.color.red_value = colors[RED].rgb.red;
+                out.color.green_value = colors[RED].rgb.green;
+                out.color.blue_value = colors[RED].rgb.blue;
+                io_send_message(&out);
+*/
+    startup_helper();
+/*
     calibrate_color(&colors[RED]);
     
     Serial.print("Red: ");
@@ -72,7 +83,7 @@ void setup()
     Serial.println(colors[RED].rgb.blue);
     Serial.print("Delta: ");
     Serial.println(colors[RED].delta);
-    
+  */
     /*
     for (;;)
     {
@@ -130,7 +141,7 @@ void startup_helper()
             case IN_COMMAND_CALIBRATE_RED:
                 //calibrate_color(&colors[RED]);
 
-                //read_color(&colors[RED].rgb);
+                read_color(&colors[RED].rgb);
 
                 Out_Message out;
                 out.type = OUT_MESSAGE_COLOR;
@@ -333,13 +344,13 @@ void calibrate_color(Delta_RGB *result)
     for (uint8_t i = 0; i < CALIBRACTION_ITERATIONS; i++)
     {
         read_color(&samples[i]);
-        
+        /*
         Serial.print(samples[i].red);
         Serial.print(" ");
         Serial.print(samples[i].green);
         Serial.print(" ");
         Serial.println(samples[i].blue);
-        
+        */
     }
 
     
