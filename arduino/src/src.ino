@@ -346,73 +346,41 @@ void read_color(RGB *result)
     result->blue = RGB_sensor.readBlue();
 }
 
-uint16_t euclidean_distance_3d(RGB *rgb1, RGB *rgb2)
+float euclidean_distance_3d(RGB *rgb1, RGB *rgb2)
 {
     int16_t res1 = (int16_t)rgb1->red - (int16_t)rgb2->red;
     int16_t res2 = (int16_t)rgb1->green - (int16_t)rgb2->green;
     int16_t res3 = (int16_t)rgb1->blue - (int16_t)rgb2->blue;
 
-    return (uint16_t)sqrt(pow(res1, 2) + pow(res2, 2) + pow(res3, 2));
+    return (float)sqrt(pow(res1, 2) + pow(res2, 2) + pow(res3, 2));
 }
 
 void calibrate_color(Delta_RGB *result)
 {
-
+    // Read samples to calibrate from
     RGB samples[CALIBRACTION_ITERATIONS];
-    /*
     for (uint8_t i = 0; i < CALIBRACTION_ITERATIONS; i++)
     {
         read_color(&samples[i]);
-/*
-        Serial.print("Color: ");
-        Serial.print(samples[i].red);
-        Serial.print(" ");
-        Serial.print(samples[i].green);
-        Serial.print(" ");
-        Serial.println(samples[i].blue);
-*/
-    /*
-                Out_Message out;
-                out.type = OUT_MESSAGE_COLOR;
-                out.color.type = RED;
-
-                out.color.red_value = samples[i].red;
-                out.color.green_value = samples[i].green;
-                out.color.blue_value = samples[i].blue;
-                io_send_message(&out);
-                */
-    /*
-        Serial.print(samples[i].red);
-        Serial.print(" ");
-        Serial.print(samples[i].green);
-        Serial.print(" ");
-        Serial.println(samples[i].blue);
-        
-    }
-    */
-
-    for (int i = 0; i < CALIBRACTION_ITERATIONS; i++)
-    {
-        samples[i] = {i % 10, i % 8, i % 6};
     }
 
+    // https://en.wikipedia.org/wiki/Bounding_sphere
+    // Using Ritter's bounding sphere method.
+    // We start by picking a point in 3d space
     RGB *point1 = &samples[0];
     RGB *point2;
 
-    uint16_t greatest_distance = 0;
+    float greatest_distance = 0;
 
     // Find the point furthest away from point1
     for (uint8_t i = 1; i < CALIBRACTION_ITERATIONS; i++)
     {
-        uint16_t distance = euclidean_distance_3d(point1, &samples[i]);
+        float distance = euclidean_distance_3d(point1, &samples[i]);
         if (distance > greatest_distance)
         {
             greatest_distance = distance;
             point2 = &samples[i];
         }
-        //Serial.print(distance);
-        //Serial.print(" - ");
-        //Serial.println(greatest_distance);
     }
 
     greatest_distance = 0;
@@ -420,125 +388,97 @@ void calibrate_color(Delta_RGB *result)
     // Find the point furthest away from point2
     for (uint8_t i = 0; i < CALIBRACTION_ITERATIONS; i++)
     {
-        uint16_t distance = euclidean_distance_3d(point2, &samples[i]);
+        float distance = euclidean_distance_3d(point2, &samples[i]);
         if (distance > greatest_distance)
         {
             greatest_distance = distance;
             point1 = &samples[i];
         }
-        /*
-        Serial.print(point2->red);
-        Serial.print(" ");
-        Serial.print(point2->green);
-        Serial.print(" ");
-        Serial.println(point2->blue);
-
-        Serial.print(samples[i].red);
-        Serial.print(" ");
-        Serial.print(samples[i].green);
-        Serial.print(" ");
-        Serial.println(samples[i].blue);
-
-        Serial.println(distance);
-        */
     }
 
+    // We now construct a sphere which cotains the two points.
+    // This is done by first, finding the point in between the two points
     result->rgb.red = (point1->red + point2->red) / 2;
     result->rgb.green = (point1->green + point2->green) / 2;
     result->rgb.blue = (point1->blue + point2->blue) / 2;
-    result->delta = greatest_distance / 2;
-    /*
-    Serial.print("Point1: ");
-    Serial.print(point1->red);
-    Serial.print(" ");
-    Serial.print(point1->green);
-    Serial.print(" ");
-    Serial.println(point1->blue);
 
-    Serial.print("Point2: ");
-    Serial.print(point2->red);
-    Serial.print(" ");
-    Serial.print(point2->green);
-    Serial.print(" ");
-    Serial.println(point2->blue);
-*/
-    // Find the circle that can contain all samples
+    // Then finding the radius of the sphere, by taking the distance
+    // from the center to one of the two points.
+    // NOTE: We calculate both, since rounding errors gives us a pointer
+    //       not exactly in the center
+    float distance_to_point1 = euclidean_distance_3d(&result->rgb, point1);
+    float distance_to_point2 = euclidean_distance_3d(&result->rgb, point2);
+
+    // Choose the greatest radius, ensures that both points are in the sphere
+    if (distance_to_point1 > distance_to_point2)
+        result->delta = (uint16_t)ceil(distance_to_point1);
+    else
+        result->delta = (uint16_t)ceil(distance_to_point2);
+
+    ASSERT(result->delta >= distance_to_point1);
+    ASSERT(result->delta >= distance_to_point2);
+
+    // Now we need to ensure that the sphere we just found actually 
+    // contains all points
     for (;;)
     {
-        // Serial.println(";_;");
         RGB *outside_point = NULL;
+        float distance_to_outside_point;
 
+        // Checking if all points are contained
         for (uint8_t i = 0; i < CALIBRACTION_ITERATIONS; i++)
         {
-            uint16_t distance = euclidean_distance_3d(&result->rgb, &samples[i]);
-            /*
-            Serial.print(result->rgb.red);
-            Serial.print(" ");
-            Serial.print(result->rgb.green);
-            Serial.print(" ");
-            Serial.println(result->rgb.blue);
-
-            Serial.print(samples[i].red);
-            Serial.print(" ");
-            Serial.print(samples[i].green);
-            Serial.print(" ");
-            Serial.println(samples[i].blue);
-
-            Serial.print(distance);
-            Serial.print(" ");
-            Serial.println(result->delta);
-*/
-            if (distance > result->delta)
+            distance_to_outside_point = euclidean_distance_3d(&result->rgb, &samples[i]);
+            if (distance_to_outside_point > result->delta)
             {
                 outside_point = &samples[i];
                 break;
             }
         }
 
+        // If no points was outside the sphere, we know the sphere contains
+        // all points, and the algorithm is done
         if (outside_point == NULL)
             break;
 
-        int16_t distance = (int16_t)euclidean_distance_3d(&result->rgb, outside_point);
+        // When a point is found outside the sphere, we need a new sphere
+        // that contains all points in the previous sphere + the outside point.
 
-        print_rgb(&result->rgb);    // 4 2 2
-        print_rgb(outside_point);   // 9 5 5
-
-        Serial.print("distance: ");
-        Serial.println(distance);
-
-        int16_t delta_red = ((int16_t)result->rgb.red - (int16_t)outside_point->red) / distance;
-        int16_t delta_green = ((int16_t)result->rgb.green - (int16_t)outside_point->green) / distance;
-        int16_t delta_blue = ((int16_t)result->rgb.blue - (int16_t)outside_point->blue) / distance;
-
-        print_tri(delta_red, delta_green, delta_blue);
+        // We construct the sphere by extending the line from the center
+        // of the sphere to the outside point by the radius of the sphere.
+        // NOTE: http://math.stackexchange.com/questions/352828/increase-length-of-line
+        float delta_red = ((float)result->rgb.red - outside_point->red) / distance;
+        float delta_green = ((float)result->rgb.green - outside_point->green) / distance;
+        float delta_blue = ((float)result->rgb.blue - outside_point->blue) / distance;
         
+        // The moved_point, will be the new point that is created from extending
+        // that line.
+        RGB moved_result;
+        moved_result.red = (uint16_t)ceil(result->rgb.red + delta_red);
+        moved_result.green = (uint16_t)ceil(result->rgb.green + delta_green);
+        moved_result.blue = (uint16_t)ceil(result->rgb.blue + delta_blue);
 
-        result->rgb.red = result->rgb.red + delta_red;
-        result->rgb.green = result->rgb.green + delta_green;
-        result->rgb.blue = result->rgb.blue + delta_blue;
-        result->delta = (distance + result->delta) / 2;
+        // We now construct the new sphere which cotains outside_point and 
+        // moved_result. This is the same as how we created our original sphere.
+        result->rgb.red = (moved_result.red + outside_point->red) / 2;
+        result->rgb.green = (moved_result.green + outside_point->green) / 2;
+        result->rgb.blue = (moved_result.blue + outside_point->blue) / 2;
 
-        print_rgb(&result->rgb);
+        uint16_t prev_delta = result->delta;
+        float distance_to_moved_result = euclidean_distance_3d(&result->rgb, &moved_result);
+        float distance_to_outside_point = euclidean_distance_3d(&result->rgb, &moved_result);
+
+        if (distance_to_moved_result > distance_to_outside_point)
+            result->delta = (uint16_t)ceil(distance_to_moved_result);
+        else
+            result->delta = (uint16_t)ceil(distance_to_outside_point);
+
+        ASSERT(result->delta >= distance_to_moved_result);
+        ASSERT(result->delta >= distance_to_outside_point);
+        ASSERT(result->delta >= prev_delta);
+
+        // Now we repeat!
     }
-}
-
-void print_tri(int16_t a, int16_t b, int16_t c)
-{
-    Serial.print(a);
-    Serial.print(" ");
-    Serial.print(b);
-    Serial.print(" ");
-    Serial.println(c);
-}
-
-void print_rgb(RGB *rgb)
-{
-    Serial.print("RGB: ");
-    Serial.print(rgb->red);
-    Serial.print(" ");
-    Serial.print(rgb->green);
-    Serial.print(" ");
-    Serial.println(rgb->blue);
 }
 
 Ball_Color determin_color(RGB *color)
