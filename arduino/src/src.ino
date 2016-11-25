@@ -33,7 +33,8 @@ void setup()
         }
     }
 
-    while(RGB_sensor.readRed() == 0 || RGB_sensor.readGreen() == 0 || RGB_sensor.readBlue() == 0);
+    while (RGB_sensor.readRed() == 0 || RGB_sensor.readGreen() == 0 || RGB_sensor.readBlue() == 0)
+        ;
 
     /*
   //exit(0);
@@ -59,7 +60,7 @@ void setup()
   DEBUG_PRINTLN("Starting the sorting machine...");
   motor_turn_analog(&motor_conveyor, 255);
   */
-/*
+    /*
                 calibrate_color(&colors[RED]);
 
                 Out_Message out;
@@ -71,8 +72,8 @@ void setup()
                 out.color.blue_value = colors[RED].rgb.blue;
                 io_send_message(&out);
 */
-    startup_helper();
-/*
+    //startup_helper();
+    /*
     calibrate_color(&colors[RED]);
     
     Serial.print("Red: ");
@@ -122,6 +123,23 @@ void setup()
         }
     }
     */
+
+    test_color_com();
+}
+
+void test_color_com()
+{
+    while (true)
+    {
+        calibrate_color(&colors[RED]);
+        Serial.print("\n\nCALIBRATE: ");
+        Serial.print(colors[RED].rgb.red);
+        Serial.print(" ");
+        Serial.print(colors[RED].rgb.green);
+        Serial.print(" ");
+        Serial.print(colors[RED].rgb.blue);
+        Serial.println("\n\n");
+    }
 }
 
 void startup_helper()
@@ -139,9 +157,9 @@ void startup_helper()
             switch (message.command.type)
             {
             case IN_COMMAND_CALIBRATE_RED:
-                //calibrate_color(&colors[RED]);
+                calibrate_color(&colors[RED]);
 
-                read_color(&colors[RED].rgb);
+                //read_color(&colors[RED].rgb);
 
                 Out_Message out;
                 out.type = OUT_MESSAGE_COLOR;
@@ -334,26 +352,50 @@ uint16_t euclidean_distance_3d(RGB *rgb1, RGB *rgb2)
     int16_t res2 = (int16_t)rgb1->green - (int16_t)rgb2->green;
     int16_t res3 = (int16_t)rgb1->blue - (int16_t)rgb2->blue;
 
-    return (uint16_t)sqrt(res1 * res1 + res2 * res2 + res3 * res3);
+    return (uint16_t)sqrt(pow(res1, 2) + pow(res2, 2) + pow(res3, 2));
 }
 
 void calibrate_color(Delta_RGB *result)
 {
-    
+
     RGB samples[CALIBRACTION_ITERATIONS];
+    /*
     for (uint8_t i = 0; i < CALIBRACTION_ITERATIONS; i++)
     {
         read_color(&samples[i]);
-        /*
+/*
+        Serial.print("Color: ");
         Serial.print(samples[i].red);
         Serial.print(" ");
         Serial.print(samples[i].green);
         Serial.print(" ");
         Serial.println(samples[i].blue);
-        */
+*/
+    /*
+                Out_Message out;
+                out.type = OUT_MESSAGE_COLOR;
+                out.color.type = RED;
+
+                out.color.red_value = samples[i].red;
+                out.color.green_value = samples[i].green;
+                out.color.blue_value = samples[i].blue;
+                io_send_message(&out);
+                */
+    /*
+        Serial.print(samples[i].red);
+        Serial.print(" ");
+        Serial.print(samples[i].green);
+        Serial.print(" ");
+        Serial.println(samples[i].blue);
+        
+    }
+    */
+
+    for (int i = 0; i < CALIBRACTION_ITERATIONS; i++)
+    {
+        samples[i] = {i % 10, i % 8, i % 6};
     }
 
-    
     RGB *point1 = &samples[0];
     RGB *point2;
 
@@ -368,6 +410,9 @@ void calibrate_color(Delta_RGB *result)
             greatest_distance = distance;
             point2 = &samples[i];
         }
+        //Serial.print(distance);
+        //Serial.print(" - ");
+        //Serial.println(greatest_distance);
     }
 
     greatest_distance = 0;
@@ -381,21 +426,69 @@ void calibrate_color(Delta_RGB *result)
             greatest_distance = distance;
             point1 = &samples[i];
         }
+        /*
+        Serial.print(point2->red);
+        Serial.print(" ");
+        Serial.print(point2->green);
+        Serial.print(" ");
+        Serial.println(point2->blue);
+
+        Serial.print(samples[i].red);
+        Serial.print(" ");
+        Serial.print(samples[i].green);
+        Serial.print(" ");
+        Serial.println(samples[i].blue);
+
+        Serial.println(distance);
+        */
     }
 
     result->rgb.red = (point1->red + point2->red) / 2;
     result->rgb.green = (point1->green + point2->green) / 2;
     result->rgb.blue = (point1->blue + point2->blue) / 2;
     result->delta = greatest_distance / 2;
+    /*
+    Serial.print("Point1: ");
+    Serial.print(point1->red);
+    Serial.print(" ");
+    Serial.print(point1->green);
+    Serial.print(" ");
+    Serial.println(point1->blue);
 
+    Serial.print("Point2: ");
+    Serial.print(point2->red);
+    Serial.print(" ");
+    Serial.print(point2->green);
+    Serial.print(" ");
+    Serial.println(point2->blue);
+*/
     // Find the circle that can contain all samples
     for (;;)
     {
+        // Serial.println(";_;");
         RGB *outside_point = NULL;
 
         for (uint8_t i = 0; i < CALIBRACTION_ITERATIONS; i++)
         {
-            if (euclidean_distance_3d(&result->rgb, &samples[i]) > result->delta)
+            uint16_t distance = euclidean_distance_3d(&result->rgb, &samples[i]);
+            /*
+            Serial.print(result->rgb.red);
+            Serial.print(" ");
+            Serial.print(result->rgb.green);
+            Serial.print(" ");
+            Serial.println(result->rgb.blue);
+
+            Serial.print(samples[i].red);
+            Serial.print(" ");
+            Serial.print(samples[i].green);
+            Serial.print(" ");
+            Serial.println(samples[i].blue);
+
+            Serial.print(distance);
+            Serial.print(" ");
+            Serial.println(result->delta);
+*/
+            if (distance > result->delta)
             {
                 outside_point = &samples[i];
                 break;
@@ -405,18 +498,47 @@ void calibrate_color(Delta_RGB *result)
         if (outside_point == NULL)
             break;
 
-        uint16_t distance = euclidean_distance_3d(&result->rgb, outside_point);
+        int16_t distance = (int16_t)euclidean_distance_3d(&result->rgb, outside_point);
 
-        RGB delta;
-        delta.red = (result->rgb.red - outside_point->red) / distance;
-        delta.green = (result->rgb.green - outside_point->green) / distance;
-        delta.blue = (result->rgb.blue - outside_point->blue) / distance;
+        print_rgb(&result->rgb);    // 4 2 2
+        print_rgb(outside_point);   // 9 5 5
 
-        result->rgb.red = result->rgb.red + delta.red;
-        result->rgb.green = result->rgb.green + delta.green;
-        result->rgb.blue = result->rgb.blue + delta.blue;
+        Serial.print("distance: ");
+        Serial.println(distance);
+
+        int16_t delta_red = ((int16_t)result->rgb.red - (int16_t)outside_point->red) / distance;
+        int16_t delta_green = ((int16_t)result->rgb.green - (int16_t)outside_point->green) / distance;
+        int16_t delta_blue = ((int16_t)result->rgb.blue - (int16_t)outside_point->blue) / distance;
+
+        print_tri(delta_red, delta_green, delta_blue);
+        
+
+        result->rgb.red = result->rgb.red + delta_red;
+        result->rgb.green = result->rgb.green + delta_green;
+        result->rgb.blue = result->rgb.blue + delta_blue;
         result->delta = (distance + result->delta) / 2;
+
+        print_rgb(&result->rgb);
     }
+}
+
+void print_tri(int16_t a, int16_t b, int16_t c)
+{
+    Serial.print(a);
+    Serial.print(" ");
+    Serial.print(b);
+    Serial.print(" ");
+    Serial.println(c);
+}
+
+void print_rgb(RGB *rgb)
+{
+    Serial.print("RGB: ");
+    Serial.print(rgb->red);
+    Serial.print(" ");
+    Serial.print(rgb->green);
+    Serial.print(" ");
+    Serial.println(rgb->blue);
 }
 
 Ball_Color determin_color(RGB *color)

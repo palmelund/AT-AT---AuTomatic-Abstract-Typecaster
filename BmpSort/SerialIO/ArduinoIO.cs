@@ -177,7 +177,7 @@ namespace SerialIO
 		{
 		    message = null;
 
-		    Console.WriteLine("Awaiting");
+		    //Console.WriteLine("Awaiting");
 
 		    // Wait until we have a new message and its length in the buffer.
 			while (_port.BytesToRead < 2)
@@ -185,12 +185,12 @@ namespace SerialIO
 			    // Console.WriteLine(_port.BytesToRead);
 			}
 
-		    Console.WriteLine("Two bytes found");
+		    //Console.WriteLine("Two bytes found");
 
 		    var b = new byte[2];
 			_port.Read (b, 0, 2);
 
-			Console.WriteLine ("Startbytes: " + b [0] + " " + b [1]);
+			//Console.WriteLine ("Startbytes: " + b [0] + " " + b [1]);
 
 		    if (b[0] != Begin)
 		    {
@@ -212,7 +212,7 @@ namespace SerialIO
 
 		    // Return the data as a message of the correct type.
 
-		    Console.WriteLine("Data[0]:" + data[0] + "\nLength: " + data.Length);
+		    //Console.WriteLine("Data[0]:" + data[0] + "\nLength: " + data.Length);
 
 			switch (data [0]) {
 			case IN_COMMAND:
@@ -222,11 +222,11 @@ namespace SerialIO
 				message = new RequestMessage ((ComputerRequest)data [1]);
 			    return true;
 			case IN_COLOR:
-				Console.Write ("Bytes recieved: ");
-				foreach (var i in data) {
-					Console.Write (i + " ");
-				}
-				Console.WriteLine ();
+				//Console.Write ("Bytes recieved: ");
+				//foreach (var i in data) {
+				//	Console.Write (i + " ");
+				//}
+				//Console.WriteLine ();
 
 				message = new ColorMessage ((Color)data [1], BitConverter.ToUInt16(data, 2), BitConverter.ToUInt16(data, 4), BitConverter.ToUInt16(data,6));
 				    return true;

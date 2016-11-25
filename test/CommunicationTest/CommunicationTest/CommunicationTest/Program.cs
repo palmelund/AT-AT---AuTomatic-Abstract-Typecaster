@@ -14,14 +14,17 @@ namespace CommunicationTest
 
 				io.SendCommand (ArduinoCommand.CalibrateRed);
 
-				Console.WriteLine ("Red color: ");
+				// Console.WriteLine ("Red color: ");
 				IMessage message;
-				if (!io.AwaitMessage (out message))
-					return;
-				var c = message as ColorMessage;
-				if (c == null)
-					return;
-				Console.WriteLine ("R: " + c.RedIntensity + " G: " + c.GreenIntensity + " B: " + c.BlueIntensity);
+				for (int i = 0; i < 101; i++) {
+					if (!io.AwaitMessage (out message))
+						return;
+					var c = message as ColorMessage;
+					if (c == null)
+						return;
+					Console.WriteLine ( i + " - R: " + c.RedIntensity + " G: " + c.GreenIntensity + " B: " + c.BlueIntensity);
+				}
+				Console.WriteLine ("Enter to continue!");
 			}
 		    /*
 			Console.ReadKey ();
