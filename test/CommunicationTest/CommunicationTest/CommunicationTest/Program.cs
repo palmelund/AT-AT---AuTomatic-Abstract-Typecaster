@@ -8,7 +8,22 @@ namespace CommunicationTest
 		public static void Main (string[] args)
 		{
 			var io = new ArduinoIO ("/dev/ttyACM0");
+			while (true) {
+				
+				Console.ReadKey ();
 
+				io.SendCommand (ArduinoCommand.CalibrateRed);
+
+				Console.WriteLine ("Red color: ");
+				IMessage message;
+				if (!io.AwaitMessage (out message))
+					return;
+				var c = message as ColorMessage;
+				if (c == null)
+					return;
+				Console.WriteLine ("R: " + c.RedIntensity + " G: " + c.GreenIntensity + " B: " + c.BlueIntensity);
+			}
+		    /*
 			Console.ReadKey ();
 			io.SendColor (Color.Red, 255);
 			var colorMessage = io.AwaitMessage () as ColorMessage;
@@ -28,6 +43,7 @@ namespace CommunicationTest
 			Console.WriteLine (requestMessage.Request);
 
 			Console.ReadKey ();
+*/
 		}
 	}
 }

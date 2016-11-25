@@ -12,17 +12,23 @@ namespace SerialIO
 	    /// <summary>
 	    /// The intensity of the color
 	    /// </summary>
-		public ushort Intensity { get; set; }
+		public ushort RedIntensity { get; set; }
+	    public ushort GreenIntensity { get; set; }
+	    public ushort BlueIntensity { get; set; }
 
 	    /// <summary>
 	    /// Creates a color message that can be sent to and received from the Arduino
 	    /// </summary>
 	    /// <param name="color">The color part of a RGB value</param>
-	    /// <param name="intensity">The intensity of the color</param>
-		public ColorMessage (Color color, ushort intensity)
+	    /// <param name="redIntensity">TODO</param>
+	    /// <param name="greenIntensity">TODO</param>
+	    /// <param name="blueIntensity">TODO</param>
+	    public ColorMessage (Color color, ushort redIntensity, ushort greenIntensity, ushort blueIntensity)
 		{
 			Color = color;
-			Intensity = intensity;
+			RedIntensity = redIntensity;
+		    GreenIntensity = greenIntensity;
+		    BlueIntensity = blueIntensity;
 		}
 	}
 }

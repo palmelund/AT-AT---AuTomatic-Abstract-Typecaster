@@ -1,6 +1,7 @@
 #ifndef _SRC_H_
 #define _SRC_H_
 
+#include <math.h>
 #include <limits.h>
 #include "defines.h"
 #include "motor_api.h"

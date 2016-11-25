@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO.Ports;
+using System.Linq;
 
 namespace SerialIO
 {
@@ -11,9 +12,10 @@ namespace SerialIO
 		CalibrateRed = 0,
 		CalibrateGreen = 1,
 		CalibrateBlue = 2,
-		CalibrateDistance = 3,
-		Start = 4,
-		Stop = 5
+	    CalibrateYellow = 3,
+		CalibrateDistance = 4,
+		Start = 5,
+		Stop = 6
 	}
 
     /// <summary>
@@ -48,9 +50,10 @@ namespace SerialIO
     /// </summary>
 	public enum Color : byte
 	{
-		Red = 0,
-		Green = 1,
-		Blue = 2
+		Green  = 0,
+		Yellow = 1,
+		Red    = 2,
+		Blue   = 3,
 	}
 
     /// <summary>
@@ -84,7 +87,7 @@ namespace SerialIO
 
 			if (_port.IsOpen)
 				_port.Close ();
-			
+
 			_port.Open ();
 			_port = new SerialPort (portName, 9600);	// "/dev/ttyACM0" is often the value used on Linux
 
@@ -129,16 +132,25 @@ namespace SerialIO
 	    /// This is part of a RGB color, and has to be sent three times to send the entire color
 	    /// </summary>
 	    /// <param name="color">One of the three RGB colors</param>
-	    /// <param name="intensity">Intensity of the color, based on standard GRB values.</param>
-		public void SendColor(Color color, ushort intensity)
+	    /// <param name="redIntensity">The red intensity of the color</param>
+	    /// <param name="greenIntensity">The green intensity of the color</param>
+	    /// <param name="blueIntensity">The blue intensity of the color</param>
+	    public void SendColor(Color color, ushort redIntensity, ushort greenIntensity, ushort blueIntensity)
 		{
 		    // Begin is the constant start symbol
 		    // 0x04 is the number of bytes of information sent to the Arduino, currently always 4 for a color
 		    // 0x02 is the Arduino type for the color message
 		    // color is the color that has to be set in the RGB value.
 		    // intensity is the intensity of the color, and is split into two bytes to be transmitted correctly.
-		    var b = new byte[] { Begin, 0x04, OUT_COLOR, (byte)color, (byte)(intensity >> 8), (byte)intensity };    // TODO: Make human readable
+		    var b = new byte[] { Begin, 0x08, OUT_COLOR, (byte)color, (byte)(redIntensity >> 8), (byte)redIntensity, (byte)(greenIntensity >> 8), (byte)greenIntensity, (byte)(blueIntensity >> 8), (byte)blueIntensity };    // TODO: Make human readable
 			_port.Write (b, 0, b.Length);
+		    Console.Write("Sent message: ");
+		    foreach (var i in b)
+		    {
+                Console.Write(i +" ");
+		    }
+
+		    Console.WriteLine();
 		}
 
 	    /// <summary>
@@ -161,41 +173,60 @@ namespace SerialIO
 	    /// </summary>
 	    /// <returns>A message from the arduino. Has to be read type checked later to get message</returns>
 	    /// <exception cref="ArgumentException">If the arduino sends a message that doesn't follow the defined values or arguments, an exception is thrown</exception>
-		public IMessage AwaitMessage()
+		public bool AwaitMessage(out IMessage message)
 		{
+		    message = null;
+
+		    Console.WriteLine("Awaiting");
+
 		    // Wait until we have a new message and its length in the buffer.
 			while (_port.BytesToRead < 2)
-				;
+			{
+			    // Console.WriteLine(_port.BytesToRead);
+			}
 
-			var b = new byte[2];
+		    Console.WriteLine("Two bytes found");
+
+		    var b = new byte[2];
 			_port.Read (b, 0, 2);
 
-			if (b[0] != Begin)
-				throw new ArgumentException("Invalid start of message.");
+		    if (b[0] != Begin)
+		    {
+		        return false;
+		    }
 
 		    // Create a new byte array with the length of the message sent
 			var data = new byte[b [1]];
 
 		    // Wait for the entire message to be in the buffer.
 			while (_port.BytesToRead < data.Length)
-				;
+			{
+			}
 
-			_port.Read (data, 0, data.Length);
+		    _port.Read (data, 0, data.Length);
 
 		    // Return the data as a message of the correct type.
+
+		    Console.WriteLine("Data[0]:" + data[0] + "\nLength: " + data.Length);
+
 			switch (data [0]) {
 			case IN_COMMAND:
-				return new CommandMessage ((ComputerCommand)data [1]);
+				message = new CommandMessage ((ComputerCommand)data [1]);
+			    return true;
 			case IN_REQUEST:
-				return new RequestMessage ((ComputerRequest)data [1]);
+				message = new RequestMessage ((ComputerRequest)data [1]);
+			    return true;
 			case IN_COLOR:
-				return new ColorMessage ((Color)data [1], BitConverter.ToUInt16(data, 2));
-			case IN_DISTANCE:
-				return new DistanceMessage (BitConverter.ToUInt16(data, 1));
-			default:
-				throw new ArgumentException ("Unknown command");
+			        Console.WriteLine("Reading color");
+				message = new ColorMessage ((Color)data [1], BitConverter.ToUInt16(data, 2), BitConverter.ToUInt16(data, 4), BitConverter.ToUInt16(data,6));
+			    Console.WriteLine("Read color");
+			        return true;
+			    case IN_DISTANCE:
+				message = new DistanceMessage (BitConverter.ToUInt16(data, 1));
+			    return true;
+			    default:
+			    return false;
 			}
 		}
 	}
 }
-

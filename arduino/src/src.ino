@@ -6,6 +6,11 @@ Advanced_Motor adv_motor_separator;
 Ultra_Sound_Sensor distance_sensor;
 
 uint16_t distance_to_wall;
+
+// 0: Green
+// 1: Yellow
+// 2: Red
+// 3: Blue
 Delta_RGB colors[COLOR_COUNT];
 
 // -------------------------------
@@ -16,6 +21,20 @@ void setup()
     Serial.begin(9600);
     while (!Serial)
         ;
+
+    if (!RGB_sensor.init())
+    {
+        while (true)
+        {
+            digitalWrite(42, HIGH);
+            delay(100);
+            digitalWrite(42, LOW);
+            delay(100);
+        }
+    }
+
+    while(RGB_sensor.readRed() == 0 || RGB_sensor.readGreen() == 0 || RGB_sensor.readBlue() == 0);
+
     /*
   //exit(0);
 
@@ -41,6 +60,20 @@ void setup()
   motor_turn_analog(&motor_conveyor, 255);
   */
 
+    //startup_helper();
+
+    calibrate_color(&colors[RED]);
+    
+    Serial.print("Red: ");
+    Serial.println(colors[RED].rgb.red);
+    Serial.print("Green: ");
+    Serial.println(colors[RED].rgb.green);
+    Serial.print("Blue: ");
+    Serial.println(colors[RED].rgb.blue);
+    Serial.print("Delta: ");
+    Serial.println(colors[RED].delta);
+    
+    /*
     for (;;)
     {
         In_Message message_received;
@@ -77,10 +110,67 @@ void setup()
             break;
         }
     }
+    */
+}
+
+void startup_helper()
+{
+    pinMode(42, OUTPUT);
+    bool start = false;
+    while (!start)
+    {
+        In_Message message;
+        io_await_message(&message);
+
+        switch (message.type)
+        {
+        case IN_MESSAGE_COMMAND:
+            switch (message.command.type)
+            {
+            case IN_COMMAND_CALIBRATE_RED:
+                //calibrate_color(&colors[RED]);
+
+                //read_color(&colors[RED].rgb);
+
+                Out_Message out;
+                out.type = OUT_MESSAGE_COLOR;
+                out.color.type = RED;
+
+                out.color.red_value = colors[RED].rgb.red;
+                out.color.green_value = colors[RED].rgb.green;
+                out.color.blue_value = colors[RED].rgb.blue;
+                io_send_message(&out);
+
+                continue;
+            case IN_COMMAND_CALIBRATE_GREEN:
+                calibrate_color(&colors[GREEN]);
+                continue;
+            case IN_COMMAND_CALIBRATE_BLUE:
+                calibrate_color(&colors[BLUE]);
+                continue;
+            case IN_COMMAND_CALIBRATE_DISTANCE:
+                calibrate_color(&colors[YELLOW]);
+                continue;
+            case IN_COMMAND_START:
+                start = true;
+                continue;
+            case IN_COMMAND_STOP:
+            default:
+                abort();
+                continue;
+            }
+        case IN_MESSAGE_OBJECT:
+        case IN_MESSAGE_COLOR:
+        case IN_MESSAGE_DISTANCE:
+        default:
+            continue;
+        }
+    }
 }
 
 void loop()
 {
+    return;
     static int16_t bucket_pos[5] = {0, 50, 100, 260, 310};
     static Segment_Queue segment_queue;
     static Ball_Color last_ball = EMPTY;
@@ -238,10 +328,21 @@ uint16_t euclidean_distance_3d(RGB *rgb1, RGB *rgb2)
 
 void calibrate_color(Delta_RGB *result)
 {
+    
     RGB samples[CALIBRACTION_ITERATIONS];
     for (uint8_t i = 0; i < CALIBRACTION_ITERATIONS; i++)
+    {
         read_color(&samples[i]);
+        
+        Serial.print(samples[i].red);
+        Serial.print(" ");
+        Serial.print(samples[i].green);
+        Serial.print(" ");
+        Serial.println(samples[i].blue);
+        
+    }
 
+    
     RGB *point1 = &samples[0];
     RGB *point2;
 

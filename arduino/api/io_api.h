@@ -18,16 +18,17 @@
 // Input message sizes
 #define IN_SIZE_COMMAND 2
 #define IN_SIZE_OBJECT 2
-#define IN_SIZE_COLOR 4
+#define IN_SIZE_COLOR 8
 #define IN_SIZE_DISTANCE 3
 
 // Input command types
 #define IN_COMMAND_CALIBRATE_RED 0
 #define IN_COMMAND_CALIBRATE_GREEN 1
 #define IN_COMMAND_CALIBRATE_BLUE 2
-#define IN_COMMAND_CALIBRATE_DISTANCE 3
-#define IN_COMMAND_START 4
-#define IN_COMMAND_STOP 5
+#define IN_COMMAND_CALIBRATE_YELLOW 3
+#define IN_COMMAND_CALIBRATE_DISTANCE 4
+#define IN_COMMAND_START 5
+#define IN_COMMAND_STOP 6
 
 struct In_Message
 {
@@ -50,7 +51,9 @@ struct In_Message
         struct
         {
             uint8_t type;
-            uint16_t value;
+            uint16_t red_value;
+            uint16_t green_value;
+            uint16_t blue_value;
         } color;
 
         struct 
@@ -69,7 +72,7 @@ struct In_Message
 // Output message sizes
 #define OUT_SIZE_COMMAND 2
 #define OUT_SIZE_REQUEST 2
-#define OUT_SIZE_COLOR 4
+#define OUT_SIZE_COLOR 8
 #define OUT_SIZE_DISTANCE 3
 
 // Output command types
@@ -99,7 +102,9 @@ struct Out_Message
         struct
         {
             uint8_t type;
-            uint16_t value;
+            uint16_t red_value;
+            uint16_t green_value;
+            uint16_t blue_value;
         } color;
 
         struct
