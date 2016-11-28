@@ -10,6 +10,9 @@ int32_t base_motor_get_degrees(Base_Motor *motor)
     // Mark reading as true, so no race conditions occur
     motor->reading = true;
     res = motor->degrees;
+
+    // Just to make sure motor->degrees never changes when reading = true
+    ASSERT(res == motor->degrees); 
     motor->reading = false;
 
     return res * motor->degree_ratio;
@@ -34,7 +37,8 @@ void motor_init(Motor *motor, float degree_ratio, uint8_t pin,
 }
 
 void advanced_motor_init(Advanced_Motor *motor, float degree_ratio,
-                         uint8_t pin1, uint8_t pin2, uint8_t interrupt_pin1, uint8_t interrupt_pin2,
+                         uint8_t pin1, uint8_t pin2, uint8_t interrupt_pin1, 
+                         uint8_t interrupt_pin2,
                          void (*interrupt_handler1)(void))
 {
     motor->pin1 = pin1;
@@ -60,34 +64,24 @@ void advanced_motor_turn_to_degree(Advanced_Motor *motor, uint16_t degree)
     // 0 and 359 inclusive
     ASSERT(degree < 360);
 
-    /*
-  if (degree >= 360); 
-  {
-    Serial.print("advanced_motor_turn_to_degree was supplied ");
-    Serial.print("with an invalid degree: ");
-    Serial.println(degree);
-    return;
-  }
-  */
-
     int32_t current_pos = advanced_motor_get_degrees(motor);
     int32_t turns = (current_pos / 360);
 
     // We need to choose two goal, one above and one below our current_pos.
     // These goal needs to be the full number representaion of the degree number
     // that has to be reached.
-    int32_t goal2, goal1 = 360 * turns + (int32_t)degree;
+    int32_t goal2, goal1 = 360 * turns + degree;
     int32_t distance_forward, distance_backward;
 
     if (goal1 > current_pos)
     {
-        goal2 = 360 * (turns - 1) + (int32_t)degree;
+        goal2 = 360 * (turns - 1) + degree;
         distance_forward = current_pos - goal2;
         distance_backward = goal1 - current_pos;
     }
     else if (goal1 < current_pos)
     {
-        goal2 = 360 * (turns + 1) + (int32_t)degree;
+        goal2 = 360 * (turns + 1) + degree;
         distance_forward = current_pos - goal1;
         distance_backward = goal2 - current_pos;
     }
@@ -111,15 +105,6 @@ void motor_turn_to_degree(Motor *motor, uint16_t degree)
     // 0 and 359 inclusive
     ASSERT(degree < 360);
 
-    /*
-  if (degree >= 360) 
-  {
-    Serial.print("motor_turn_to_degree was supplied with an invalid degree: ");
-    Serial.println(degree);
-    return;
-  }
-  */
-
     int32_t current_pos = motor_get_degrees(motor);
     int32_t turns = (current_pos / 360);
     int32_t goal = 360 * turns + degree;
@@ -134,15 +119,17 @@ void motor_turn_to_degree(Motor *motor, uint16_t degree)
 }
 
 void advanced_motor_turn_degrees(Advanced_Motor *motor, uint16_t degrees,
-                                 Turning_Direction direction)
+                                 int8_t direction)
 {
     // Calculate the goal that the motor should reach
-    int32_t goal = advanced_motor_get_degrees(motor) + ((int32_t)degrees * direction);
+    int32_t read_degrees = advanced_motor_get_degrees(motor);
+    int32_t goal = read_degrees + ((int32_t)degrees * direction);
 
     advanced_motor_turn(motor, direction);
 
-        bool waiting = true;
-        int32_t motor_degrees;
+    bool waiting = true;
+    int32_t motor_degrees;
+
     // Wait for the motor to reach the goal
     switch (direction)
     {
@@ -162,6 +149,9 @@ void advanced_motor_turn_degrees(Advanced_Motor *motor, uint16_t degrees,
     case BACKWARD:
         while (goal > advanced_motor_get_degrees(motor))
             ;
+        break;
+    default:
+        ASSERT(false);
         break;
     }
 
@@ -203,7 +193,7 @@ void motor_stop(Motor *motor)
     digitalWrite(motor->pin, LOW);
 }
 
-void advanced_motor_turn(Advanced_Motor *motor, Turning_Direction direction)
+void advanced_motor_turn(Advanced_Motor *motor, int8_t direction)
 {
     switch (direction)
     {
@@ -217,18 +207,12 @@ void advanced_motor_turn(Advanced_Motor *motor, Turning_Direction direction)
         break;
     default:
         ASSERT(false);
-
-        /*
-      Serial.println("Not supported direction!");
-      delay(1000);
-      exit(0);
-      */
         break;
     }
 }
 
 void advanced_motor_turn_analog(Advanced_Motor *motor,
-                                Turning_Direction direction, uint8_t value)
+                                int8_t direction, uint8_t value)
 {
     switch (direction)
     {
@@ -242,11 +226,6 @@ void advanced_motor_turn_analog(Advanced_Motor *motor,
         break;
     default:
         ASSERT(false);
-        /*
-      Serial.println("Not supported direction!");
-      delay(1000);
-      exit(0);
-      */
         break;
     }
 }
@@ -307,7 +286,6 @@ void advanced_motor_update_degrees(Advanced_Motor *motor)
         break;
     default:
         ASSERT(false);
-        //Serial.println("Error in determin direction of motor");
         break;
     }
 
