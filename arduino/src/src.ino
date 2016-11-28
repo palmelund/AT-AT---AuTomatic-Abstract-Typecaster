@@ -453,9 +453,9 @@ void calibrate_color(Delta_RGB *result)
         // We construct the sphere by extending the line from the center
         // of the sphere to the outside point by the radius of the sphere.
         // NOTE: http://math.stackexchange.com/questions/352828/increase-length-of-line
-        float delta_red = ((float)result->rgb.red - outside_point->red) / distance;
-        float delta_green = ((float)result->rgb.green - outside_point->green) / distance;
-        float delta_blue = ((float)result->rgb.blue - outside_point->blue) / distance;
+        float delta_red = ((float)result->rgb.red - outside_point->red) / distance_to_outside_point;
+        float delta_green = ((float)result->rgb.green - outside_point->green) / distance_to_outside_point;
+        float delta_blue = ((float)result->rgb.blue - outside_point->blue) / distance_to_outside_point;
         
         // The moved_point, will be the new point that is created from extending
         // that line.
@@ -472,7 +472,7 @@ void calibrate_color(Delta_RGB *result)
 
         uint16_t prev_delta = result->delta;
         float distance_to_moved_result = euclidean_distance_3d(&result->rgb, &moved_result);
-        float distance_to_outside_point = euclidean_distance_3d(&result->rgb, &moved_result);
+        distance_to_outside_point = euclidean_distance_3d(&result->rgb, &moved_result);
 
         if (distance_to_moved_result > distance_to_outside_point)
             result->delta = (uint16_t)ceil(distance_to_moved_result);
