@@ -1,5 +1,24 @@
 #include "src.h"
 
+/* PLAN
+ *
+ * Startup command interface
+ *  * Calibrate colors
+ *  * Get color calibrations and measured distance
+ *  * Start sorting machine
+ *
+ * Feed ball
+ *  * feed_ball()
+ * Ping color and Sound
+ *  * Multiple code things
+ * Send command
+ *  * command_take_picture()
+ * Request object
+ *  * request_object_info()
+ * Move separator
+ *  * Multiple code things
+ */
+
 SFE_ISL29125 RGB_sensor;
 Motor motor_conveyor, motor_feeder;
 Advanced_Motor adv_motor_separator;
@@ -18,64 +37,42 @@ Delta_RGB colors[COLOR_COUNT];
 // -------------------------------
 void setup()
 {
+    // Open serial connection
     Serial.begin(9600);
     while (!Serial)
         ;
 
-    if (!RGB_sensor.init())
-    {
-        while (true)
-        {
-            digitalWrite(42, HIGH);
-            delay(100);
-            digitalWrite(42, LOW);
-            delay(100);
-        }
-    }
-
+    // Initialize color sensor
+    RGB_sensor.init();
     while (RGB_sensor.readRed() == 0 || RGB_sensor.readGreen() == 0 || RGB_sensor.readBlue() == 0)
         ;
+    //exit(0);
 
-  //exit(0);
+    DEBUG_PRINTLN("Initializing all components...");
+    DEBUG_PRINTLN("- Ultra sound sensor...");
+    distance_sensor_init(&distance_sensor, RANGE_TRIG, RANGE_ECHO);
 
-  DEBUG_PRINTLN("Initializing all components...");
-  DEBUG_PRINTLN("- Ultra sound sensor...");
-  distance_sensor_init(&distance_sensor, RANGE_TRIG, RANGE_ECHO);
+    DEBUG_PRINTLN("--- Calibrating...");
+    distance_to_wall = calibrate_ultra_sound_sensor();
+    DEBUG_PRINT("---");
+    DEBUG_PRINTLN_VAR(distance_to_wall);
 
-  DEBUG_PRINTLN("--- Calibrating...");
-  distance_to_wall = calibrate_ultra_sound_sensor();
-  DEBUG_PRINT("---"); DEBUG_PRINTLN_VAR(distance_to_wall);
+    DEBUG_PRINTLN("- Motors...");
+    motor_init(&motor_conveyor, 0.36, MOTOR_CONVEYOR_PIN, MOTOR_CONVEYOR_INT_PIN,
+               motor_conveyor_interrupt);
+    motor_init(&motor_feeder, 1.0, MOTOR_FEEDER_PIN, MOTOR_FEEDER_INT_PIN,
+               motor_feeder_interrupt);
 
-  DEBUG_PRINTLN("- Motors...");
-  motor_init(&motor_conveyor, 0.36, MOTOR_CONVEYOR_PIN, MOTOR_CONVEYOR_INT_PIN, 
-    motor_conveyor_interrupt);
-  motor_init(&motor_feeder, 1.0, MOTOR_FEEDER_PIN, MOTOR_FEEDER_INT_PIN, 
-    motor_feeder_interrupt);
-
-  advanced_motor_init(&adv_motor_separator, 1.0, MOTOR_SEPARATOR_PIN1, 
-    MOTOR_SEPARATOR_PIN2,MOTOR_SEPARATOR_INT_PIN1, MOTOR_SEPARATOR_DATA_PIN, 
-    adv_motor_separator_interrupt1);
+    advanced_motor_init(&adv_motor_separator, 1.0, MOTOR_SEPARATOR_PIN1,
+                        MOTOR_SEPARATOR_PIN2, MOTOR_SEPARATOR_INT_PIN1, MOTOR_SEPARATOR_DATA_PIN,
+                        adv_motor_separator_interrupt1);
 
     Serial.print("Distance: ");
     Serial.println(distance_to_wall);
 
-    while(true)
-    {
-        int32_t distance = distance_sensor_measure_distance(&distance_sensor);
+    DEBUG_PRINTLN("Starting the sorting machine...");
+    motor_turn(&motor_conveyor);
 
-        if (distance + 10 < distance_to_wall || distance > distance_to_wall + 10)
-        {
-        Serial.println(distance_sensor_measure_distance(&distance_sensor));
-        
-        }
-        delay(100);
-    }
-
-/*
-
-  DEBUG_PRINTLN("Starting the sorting machine...");
-  motor_turn_analog(&motor_conveyor, 255);
-  */
     /*
                 calibrate_color(&colors[RED]);
 
@@ -89,18 +86,36 @@ void setup()
                 io_send_message(&out);
 */
     //startup_helper();
+    /*while (true)
+    {
+        /*
+        //calibrate_color(&colors[RED]);
+        Serial.print("Status: ");
+        Serial.println(RGB_sensor.readStatus());
+        RGB rgb;
+        read_color(&rgb);
+        //DEBUG_PRINT_RGB(rgb);
+        
+        Serial.print("Red: ");
+        Serial.print(rgb.red);
+        Serial.print(" Green: ");
+        Serial.print(rgb.green);
+        Serial.print(" Blue: ");
+        Serial.println(rgb.blue);
+
+        delay(2000);
+*/
     /*
-    calibrate_color(&colors[RED]);
-    
-    Serial.print("Red: ");
-    Serial.println(colors[RED].rgb.red);
-    Serial.print("Green: ");
-    Serial.println(colors[RED].rgb.green);
-    Serial.print("Blue: ");
-    Serial.println(colors[RED].rgb.blue);
-    Serial.print("Delta: ");
-    Serial.println(colors[RED].delta);
-  */
+        Serial.print("Red: ");
+        Serial.println(colors[RED].rgb.red);
+        Serial.print("Green: ");
+        Serial.println(colors[RED].rgb.green);
+        Serial.print("Blue: ");
+        Serial.println(colors[RED].rgb.blue);
+        Serial.print("Delta: ");
+        Serial.println(colors[RED].delta);
+        
+    }*/
     /*
     for (;;)
     {
@@ -140,21 +155,22 @@ void setup()
     }
     */
 
-    test_color_com();
+    //test_color_com();
 }
 
 void test_color_com()
 {
     while (true)
     {
-        calibrate_color(&colors[RED]);
-        Serial.print("\n\nCALIBRATE: ");
+        read_color(&colors[RED].rgb);
+        //calibrate_color(&colors[RED]);
+        //Serial.print("\n\nCALIBRATE: ");
         Serial.print(colors[RED].rgb.red);
         Serial.print(" ");
         Serial.print(colors[RED].rgb.green);
         Serial.print(" ");
         Serial.print(colors[RED].rgb.blue);
-        Serial.println("\n\n");
+        Serial.println("");
     }
 }
 
@@ -215,11 +231,32 @@ void startup_helper()
 
 void loop()
 {
-    return;
+    static bool run = true;
+
+    if (Serial.available() > 0)
+    {
+        uint8_t c = Serial.read();
+        if (c == 'b') // BEGIN
+        {
+            run = true;
+            motor_turn(&motor_conveyor);
+        }
+
+        else if (c == 'e')  // END
+        {
+            run = false;
+            motor_stop(&motor_conveyor);
+        }
+    }
+
+    if (run == false)
+        return;
+
+    //return; // TODO: Uncomment before using body for real
     static int16_t bucket_pos[5] = {0, 50, 100, 260, 310};
     static Segment_Queue segment_queue;
     static Ball_Color last_ball = EMPTY;
-    static int32_t conveyor_target = 90;
+    static int32_t conveyor_target = 72;
 
     Ball_Color read_color = EMPTY;
     int32_t test_dist = distance_sensor_measure_distance(&distance_sensor);
@@ -231,7 +268,7 @@ void loop()
     // Tests if a ball is in front of sensor
     if (test_dist < distance_to_wall)
     {
-        //read_color = read_color_sensor();
+        read_color = BLUE;//read_color_sensor();
         DEBUG_PRINT("ball found: ");
         DEBUG_PRINTLN(get_color_name(read_color));
     }
@@ -243,7 +280,7 @@ void loop()
 
     // We only wonna move the buckets, if a ball was found, and that ball is
     // different from the last ball
-    if (current_ball != EMPTY && current_ball != last_ball)
+    if (current_ball != last_ball)
     {
         DEBUG_PRINT("ejecting: ");
         DEBUG_PRINTLN(get_color_name(current_ball));
@@ -251,11 +288,13 @@ void loop()
                                       bucket_pos[current_ball]);
 
         last_ball = current_ball;
+        DEBUG_PRINTLN_VAR(advanced_motor_get_degrees(&adv_motor_separator));
+        DEBUG_PRINTLN_VAR(bucket_pos[current_ball]);
     }
 
     while (motor_get_degrees(&motor_conveyor) < conveyor_target)
         ;
-    conveyor_target += 90;
+    conveyor_target += 72;
 }
 
 void feed_ball()
@@ -313,7 +352,7 @@ int32_t calibrate_ultra_sound_sensor()
             min = current;
     }
 
-    return min;
+    return min - 10;
 }
 
 // -------------------------------
@@ -434,7 +473,7 @@ void calibrate_color(Delta_RGB *result)
     ASSERT(result->delta >= distance_to_point1);
     ASSERT(result->delta >= distance_to_point2);
 
-    // Now we need to ensure that the sphere we just found actually 
+    // Now we need to ensure that the sphere we just found actually
     // contains all points
     for (;;)
     {
@@ -466,7 +505,7 @@ void calibrate_color(Delta_RGB *result)
         float delta_red = ((float)result->rgb.red - outside_point->red) / distance_to_outside_point;
         float delta_green = ((float)result->rgb.green - outside_point->green) / distance_to_outside_point;
         float delta_blue = ((float)result->rgb.blue - outside_point->blue) / distance_to_outside_point;
-        
+
         // The moved_point, will be the new point that is created from extending
         // that line.
         RGB moved_result;
@@ -474,7 +513,7 @@ void calibrate_color(Delta_RGB *result)
         moved_result.green = (uint16_t)ceil(result->rgb.green + delta_green);
         moved_result.blue = (uint16_t)ceil(result->rgb.blue + delta_blue);
 
-        // We now construct the new sphere which cotains outside_point and 
+        // We now construct the new sphere which cotains outside_point and
         // moved_result. This is the same as how we created our original sphere.
         result->rgb.red = (moved_result.red + outside_point->red) / 2;
         result->rgb.green = (moved_result.green + outside_point->green) / 2;
@@ -519,7 +558,7 @@ void command_take_picture()
     Out_Message message;
     message.type = OUT_MESSAGE_COMMAND;
     message.command.type = OUT_COMMAND_TAKE_PICURE;
-    
+
     io_send_message(&message);
 }
 

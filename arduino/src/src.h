@@ -16,8 +16,8 @@ enum Ball_Color
     YELLOW = 1,
     RED    = 2,
     BLUE   = 3,
-
-    EMPTY  = UCHAR_MAX
+    EMPTY  = 4,
+    GARBAGE = 5,
 };
 
 struct Segment_Queue

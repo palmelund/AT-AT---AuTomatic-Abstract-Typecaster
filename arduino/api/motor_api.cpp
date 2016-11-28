@@ -76,18 +76,18 @@ void advanced_motor_turn_to_degree(Advanced_Motor *motor, uint16_t degree)
     // We need to choose two goal, one above and one below our current_pos.
     // These goal needs to be the full number representaion of the degree number
     // that has to be reached.
-    int32_t goal2, goal1 = 360 * turns + degree;
+    int32_t goal2, goal1 = 360 * turns + (int32_t)degree;
     int32_t distance_forward, distance_backward;
 
     if (goal1 > current_pos)
     {
-        goal2 = 360 * (turns - 1) + degree;
+        goal2 = 360 * (turns - 1) + (int32_t)degree;
         distance_forward = current_pos - goal2;
         distance_backward = goal1 - current_pos;
     }
     else if (goal1 < current_pos)
     {
-        goal2 = 360 * (turns + 1) + degree;
+        goal2 = 360 * (turns + 1) + (int32_t)degree;
         distance_forward = current_pos - goal1;
         distance_backward = goal2 - current_pos;
     }
@@ -137,16 +137,27 @@ void advanced_motor_turn_degrees(Advanced_Motor *motor, uint16_t degrees,
                                  Turning_Direction direction)
 {
     // Calculate the goal that the motor should reach
-    int32_t goal = advanced_motor_get_degrees(motor) + (degrees * direction);
+    int32_t goal = advanced_motor_get_degrees(motor) + ((int32_t)degrees * direction);
 
     advanced_motor_turn(motor, direction);
 
+        bool waiting = true;
+        int32_t motor_degrees;
     // Wait for the motor to reach the goal
     switch (direction)
     {
     case FORWARD:
-        while (goal < advanced_motor_get_degrees(motor))
+        //while (goal < advanced_motor_get_degrees(motor))
             ;
+         while (waiting)
+         {
+             motor_degrees = advanced_motor_get_degrees(motor);
+
+             DEBUG_PRINTLN_VAR(motor_degrees);
+             DEBUG_PRINTLN_VAR(goal);
+             waiting =  goal < motor_degrees;
+             DEBUG_PRINTLN_VAR(goal < motor_degrees);
+         }
         break;
     case BACKWARD:
         while (goal > advanced_motor_get_degrees(motor))
