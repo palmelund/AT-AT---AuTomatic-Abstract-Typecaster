@@ -288,8 +288,6 @@ void loop()
                                       bucket_pos[current_ball]);
 
         last_ball = current_ball;
-        DEBUG_PRINTLN_VAR(advanced_motor_get_degrees(&adv_motor_separator));
-        DEBUG_PRINTLN_VAR(bucket_pos[current_ball]);
     }
 
     while (motor_get_degrees(&motor_conveyor) < conveyor_target)

@@ -127,24 +127,12 @@ void advanced_motor_turn_degrees(Advanced_Motor *motor, uint16_t degrees,
 
     advanced_motor_turn(motor, direction);
 
-    bool waiting = true;
-    int32_t motor_degrees;
-
     // Wait for the motor to reach the goal
     switch (direction)
     {
     case FORWARD:
-        //while (goal < advanced_motor_get_degrees(motor))
+        while (goal < advanced_motor_get_degrees(motor))
             ;
-         while (waiting)
-         {
-             motor_degrees = advanced_motor_get_degrees(motor);
-
-             DEBUG_PRINTLN_VAR(motor_degrees);
-             DEBUG_PRINTLN_VAR(goal);
-             waiting =  goal < motor_degrees;
-             DEBUG_PRINTLN_VAR(goal < motor_degrees);
-         }
         break;
     case BACKWARD:
         while (goal > advanced_motor_get_degrees(motor))
