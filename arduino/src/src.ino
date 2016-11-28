@@ -56,9 +56,19 @@ void setup()
     MOTOR_SEPARATOR_PIN2,MOTOR_SEPARATOR_INT_PIN1, MOTOR_SEPARATOR_DATA_PIN, 
     adv_motor_separator_interrupt1);
 
+    Serial.print("Distance: ");
+    Serial.println(distance_to_wall);
+
     while(true)
     {
-        Serial.println(distance_sensor_measure_distance(distance_sensor));
+        int32_t distance = distance_sensor_measure_distance(&distance_sensor);
+
+        if (distance + 10 < distance_to_wall || distance > distance_to_wall + 10)
+        {
+        Serial.println(distance_sensor_measure_distance(&distance_sensor));
+        
+        }
+        delay(100);
     }
 
 /*
@@ -502,4 +512,24 @@ Ball_Color determin_color(RGB *color)
     }
 
     return closest_color;
+}
+
+void command_take_picture()
+{
+    Out_Message message;
+    message.type = OUT_MESSAGE_COMMAND;
+    message.command.type = OUT_COMMAND_TAKE_PICURE;
+    
+    io_send_message(&message);
+}
+
+uint8_t request_object_info()
+{
+    In_Message message;
+    io_await_message(&message);
+
+    if (message.type == IN_MESSAGE_OBJECT)
+    {
+        return message.object.type;
+    }
 }

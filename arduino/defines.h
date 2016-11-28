@@ -31,7 +31,7 @@
 #define LED_YELLOW_PIN
 #define LED_GREEN_PIN
 
-#define DEBUGGING 1
+#define DEBUGGING 0
 
 #if DEBUGGING
 #define DEBUG_PRINT(x) Serial.print(x)

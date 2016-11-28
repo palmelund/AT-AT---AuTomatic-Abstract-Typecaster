@@ -30,6 +30,10 @@
 #define IN_COMMAND_START 5
 #define IN_COMMAND_STOP 6
 
+// Shapes
+#define IN_SHAPE_BALL 0
+#define IN_SHAPE_NOTBALL 1
+
 struct In_Message
 {
     uint8_t type;
