@@ -9,11 +9,8 @@
  * The directions a motor can turn.
  * These are also used by an advanced motor to increment or derement the degrees
  */
-enum Turning_Direction
-{
-    FORWARD  = -1,
-    BACKWARD = 1
-};
+#define FORWARD -1
+#define BACKWARD 1
 
 /*
  * The base data for all motor types
@@ -46,7 +43,7 @@ struct Advanced_Motor
     uint8_t pin2;
     uint8_t interrupt_pin1;
     uint8_t interrupt_pin2;
-    volatile Turning_Direction direction;
+    volatile int8_t direction;
 };
 
 /*
@@ -59,7 +56,8 @@ void motor_init(Motor *motor, float degree_ratio, uint8_t pin,
  * Initializes an advanced motor
  */
 void advanced_motor_init(Advanced_Motor *motor, float degree_ratio,
-                         uint8_t pin1, uint8_t pin2, uint8_t interrupt_pin1, uint8_t interrupt_pin2,
+                         uint8_t pin1, uint8_t pin2, uint8_t interrupt_pin1, 
+                         uint8_t interrupt_pin2,
                          void (*interrupt_handler1)(void));
 
 /*
@@ -71,7 +69,7 @@ void advanced_motor_turn_to_degree(Advanced_Motor *motor, uint16_t degree);
  * Turns an advanced motor a number of degrees in a certin direction
  */
 void advanced_motor_turn_degrees(Advanced_Motor *motor, uint16_t degrees,
-                                 Turning_Direction direction);
+                                 int8_t direction);
 
 /*
  * Turns a motor to an angle
@@ -97,12 +95,12 @@ void motor_stop(Motor *motor);
  * Make an advanced motor turn in a certin direction by an analog value
  */
 void advanced_motor_turn_analog(Advanced_Motor *motor,
-                                Turning_Direction direction, uint8_t value);
+                                int8_t direction, uint8_t value);
 
 /*
  * Make an advanced motor turn in a certin direction
  */
-void advanced_motor_turn(Advanced_Motor *motor, Turning_Direction direction);
+void advanced_motor_turn(Advanced_Motor *motor, int8_t direction);
 
 /*
  * Make a motor turn by an analog value
