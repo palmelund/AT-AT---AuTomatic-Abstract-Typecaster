@@ -36,7 +36,6 @@ void setup()
     while (RGB_sensor.readRed() == 0 || RGB_sensor.readGreen() == 0 || RGB_sensor.readBlue() == 0)
         ;
 
-    /*
   //exit(0);
 
   DEBUG_PRINTLN("Initializing all components...");
@@ -56,6 +55,13 @@ void setup()
   advanced_motor_init(&adv_motor_separator, 1.0, MOTOR_SEPARATOR_PIN1, 
     MOTOR_SEPARATOR_PIN2,MOTOR_SEPARATOR_INT_PIN1, MOTOR_SEPARATOR_DATA_PIN, 
     adv_motor_separator_interrupt1);
+
+    while(true)
+    {
+        Serial.println(distance_sensor_measure_distance(distance_sensor));
+    }
+
+/*
 
   DEBUG_PRINTLN("Starting the sorting machine...");
   motor_turn_analog(&motor_conveyor, 255);
