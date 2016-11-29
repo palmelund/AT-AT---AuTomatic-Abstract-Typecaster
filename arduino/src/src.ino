@@ -42,11 +42,13 @@ void setup()
     while (!Serial)
         ;
 
+#if DEBUGGING
+    DEBUG_PRINTLN("Ready!");
+
+    while (Serial.available() <= 0) ;
+#endif
+
     // Initialize color sensor
-    RGB_sensor.init();
-    while (RGB_sensor.readRed() == 0 || RGB_sensor.readGreen() == 0 || RGB_sensor.readBlue() == 0)
-        ;
-    //exit(0);
 
     DEBUG_PRINTLN("Initializing all components...");
     DEBUG_PRINTLN("- Ultra sound sensor...");
@@ -67,109 +69,53 @@ void setup()
                         MOTOR_SEPARATOR_PIN2, MOTOR_SEPARATOR_INT_PIN1, MOTOR_SEPARATOR_DATA_PIN,
                         adv_motor_separator_interrupt1);
 
-    Serial.print("Distance: ");
-    Serial.println(distance_to_wall);
+    DEBUG_PRINTLN("- Color sensor...");
+    RGB_sensor.init();
+    while (RGB_sensor.readRed() == 0 ||
+           RGB_sensor.readGreen() == 0 ||
+           RGB_sensor.readBlue() == 0)
+        ;
 
     DEBUG_PRINTLN("Starting the sorting machine...");
     motor_turn(&motor_conveyor);
 
-    /*
-                calibrate_color(&colors[RED]);
+/*
+    Delta_RGB red;
+    calibrate_color(&red);
 
-                Out_Message out;
-                out.type = OUT_MESSAGE_COLOR;
-                out.color.type = RED;
-
-                out.color.red_value = colors[RED].rgb.red;
-                out.color.green_value = colors[RED].rgb.green;
-                out.color.blue_value = colors[RED].rgb.blue;
-                io_send_message(&out);
-*/
-    //startup_helper();
-    /*while (true)
+    while (true)
     {
-        /*
-        //calibrate_color(&colors[RED]);
-        Serial.print("Status: ");
-        Serial.println(RGB_sensor.readStatus());
-        RGB rgb;
-        read_color(&rgb);
-        //DEBUG_PRINT_RGB(rgb);
-        
-        Serial.print("Red: ");
-        Serial.print(rgb.red);
-        Serial.print(" Green: ");
-        Serial.print(rgb.green);
-        Serial.print(" Blue: ");
-        Serial.println(rgb.blue);
+        RGB color;
+        read_color(&color);
+        uint16_t delta = euclidean_distance_3d(&color, &red.rgb);
 
-        delay(2000);
-*/
-    /*
-        Serial.print("Red: ");
-        Serial.println(colors[RED].rgb.red);
-        Serial.print("Green: ");
-        Serial.println(colors[RED].rgb.green);
-        Serial.print("Blue: ");
-        Serial.println(colors[RED].rgb.blue);
-        Serial.print("Delta: ");
-        Serial.println(colors[RED].delta);
-        
-    }*/
-    /*
-    for (;;)
-    {
-        In_Message message_received;
-        io_await_message(&message_received);
+        DEBUG_PRINT_RGB(color);
+        DEBUG_PRINT_RGB(red.rgb);
+        DEBUG_PRINTLN_VAR(red.delta);
+        DEBUG_PRINTLN_VAR(delta);
 
-        Out_Message message;
-        switch (message_received.type)
-        {
-        case IN_MESSAGE_COLOR:
-            message.type = OUT_MESSAGE_COLOR;
-            message.color.type = message_received.color.type;
-            message.color.value = message_received.color.value;
-            io_send_message(&message);
-            break;
+        if (delta < red.delta)
+            DEBUG_PRINTLN("Yay");
+        else
+            DEBUG_PRINTLN("Nay");
 
-        case IN_MESSAGE_COMMAND:
-            message.type = OUT_MESSAGE_COMMAND;
-            message.command.type = message_received.command.type;
-            io_send_message(&message);
-            break;
-
-        case IN_MESSAGE_DISTANCE:
-            message.type = OUT_MESSAGE_DISTANCE;
-            message.distance.value = message_received.distance.value;
-            io_send_message(&message);
-            break;
-
-        case IN_MESSAGE_OBJECT:
-            message.type = OUT_MESSAGE_REQUEST;
-            message.request.type = OUT_REQUEST_OBJECT_INFO;
-            io_send_message(&message);
-
-        default:
-            break;
-        }
+        delay(300);
     }
     */
-
-    //test_color_com();
 }
 
 void test_color_com()
 {
     while (true)
     {
-        read_color(&colors[RED].rgb);
+        read_color(&colors[RED_BALL].rgb);
         //calibrate_color(&colors[RED]);
         //Serial.print("\n\nCALIBRATE: ");
-        Serial.print(colors[RED].rgb.red);
+        Serial.print(colors[RED_BALL].rgb.red);
         Serial.print(" ");
-        Serial.print(colors[RED].rgb.green);
+        Serial.print(colors[RED_BALL].rgb.green);
         Serial.print(" ");
-        Serial.print(colors[RED].rgb.blue);
+        Serial.print(colors[RED_BALL].rgb.blue);
         Serial.println("");
     }
 }
@@ -189,28 +135,28 @@ void startup_helper()
             switch (message.command.type)
             {
             case IN_COMMAND_CALIBRATE_RED:
-                calibrate_color(&colors[RED]);
+                calibrate_color(&colors[RED_BALL]);
 
                 //read_color(&colors[RED].rgb);
 
                 Out_Message out;
                 out.type = OUT_MESSAGE_COLOR;
-                out.color.type = RED;
+                out.color.type = RED_BALL;
 
-                out.color.red_value = colors[RED].rgb.red;
-                out.color.green_value = colors[RED].rgb.green;
-                out.color.blue_value = colors[RED].rgb.blue;
+                out.color.red_value = colors[RED_BALL].rgb.red;
+                out.color.green_value = colors[RED_BALL].rgb.green;
+                out.color.blue_value = colors[RED_BALL].rgb.blue;
                 io_send_message(&out);
 
                 continue;
             case IN_COMMAND_CALIBRATE_GREEN:
-                calibrate_color(&colors[GREEN]);
+                calibrate_color(&colors[GREEN_BALL]);
                 continue;
             case IN_COMMAND_CALIBRATE_BLUE:
-                calibrate_color(&colors[BLUE]);
+                calibrate_color(&colors[BLUE_BALL]);
                 continue;
             case IN_COMMAND_CALIBRATE_DISTANCE:
-                calibrate_color(&colors[YELLOW]);
+                calibrate_color(&colors[YELLOW_BALL]);
                 continue;
             case IN_COMMAND_START:
                 start = true;
@@ -252,13 +198,12 @@ void loop()
     if (run == false)
         return;
 
-    //return; // TODO: Uncomment before using body for real
     static int16_t bucket_pos[5] = {0, 50, 100, 260, 310};
     static Segment_Queue segment_queue;
-    static Ball_Color last_ball = EMPTY;
-    static int32_t conveyor_target = 72;
+    static uint8_t last_ball = NOT_BALL;
+    static int32_t conveyor_target = SEGMENT_DEGREE_LENGTH;
 
-    Ball_Color read_color = EMPTY;
+    uint8_t read_color = NOT_BALL;
     int32_t test_dist = distance_sensor_measure_distance(&distance_sensor);
 
     DEBUG_PRINT_VAR(test_dist);
@@ -268,15 +213,13 @@ void loop()
     // Tests if a ball is in front of sensor
     if (test_dist < distance_to_wall)
     {
-        read_color = BLUE;//read_color_sensor();
+        read_color = BLUE_BALL; //read_color_sensor();
         DEBUG_PRINT("ball found: ");
         DEBUG_PRINTLN(get_color_name(read_color));
     }
 
     enqueue_segment(&segment_queue, read_color);
-    feed_ball();
-
-    Ball_Color current_ball = peek_segment(&segment_queue);
+    uint8_t current_ball = peek_segment(&segment_queue);
 
     // We only wonna move the buckets, if a ball was found, and that ball is
     // different from the last ball
@@ -290,30 +233,11 @@ void loop()
         last_ball = current_ball;
     }
 
+    task_feed_ball();
+
     while (motor_get_degrees(&motor_conveyor) < conveyor_target)
         ;
-    conveyor_target += 72;
-}
-
-void feed_ball()
-{
-    const uint8_t feed_iteration = 8;
-    static uint8_t feed_counter = feed_iteration;
-    static int16_t deg = 90;
-
-    // We only feed a ball every x iterations
-    if (feed_counter == feed_iteration)
-    {
-        motor_turn_to_degree(&motor_feeder, deg);
-
-        deg += 90;
-        if (deg == 360)
-            deg = 0;
-
-        feed_counter = 0;
-    }
-
-    feed_counter++;
+    conveyor_target += SEGMENT_DEGREE_LENGTH;
 }
 
 // -------------------------------
@@ -337,26 +261,31 @@ void adv_motor_separator_interrupt1()
 // -------------------------------
 // Ultra sound sensor functions
 // -------------------------------
+// TODO: filter out short distances
 int32_t calibrate_ultra_sound_sensor()
 {
     int32_t min = distance_sensor_measure_distance(&distance_sensor);
     int32_t current;
     for (uint8_t i = 0; i < CALIBRACTION_ITERATIONS - 1; i++)
     {
-        DEBUG_PRINTLN_VAR(min);
+        // We delay a little, because it seems that calling measure_distance
+        // to rapidly, affects the results.
+        delay(5); 
+
+        //DEBUG_PRINTLN_VAR(min);
         current = distance_sensor_measure_distance(&distance_sensor);
 
         if (current < min)
             min = current;
     }
 
-    return min - 10;
+    return min;
 }
 
 // -------------------------------
 // Queue functions
 // -------------------------------
-void enqueue_segment(Segment_Queue *segment_queue, Ball_Color segment)
+void enqueue_segment(Segment_Queue *segment_queue, uint8_t segment)
 {
     segment_queue->data[segment_queue->index] = segment;
 
@@ -365,7 +294,7 @@ void enqueue_segment(Segment_Queue *segment_queue, Ball_Color segment)
         segment_queue->index = 0;
 }
 
-Ball_Color peek_segment(Segment_Queue *segment_queue)
+uint8_t peek_segment(Segment_Queue *segment_queue)
 {
     return segment_queue->data[segment_queue->index];
 }
@@ -373,20 +302,20 @@ Ball_Color peek_segment(Segment_Queue *segment_queue)
 // -------------------------------
 // Functions for processing colors
 // -------------------------------
-char *get_color_name(Ball_Color color)
+char *get_color_name(uint8_t color)
 {
     switch (color)
     {
-    case GREEN:
+    case GREEN_BALL:
         return (char *)"Green";
-    case YELLOW:
+    case YELLOW_BALL:
         return (char *)"Yellow";
-    case RED:
+    case RED_BALL:
         return (char *)"Red";
-    case BLUE:
+    case BLUE_BALL:
         return (char *)"Blue";
-    case EMPTY:
-        return (char *)"Empty";
+    case NOT_BALL:
+        return (char *)"Not Ball";
     default:
         ASSERT(false);
     }
@@ -415,6 +344,7 @@ void calibrate_color(Delta_RGB *result)
     for (uint8_t i = 0; i < CALIBRACTION_ITERATIONS; i++)
     {
         read_color(&samples[i]);
+        //DEBUG_PRINT_RGB(samples[i]);
     }
 
     // https://en.wikipedia.org/wiki/Bounding_sphere
@@ -532,11 +462,14 @@ void calibrate_color(Delta_RGB *result)
 
         // Now we repeat!
     }
+
+    // Just to add some extra in case of noise
+    result->delta += 100;
 }
 
-Ball_Color determin_color(RGB *color)
+uint8_t determin_color(RGB *color)
 {
-    uint8_t closest_color = EMPTY;
+    uint8_t closest_color = NOT_BALL;
     uint16_t closest_distance = USHRT_MAX;
     for (uint8_t i = 0; i < COLOR_COUNT; i++)
     {
@@ -551,7 +484,11 @@ Ball_Color determin_color(RGB *color)
     return closest_color;
 }
 
-void command_take_picture()
+
+// -------------------------------
+// Task that are executed by the cyclic executive
+// -------------------------------
+void task_send_take_picture()
 {
     Out_Message message;
     message.type = OUT_MESSAGE_COMMAND;
@@ -560,7 +497,7 @@ void command_take_picture()
     io_send_message(&message);
 }
 
-uint8_t request_object_info()
+uint8_t task_request_object_info()
 {
     In_Message message;
     io_await_message(&message);
@@ -569,4 +506,36 @@ uint8_t request_object_info()
     {
         return message.object.type;
     }
+
+    return -1;
+}
+
+void task_feed_ball()
+{
+    static uint8_t feed_counter = FEEDER_ITERATION;
+    static int16_t deg = FEEDER_DEGREES;
+
+    // We only feed a ball every x iterations
+    if (feed_counter == FEEDER_ITERATION)
+    {
+        motor_turn_to_degree(&motor_feeder, deg);
+
+        deg += FEEDER_DEGREES;
+        if (deg == 360)
+            deg = 0;
+
+        feed_counter = 0;
+    }
+
+    feed_counter++;
+}
+
+void task_determin_color()
+{
+    RGB color;
+    read_color(&color);
+
+    uint8_t determind_color = determin_color(&color);
+
+
 }

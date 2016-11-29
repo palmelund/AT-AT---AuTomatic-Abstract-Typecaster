@@ -49,13 +49,13 @@ struct Advanced_Motor
 /*
  * Initializes a standard motor
  */
-void motor_init(Motor *motor, float degree_ratio, uint8_t pin,
+void motor_init(Motor* motor, float degree_ratio, uint8_t pin,
                 uint8_t interrupt_pin, void (*interrupt_handler)(void));
 
 /*
  * Initializes an advanced motor
  */
-void advanced_motor_init(Advanced_Motor *motor, float degree_ratio,
+void advanced_motor_init(Advanced_Motor* motor, float degree_ratio,
                          uint8_t pin1, uint8_t pin2, uint8_t interrupt_pin1, 
                          uint8_t interrupt_pin2,
                          void (*interrupt_handler1)(void));
@@ -63,75 +63,64 @@ void advanced_motor_init(Advanced_Motor *motor, float degree_ratio,
 /*
  * Turns an advanced motor to an angle
  */
-void advanced_motor_turn_to_degree(Advanced_Motor *motor, uint16_t degree);
+void advanced_motor_turn_to_degree(Advanced_Motor* motor, uint16_t degree);
 
 /*
  * Turns an advanced motor a number of degrees in a certin direction
  */
-void advanced_motor_turn_degrees(Advanced_Motor *motor, uint16_t degrees,
+void advanced_motor_turn_degrees(Advanced_Motor* motor, uint16_t degrees,
                                  int8_t direction);
 
 /*
  * Turns a motor to an angle
  */
-void motor_turn_to_degree(Motor *motor, uint16_t degree);
+void motor_turn_to_degree(Motor* motor, uint16_t degree);
 
 /*
  * Turns a motor a number of degrees
  */
-void motor_turn_degrees(Motor *motor, uint16_t degrees);
+void motor_turn_degrees(Motor* motor, uint16_t degrees);
 
 /*
  * Tries to stop an advanced motor with minimum coasting
  */
-void advanced_motor_stop(Advanced_Motor *motor);
+void advanced_motor_stop(Advanced_Motor* motor);
 
 /*
  * Stops a motor
  */
-void motor_stop(Motor *motor);
-
-/*
- * Make an advanced motor turn in a certin direction by an analog value
- */
-void advanced_motor_turn_analog(Advanced_Motor *motor,
-                                int8_t direction, uint8_t value);
+void motor_stop(Motor* motor);
 
 /*
  * Make an advanced motor turn in a certin direction
  */
-void advanced_motor_turn(Advanced_Motor *motor, int8_t direction);
-
-/*
- * Make a motor turn by an analog value
- */
-void motor_turn_analog(Motor *motor, uint8_t value);
+void advanced_motor_turn(Advanced_Motor* motor, int8_t direction);
 
 /*
  * Make a motor turn
  */
-void motor_turn(Motor *motor);
+void motor_turn(Motor* motor);
 
 /*
  * Safely retriving(locking) the degrees from a motor
  */
-int32_t motor_get_degrees(Motor *motor);
+int32_t motor_get_degrees(Motor* motor);
 
 /*
  * Safely retriving(locking) the degrees from an advanced motor
  */
-int32_t advanced_motor_get_degrees(Advanced_Motor *motor);
+int32_t advanced_motor_get_degrees(Advanced_Motor* motor);
 
 /*
  * Updates the degree value on a motor. 
  * Should either be scheduled or attached to an interrupt
  */
-void motor_update_degrees(Motor *motor);
+void motor_update_degrees(Motor* motor);
 
 /*
  * Updates the degree and direction value on an advanced motor. 
  * Should either be scheduled or attached to an interrupt
  */
-void advanced_motor_update_degrees(Advanced_Motor *motor);
+void advanced_motor_update_degrees(Advanced_Motor* motor);
 
 #endif // _MOTOR_API_H_

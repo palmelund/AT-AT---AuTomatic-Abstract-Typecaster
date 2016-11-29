@@ -25,13 +25,19 @@
 #define RANGE_ECHO 53                   // Read distance
 #define RANGE_TRIG 31                   // Start the sensor
 
-#define QUEUE_SIZE 7                    // Size of the conveyor queue
-
-#define CALIBRACTION_ITERATIONS 100
-
 #define LED_RED_PIN
 #define LED_YELLOW_PIN
 #define LED_GREEN_PIN
+
+#define CALIBRACTION_ITERATIONS 100
+#define FEEDER_ITERATION 8              // The iterations between each feed
+#define FEEDER_DEGREES 90               // The degrees the feeder needs to turn
+                                        // to feed a ball.
+#define SEGMENT_DEGREE_LENGTH 72        // The number of degrees it takes for 
+                                        // the conveyor belt motor to move one
+                                        // segment.
+#define QUEUE_SIZE 7                    // Size of the conveyor queue
+
 
 #if DEBUGGING
 #define DEBUG_PRINT(x) Serial.print(x)

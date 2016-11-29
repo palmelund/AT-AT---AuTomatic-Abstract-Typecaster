@@ -39,17 +39,6 @@ void io_send_message(Out_Message *sending_message)
         Serial.write((uint8_t)(sending_message->color.green_value >> 8));
         Serial.write((uint8_t)(sending_message->color.blue_value & 0x00FF));
         Serial.write((uint8_t)(sending_message->color.blue_value >> 8));
-
-        /*
-        Serial.write(sending_message->color.type);
-        Serial.write(sending_message->data[2]);
-        Serial.write(sending_message->data[1]);
-        Serial.write(sending_message->data[4]);
-        Serial.write(sending_message->data[3]);
-        Serial.write(sending_message->data[6]);
-        Serial.write(sending_message->data[5]);
-  */ //for (int i = 0; i < OUT_SIZE_COLOR - 1; i++)
-        //    Serial.write(sending_message->data[i]);
         break;
 
     case OUT_MESSAGE_COMMAND:
@@ -82,18 +71,15 @@ void io_await_message(In_Message *received_message)
 {
     // Wait until data has been received by the Arduino
     while (Serial.available() < 2)
-    {
-    }
+        ;
 
     uint8_t begin_message = read_byte();
-
     uint8_t message_size = read_byte();
 
     ASSERT(begin_message == BEGIN_MESSAGE);
     ASSERT(message_size > 0);
     while (Serial.available() < message_size)
-    {
-    }
+        ;
 
     received_message->type = read_byte();
 
