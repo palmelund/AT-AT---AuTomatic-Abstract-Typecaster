@@ -50,6 +50,7 @@ void setup()
 #endif
 
     // Initialize color sensor
+    RGB_sensor.init();
 
     DEBUG_PRINTLN("Initializing all components...");
     DEBUG_PRINTLN("- Ultra sound sensor...");
@@ -71,7 +72,6 @@ void setup()
                         adv_motor_separator_interrupt1);
 
     DEBUG_PRINTLN("- Color sensor...");
-    RGB_sensor.init();
     while (RGB_sensor.readRed() == 0 ||
            RGB_sensor.readGreen() == 0 ||
            RGB_sensor.readBlue() == 0)
@@ -215,25 +215,6 @@ void adv_motor_separator_interrupt1()
 // Ultra sound sensor functions
 // -------------------------------
 // TODO: filter out short distances
-int32_t calibrate_ultra_sound_sensor()
-{
-    int32_t min = distance_sensor_measure_distance(&distance_sensor);
-    int32_t current;
-    for (uint8_t i = 0; i < CALIBRACTION_ITERATIONS - 1; ++i)
-    {
-        // We delay a little, because it seems that calling measure_distance
-        // to rapidly, affects the results.
-        delay(5); 
-
-        //DEBUG_PRINTLN_VAR(min);
-        current = distance_sensor_measure_distance(&distance_sensor);
-
-        if (current < min)
-            min = current;
-    }
-
-    return min;
-}
 
 /*
  * Worst case execution time testing

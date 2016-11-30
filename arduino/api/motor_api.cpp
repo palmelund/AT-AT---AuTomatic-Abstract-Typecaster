@@ -81,7 +81,6 @@ void advanced_motor_turn_to_degree(Advanced_Motor* motor, uint16_t degree)
         goal2 = 360 * (turns - 1) + degree;
         distance_forward = current_pos - goal2;
         distance_backward = goal1 - current_pos;
-        /*
         DEBUG_PRINTLN_VAR(goal1 > current_pos);
         DEBUG_PRINTLN_VAR(current_pos);
         DEBUG_PRINTLN_VAR(degree);
@@ -89,11 +88,11 @@ void advanced_motor_turn_to_degree(Advanced_Motor* motor, uint16_t degree)
         DEBUG_PRINTLN_VAR(goal2);
         DEBUG_PRINTLN_VAR(distance_forward);
         DEBUG_PRINTLN_VAR(distance_backward);
+        /*
         */
     }
     else if (goal1 < current_pos)
     {
-        /*
         goal2 = 360 * (turns + 1) + degree;
         distance_forward = current_pos - goal1;
         distance_backward = goal2 - current_pos;
@@ -104,6 +103,7 @@ void advanced_motor_turn_to_degree(Advanced_Motor* motor, uint16_t degree)
         DEBUG_PRINTLN_VAR(goal2);
         DEBUG_PRINTLN_VAR(distance_forward);
         DEBUG_PRINTLN_VAR(distance_backward);
+        /*
         */
     }
     // If goal and current_pos are equal, the motor doesn't need to turn, so
