@@ -34,11 +34,17 @@ void wce_task_check_first_segment(Motor* conveyor, Motor* feeder,
 }
 
 void wce_task_send_take_picture(Motor* conveyor, Motor* feeder,
-    Advanced_Motor* seperator)
+    Advanced_Motor* seperator, Segment_Queue* queue)
 {
     motor_turn(conveyor);
     motor_turn(feeder);
     advanced_motor_turn(seperator, FORWARD);
+
+    for (uint8_t i = 0; i < QUEUE_SIZE; ++i)
+    {
+        Segment* segment = get_segment(queue, i);
+        segment->is_occupied = true;
+    }
 
     delay(1000);
 
@@ -47,7 +53,7 @@ void wce_task_send_take_picture(Motor* conveyor, Motor* feeder,
     {
         time_start = micros();
 
-        task_send_take_picture();
+        task_send_take_picture(queue);
 
         time_end = micros();
 
@@ -172,4 +178,28 @@ void wce_task_rotate_seperator(Motor* conveyor, Motor* feeder,
 
     motor_stop(conveyor);
     advanced_motor_stop(seperator);
+}
+
+void wce_conveyor_segment_turn_speed(Motor* conveyor)
+{
+    motor_turn(conveyor);
+    delay(1000);
+
+    uint32_t time_start, time_end;
+    for (uint8_t i = 0; i < CALIBRACTION_ITERATIONS; ++i)
+    {
+        uint32_t goal = motor_get_degrees(conveyor) + SEGMENT_DEGREE_LENGTH;
+        time_start = micros();
+        
+        while (motor_get_degrees(conveyor) < goal) ;
+
+        time_end = micros();
+
+        Serial.print(i);
+        Serial.print("\t& ");
+        Serial.print(time_end - time_start);
+        Serial.println("\t\\\\ \\hline");
+
+        delay(1000);
+    }
 }

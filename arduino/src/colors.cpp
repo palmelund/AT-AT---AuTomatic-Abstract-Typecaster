@@ -5,15 +5,15 @@ char *get_color_name(uint8_t color)
     switch (color)
     {
     case GREEN:
-        return (char *)"Green";
+        return (char *)"G";
     case YELLOW:
-        return (char *)"Yellow";
+        return (char *)"Y";
     case RED:
-        return (char *)"Red";
+        return (char *)"R";
     case BLUE:
-        return (char *)"Blue";
+        return (char *)"B";
     case UNKNOWN:
-        return (char *)"???";
+        return (char *)"?";
     default:
         ASSERT(false);
     }
@@ -111,7 +111,7 @@ void calibrate_color(SFE_ISL29125* RGB_sensor, Delta_RGB *result)
         {
             distance_to_outside_point = 
                 euclidean_distance_3d(&result->rgb, &samples[i]);
-            if (distance_to_outside_point > result->delta)
+            if (distance_to_outside_point > (float)result->delta)
             {
                 outside_point = &samples[i];
                 break;
@@ -162,6 +162,10 @@ void calibrate_color(SFE_ISL29125* RGB_sensor, Delta_RGB *result)
 
         ASSERT(result->delta >= distance_to_moved_result);
         ASSERT(result->delta >= distance_to_outside_point);
+
+        DEBUG_PRINTLN_VAR(result->delta);
+        DEBUG_PRINTLN_VAR(prev_delta);
+        DEBUG_PRINTLN("");
         ASSERT(result->delta >= prev_delta);
 
         // Now we repeat!

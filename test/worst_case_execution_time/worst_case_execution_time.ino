@@ -86,7 +86,7 @@ void setup()
 
     #ifdef WCE_TEST_SEND_TAKE_PICTURE
     wce_task_send_take_picture(&motor_conveyor, &motor_feeder,
-        &adv_motor_separator);
+        &adv_motor_separator, &segment_queue);
     #endif
 
     #ifdef WCE_TEST_DETERMIN_COLOR
@@ -103,6 +103,10 @@ void setup()
     #ifdef WCE_TEST_ROTATE_SEPERATOR
     wce_task_rotate_seperator(&motor_conveyor, &motor_feeder,
         &adv_motor_separator, &segment_queue);
+    #endif
+
+    #ifdef WCE_TEST_CONVEYOR_SEGMENT_TURN_SPEED
+    wce_conveyor_segment_turn_speed(&motor_conveyor);
     #endif
 }
 

@@ -3,6 +3,7 @@
 //#ifndef _SEGMENTS_H_
 //#define _SEGMENTS_H_
 #include <stdint.h>
+#include "colors.h"
 
 #define QUEUE_SIZE 7                    // Size of the conveyor queue
 
@@ -27,17 +28,17 @@
 
 // The bucket locations
 #define BUCKET_COUNT 5
-#define BLUE_BUCKET 0
+#define GARBAGE_BUCKET 0
 #define GREEN_BUCKET 50
 #define YELLOW_BUCKET 100
 #define RED_BUCKET 260
-#define GARBAGE_BUCKET 310
+#define BLUE_BUCKET 310
 
 struct Segment
 {
     bool is_occupied = false;
-    uint8_t object_type;
-    uint8_t color;
+    uint8_t object_type = GARBAGE;
+    uint8_t color = UNKNOWN;
 
     // NOTE: A union might be needed in the future for expanding this types
     //       functionallity.
@@ -46,7 +47,7 @@ struct Segment
 struct Segment_Queue
 {
     Segment data[QUEUE_SIZE];
-    uint8_t index = 0;
+    int8_t index = 0;
 };
 
 Segment* queue_next(Segment_Queue *segment_queue);

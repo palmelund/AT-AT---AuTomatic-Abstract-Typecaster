@@ -7,7 +7,7 @@
 #include <stddef.h>
 #include "Arduino.h"
 
-#define DEBUGGING 0
+#define DEBUGGING 1
 
 #define CALIBRACTION_ITERATIONS 100
 

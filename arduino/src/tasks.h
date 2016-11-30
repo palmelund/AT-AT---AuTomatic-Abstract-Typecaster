@@ -12,7 +12,7 @@
 #include "motor_api.h"
 #include <stdint.h>
 
-#define FEEDER_ITERATION 1              // The iterations between each feed
+#define FEEDER_ITERATION 8              // The iterations between each feed
 #define FEEDER_DEGREES 90               // The degrees the feeder needs to turn
                                         // to feed a ball.
                                         
@@ -22,7 +22,7 @@ int32_t task_calibrate_ultra_sound_sensor(Ultra_Sound_Sensor* distance_sensor);
 void task_check_first_segment(Ultra_Sound_Sensor* distance_sensor, 
     uint16_t distance_to_wall, Segment_Queue* segment_queue);
 
-void task_send_take_picture();
+void task_send_take_picture(Segment_Queue* queue);
 
 void task_determin_color(SFE_ISL29125* color_sensor,
     Segment_Queue* segment_queue, Delta_RGB* known_colors);

@@ -20,7 +20,7 @@ int32_t task_calibrate_ultra_sound_sensor(Ultra_Sound_Sensor* distance_sensor)
             min = current;
     }
 
-    return min;
+    return min - 8;
 }
 
 // -------------------------------
@@ -40,23 +40,29 @@ void task_check_first_segment(Ultra_Sound_Sensor* distance_sensor,
     // Tests if a ball is in front of sensor
     if (test_dist < distance_to_wall)
     {
-        DEBUG_PRINTLN("Segment was occupied");
+        //DEBUG_PRINTLN("Segment was occupied");
         first_segment->is_occupied = true;
+        first_segment->object_type = BALL;
+        first_segment->color = UNKNOWN;
     }
     else
     {
-        DEBUG_PRINTLN("Segment was empty");
+        //DEBUG_PRINTLN("Segment was empty");
         first_segment->is_occupied = false;
     }
 }
 
-void task_send_take_picture()
+void task_send_take_picture(Segment_Queue* queue)
 {
-    Out_Message message;
-    message.type = OUT_MESSAGE_COMMAND;
-    message.command.type = OUT_COMMAND_TAKE_PICURE;
+    Segment* segment = get_segment(queue, KINECT_SEGMENT_INDEX);
+    if (segment->is_occupied)
+    {
+        Out_Message message;
+        message.type = OUT_MESSAGE_COMMAND;
+        message.command.type = OUT_COMMAND_TAKE_PICURE;
 
-    io_send_message(&message);
+        io_send_message(&message);
+    }
 }
 
 void task_determin_color(SFE_ISL29125* color_sensor,
@@ -70,6 +76,9 @@ void task_determin_color(SFE_ISL29125* color_sensor,
         read_color(color_sensor, &color);
         uint8_t determined_color = determin_color(known_colors, &color);
         segment->color = determined_color;
+
+        //DEBUG_PRINT("Ball was: ");
+        //DEBUG_PRINTLN(get_color_name(determined_color));
     }
 }
 
@@ -119,30 +128,23 @@ void task_rotate_seperator(Advanced_Motor* separator, Segment_Queue* queue)
         YELLOW_BUCKET, 
         GARBAGE_BUCKET
     };
-    static Segment last_occupied_segment;
 
     Segment* segment = get_segment(queue, LAST_INDEX);
+    static uint8_t last_position = GARBAGE_BUCKET;
+    uint8_t position;
 
-    // We only wonna move the buckets, if the segment is occupied, and
-    // is different from the last occupied segment
-    if (segment->is_occupied && 
-        (last_occupied_segment.object_type != segment->object_type ||
-        last_occupied_segment.color != segment->color))
+    if (segment->is_occupied && segment->object_type == BALL)
     {
-        DEBUG_PRINT("ejecting: ");
-        if (segment->object_type == BALL)
-        {
-            DEBUG_PRINTLN(get_color_name(segment->object_type));
-            advanced_motor_turn_to_degree(separator,
-                                        bucket_pos[segment->color]);
-        }
-        else 
-        {
-            DEBUG_PRINTLN("Garbage");
-            advanced_motor_turn_to_degree(separator,
-                                        bucket_pos[BUCKET_COUNT - 1]);
-        }
+        position = segment->color;
+    }
+    else
+    {
+        position = COLOR_COUNT;
+    }
 
-        last_occupied_segment = *segment;
+    if (position != last_position)
+    {
+        advanced_motor_turn_to_degree(separator, bucket_pos[position]);
+        last_position = position;
     }
 }

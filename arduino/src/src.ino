@@ -26,12 +26,27 @@ Ultra_Sound_Sensor distance_sensor;
 
 uint16_t distance_to_wall;
 
-// 0: Green
-// 1: Yellow
-// 2: Red
-// 3: Blue
-Delta_RGB colors[COLOR_COUNT];
+/*
+RED: 957, 1139, 966 - 106
+GREEN: 707, 1183, 1030 - 156
+BLUE: 716, 1110, 1228 - 153
+YELLOW: 1246, 1799, 1173 - 309
+*/
+
+// 0: RED
+// 1: GREEN
+// 2: BLUE
+// 3: YELLOW
+Delta_RGB colors[COLOR_COUNT] = {
+    { { 967, 1067, 835 }, 100 },
+    { { 602, 1040, 853 }, 100 },
+    { { 566, 936, 1156 }, 100 },
+    { { 1513, 2045, 1116 }, 100 }
+};
 Segment_Queue segment_queue;
+
+
+int32_t conveyor_target;
 
 // -------------------------------
 // Arduino main functions
@@ -43,12 +58,6 @@ void setup()
     while (!Serial)
         ;
 
-#if DEBUGGING
-    DEBUG_PRINTLN("Ready!");
-
-    while (Serial.available() <= 0) ;
-#endif
-
     // Initialize color sensor
     RGB_sensor.init();
 
@@ -57,7 +66,7 @@ void setup()
     distance_sensor_init(&distance_sensor, RANGE_TRIG, RANGE_ECHO);
 
     DEBUG_PRINTLN("--- Calibrating...");
-    distance_to_wall = calibrate_ultra_sound_sensor();
+    distance_to_wall = task_calibrate_ultra_sound_sensor(&distance_sensor);
     DEBUG_PRINT("---");
     DEBUG_PRINTLN_VAR(distance_to_wall);
 
@@ -77,8 +86,33 @@ void setup()
            RGB_sensor.readBlue() == 0)
         ;
 
-    DEBUG_PRINTLN("Starting the sorting machine...");
-    //motor_turn(&motor_conveyor);
+#if DEBUGGING
+    motor_stop(&motor_conveyor);
+    DEBUG_PRINTLN("Ready!");
+
+    while (Serial.available() <= 0) ;
+    Serial.read();
+#endif
+
+    conveyor_target = SEGMENT_DEGREE_LENGTH * 2;
+    advanced_motor_turn_to_degree(&adv_motor_separator, GARBAGE_BUCKET);
+    motor_turn(&motor_conveyor);
+
+    DEBUG_PRINTLN("Calibrating colors...");
+    for (uint8_t i = 0; i < COLOR_COUNT; ++i)
+    {
+        calibrate_color(&RGB_sensor, &colors[i]);
+
+        DEBUG_PRINT_VAR(colors[i].delta);
+        DEBUG_PRINT(" - ");
+        DEBUG_PRINT_RGB(colors[i].rgb);
+
+        while (motor_get_degrees(&motor_conveyor) < conveyor_target)
+            ;
+        conveyor_target += SEGMENT_DEGREE_LENGTH * 2;
+    }
+
+    DEBUG_PRINTLN("Done!");
 
     //wce_task_check_first_segment();
 /*
@@ -105,6 +139,70 @@ void setup()
     }
     */
 }
+
+void loop()
+{
+    static bool run = true;
+
+    if (Serial.available() > 0)
+    {
+        uint8_t c = Serial.read();
+        if (c == 'b') // BEGIN
+        {
+            run = true;
+            motor_turn(&motor_conveyor);
+        }
+
+        else if (c == 'e')  // END
+        {
+            run = false;
+            motor_stop(&motor_conveyor);
+        }
+    }
+
+    if (run == false)
+        return;
+
+
+    task_check_first_segment(&distance_sensor, distance_to_wall, &segment_queue);
+    //print_queue();
+    task_determin_color(&RGB_sensor, &segment_queue, colors);
+    task_rotate_seperator(&adv_motor_separator, &segment_queue);
+    task_feed_ball(&motor_feeder);
+
+    while (motor_get_degrees(&motor_conveyor) < conveyor_target)
+        ;
+    conveyor_target += SEGMENT_DEGREE_LENGTH;
+}
+
+// -------------------------------
+// Interrupt functions
+// -------------------------------
+void motor_conveyor_interrupt()
+{
+    motor_update_degrees(&motor_conveyor);
+}
+
+void motor_feeder_interrupt()
+{
+    motor_update_degrees(&motor_feeder);
+}
+
+void adv_motor_separator_interrupt1()
+{
+    advanced_motor_update_degrees(&adv_motor_separator);
+}
+
+
+
+
+
+
+
+
+
+
+
 
 void startup_helper()
 {
@@ -161,61 +259,24 @@ void startup_helper()
     }
 }
 
-void loop()
+void print_queue()
 {
-    static bool run = true;
-
-    if (Serial.available() > 0)
+    for (int8_t i = QUEUE_SIZE - 1; i >= 0; --i)
     {
-        uint8_t c = Serial.read();
-        if (c == 'b') // BEGIN
+        Serial.print("|");
+        Segment* segment = get_segment(&segment_queue, i);
+        
+        if (segment->is_occupied)
         {
-            run = true;
-            motor_turn(&motor_conveyor);
+            if (segment->object_type == BALL)
+                Serial.print(get_color_name(segment->color));
+            else
+                Serial.print("O");
         }
-
-        else if (c == 'e')  // END
+        else
         {
-            run = false;
-            motor_stop(&motor_conveyor);
+            Serial.print(" ");
         }
     }
-
-    if (run == false)
-        return;
-
-    static int32_t conveyor_target = SEGMENT_DEGREE_LENGTH;
-
-    
-
-    while (motor_get_degrees(&motor_conveyor) < conveyor_target)
-        ;
-    conveyor_target += SEGMENT_DEGREE_LENGTH;
+    Serial.println("|");
 }
-
-// -------------------------------
-// Interrupt functions
-// -------------------------------
-void motor_conveyor_interrupt()
-{
-    motor_update_degrees(&motor_conveyor);
-}
-
-void motor_feeder_interrupt()
-{
-    motor_update_degrees(&motor_feeder);
-}
-
-void adv_motor_separator_interrupt1()
-{
-    advanced_motor_update_degrees(&adv_motor_separator);
-}
-
-// -------------------------------
-// Ultra sound sensor functions
-// -------------------------------
-// TODO: filter out short distances
-
-/*
- * Worst case execution time testing
- */

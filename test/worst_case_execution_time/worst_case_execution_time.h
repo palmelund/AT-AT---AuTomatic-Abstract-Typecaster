@@ -8,6 +8,7 @@
 //#define WCE_TEST_DETERMIN_COLOR
 //#define WCE_TEST_FEED_BALL
 //#define WCE_TEST_ROTATE_SEPERATOR
+//#define WCE_TEST_CONVEYOR_SEGMENT_TURN_SPEED
 
 #ifdef WCE_TEST_CHECK_FIRST_SEGMENT
 void wce_task_check_first_segment(Motor* conveyor, Motor* feeder,
@@ -17,7 +18,7 @@ void wce_task_check_first_segment(Motor* conveyor, Motor* feeder,
 
 #ifdef WCE_TEST_SEND_TAKE_PICTURE
 void wce_task_send_take_picture(Motor* conveyor, Motor* feeder,
-    Advanced_Motor* seperator);
+    Advanced_Motor* seperator, Segment_Queue* queue);
 #endif
 
 #ifdef WCE_TEST_DETERMIN_COLOR
@@ -34,4 +35,8 @@ void wce_task_feed_ball(Motor* conveyor, Motor* feeder,
 #ifdef WCE_TEST_ROTATE_SEPERATOR
 void wce_task_rotate_seperator(Motor* conveyor, Motor* feeder,
     Advanced_Motor* seperator, Segment_Queue* queue);
+#endif
+
+#ifdef WCE_TEST_CONVEYOR_SEGMENT_TURN_SPEED
+void wce_conveyor_segment_turn_speed(Motor* conveyor);
 #endif
