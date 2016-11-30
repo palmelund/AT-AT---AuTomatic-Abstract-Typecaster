@@ -16,12 +16,29 @@
 #define YELLOW_BALL 1
 #define RED_BALL 2
 #define BLUE_BALL 3
-#define NOT_BALL 4
+#define GARBAGE 4
 // TODO: Empty segment?
+
+// The bucket locations
+#define BUCKET_COUNT 5
+#define BLUE_BUCKET 0
+#define GREEN_BUCKET 50
+#define YELLOW_BUCKET 100
+#define RED_BUCKET 260
+#define GARBAGE_BUCKET 310
+
+struct Segment
+{
+    bool is_occupied = false;
+    uint8_t object_type;
+
+    // NOTE: A union might be needed in the future for expanding this types
+    //       functionallity.
+};
 
 struct Segment_Queue
 {
-    uint8_t data[QUEUE_SIZE] = {NOT_BALL};
+    Segment data[QUEUE_SIZE] = {NOT_BALL};
     uint8_t index = 0;
 };
 

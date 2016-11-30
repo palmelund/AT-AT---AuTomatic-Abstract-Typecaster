@@ -31,6 +31,7 @@ uint16_t distance_to_wall;
 // 2: Red
 // 3: Blue
 Delta_RGB colors[COLOR_COUNT];
+Segment_Queue segment_queue;
 
 // -------------------------------
 // Arduino main functions
@@ -198,42 +199,9 @@ void loop()
     if (run == false)
         return;
 
-    static int16_t bucket_pos[5] = {0, 50, 100, 260, 310};
-    static Segment_Queue segment_queue;
-    static uint8_t last_ball = NOT_BALL;
     static int32_t conveyor_target = SEGMENT_DEGREE_LENGTH;
 
-    uint8_t read_color = NOT_BALL;
-    int32_t test_dist = distance_sensor_measure_distance(&distance_sensor);
-
-    DEBUG_PRINT_VAR(test_dist);
-    DEBUG_PRINT(" ");
-    DEBUG_PRINTLN_VAR(distance_to_wall);
-
-    // Tests if a ball is in front of sensor
-    if (test_dist < distance_to_wall)
-    {
-        read_color = BLUE_BALL; //read_color_sensor();
-        DEBUG_PRINT("ball found: ");
-        DEBUG_PRINTLN(get_color_name(read_color));
-    }
-
-    enqueue_segment(&segment_queue, read_color);
-    uint8_t current_ball = peek_segment(&segment_queue);
-
-    // We only wonna move the buckets, if a ball was found, and that ball is
-    // different from the last ball
-    if (current_ball != last_ball)
-    {
-        DEBUG_PRINT("ejecting: ");
-        DEBUG_PRINTLN(get_color_name(current_ball));
-        advanced_motor_turn_to_degree(&adv_motor_separator,
-                                      bucket_pos[current_ball]);
-
-        last_ball = current_ball;
-    }
-
-    task_feed_ball();
+    
 
     while (motor_get_degrees(&motor_conveyor) < conveyor_target)
         ;
@@ -285,18 +253,19 @@ int32_t calibrate_ultra_sound_sensor()
 // -------------------------------
 // Queue functions
 // -------------------------------
-void enqueue_segment(Segment_Queue *segment_queue, uint8_t segment)
-{
-    segment_queue->data[segment_queue->index] = segment;
 
+Segment* queue_next(Segment_Queue *segment_queue)
+{
     segment_queue->index++;
     if (segment_queue->index >= QUEUE_SIZE)
         segment_queue->index = 0;
+
+    return &segment_queue->data[segment_queue->index];
 }
 
-uint8_t peek_segment(Segment_Queue *segment_queue)
+Segment* get_segment(Segment_Queue *segment_queue, uint8_t offset)
 {
-    return segment_queue->data[segment_queue->index];
+    return &segment_queue->data[(segment_queue->index + offset) % QUEUE_SIZE];
 }
 
 // -------------------------------
@@ -488,6 +457,30 @@ uint8_t determin_color(RGB *color)
 // -------------------------------
 // Task that are executed by the cyclic executive
 // -------------------------------
+
+void task_check_first_segment()
+{
+    int32_t test_dist = distance_sensor_measure_distance(&distance_sensor);
+
+    DEBUG_PRINT_VAR(test_dist);
+    DEBUG_PRINT(" ");
+    DEBUG_PRINTLN_VAR(distance_to_wall);
+
+
+    Segment* first_segment = queue_next(&segment_queue);
+
+    // Tests if a ball is in front of sensor
+    if (test_dist < distance_to_wall)
+    {
+        DEBUG_PRINTLN("Segment was occupied");
+        first_segment->is_occupied = true;
+    }
+    else
+    {
+        DEBUG_PRINTLN("Segment was empty");
+        first_segment->is_occupied = false;
+    }
+}
 void task_send_take_picture()
 {
     Out_Message message;
@@ -497,7 +490,20 @@ void task_send_take_picture()
     io_send_message(&message);
 }
 
-uint8_t task_request_object_info()
+void task_determin_color()
+{
+    Segment* segment = get_segment(&segment_queue, COLOR_SENSOR_SEGMENT_INDEX);
+
+    if (segment->is_occupied && segment->object_type == BALL)
+    {
+        RGB color;
+        read_color(&color);
+        uint8_t determined_color = determin_color(&color);
+        segment->color = determined_color;
+    }
+}
+
+void task_request_object_info()
 {
     In_Message message;
     io_await_message(&message);
@@ -507,7 +513,7 @@ uint8_t task_request_object_info()
         return message.object.type;
     }
 
-    return -1;
+    ASSERT(false);
 }
 
 void task_feed_ball()
@@ -530,12 +536,29 @@ void task_feed_ball()
     feed_counter++;
 }
 
-void task_determin_color()
+void task_rotate_seperator()
 {
-    RGB color;
-    read_color(&color);
+    static int16_t bucket_pos[BUCKET_COUNT] = { 
+        GREEN_BUCKET, 
+        YELLOW_BUCKET, 
+        RED_BUCKET, 
+        BLUE_BUCKET, 
+        GARBAGE_BUCKET
+    };
+    static Segment last_occupied_segment;
 
-    uint8_t determind_color = determin_color(&color);
+    Segment* segment = get_segment(&segment_queue, LAST_INDEX);
 
+    // We only wonna move the buckets, if the segment is occupied, and
+    // is different from the last occupied segment
+    if (segment->is_occupied && 
+        last_occupied_segment->object_type != segment->object_type)
+    {
+        DEBUG_PRINT("ejecting: ");
+        DEBUG_PRINTLN(get_color_name(current_ball));
+        advanced_motor_turn_to_degree(&adv_motor_separator,
+                                    bucket_pos[segment->object_type]);
 
+        last_occupied_segment = *segment;
+    }
 }
