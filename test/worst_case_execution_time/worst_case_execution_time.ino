@@ -51,6 +51,8 @@ void setup()
 
     // Initialize color sensor
 
+    RGB_sensor.init();
+
     DEBUG_PRINTLN("Initializing all components...");
     DEBUG_PRINTLN("- Ultra sound sensor...");
     distance_sensor_init(&distance_sensor, RANGE_TRIG, RANGE_ECHO);
@@ -71,15 +73,37 @@ void setup()
                         adv_motor_separator_interrupt1);
 
     DEBUG_PRINTLN("- Color sensor...");
-    RGB_sensor.init();
     while (RGB_sensor.readRed() == 0 ||
            RGB_sensor.readGreen() == 0 ||
            RGB_sensor.readBlue() == 0)
         ;
 
+    #ifdef WCE_TEST_CHECK_FIRST_SEGMENT
     wce_task_check_first_segment(&motor_conveyor, &motor_feeder,
         &adv_motor_separator, &distance_sensor, distance_to_wall, 
         &segment_queue);
+    #endif
+
+    #ifdef WCE_TEST_SEND_TAKE_PICTURE
+    wce_task_send_take_picture(&motor_conveyor, &motor_feeder,
+        &adv_motor_separator);
+    #endif
+
+    #ifdef WCE_TEST_DETERMIN_COLOR
+    wce_determin_color(&motor_conveyor, &motor_feeder,
+        &adv_motor_separator, &RGB_sensor, &segment_queue, 
+        colors);
+    #endif
+
+    #ifdef WCE_TEST_FEED_BALL
+    wce_task_feed_ball(&motor_conveyor, &motor_feeder,
+        &adv_motor_separator);
+    #endif
+
+    #ifdef WCE_TEST_ROTATE_SEPERATOR
+    wce_task_rotate_seperator(&motor_conveyor, &motor_feeder,
+        &adv_motor_separator, &segment_queue);
+    #endif
 }
 
 // -------------------------------

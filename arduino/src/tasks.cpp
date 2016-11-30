@@ -26,7 +26,6 @@ int32_t task_calibrate_ultra_sound_sensor(Ultra_Sound_Sensor* distance_sensor)
 // -------------------------------
 // Task that are executed by the cyclic executive
 // -------------------------------
-
 void task_check_first_segment(Ultra_Sound_Sensor* distance_sensor, 
     uint16_t distance_to_wall, Segment_Queue* segment_queue)
 {
@@ -60,8 +59,8 @@ void task_send_take_picture()
     io_send_message(&message);
 }
 
-void task_determin_color(SFE_ISL29125* color_sensor, 
-    uint16_t distance_to_wall, Segment_Queue* segment_queue)
+void task_determin_color(SFE_ISL29125* color_sensor,
+    Segment_Queue* segment_queue, Delta_RGB* known_colors)
 {
     Segment* segment = get_segment(segment_queue, COLOR_SENSOR_SEGMENT_INDEX);
 
@@ -69,7 +68,7 @@ void task_determin_color(SFE_ISL29125* color_sensor,
     {
         RGB color;
         read_color(color_sensor, &color);
-        uint8_t determined_color = determin_color(&color);
+        uint8_t determined_color = determin_color(known_colors, &color);
         segment->color = determined_color;
     }
 }
