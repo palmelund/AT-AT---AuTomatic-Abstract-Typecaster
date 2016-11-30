@@ -18,6 +18,8 @@ using System.Globalization;
 using Accord;
 using System.IO.Ports;
 using System.Runtime.CompilerServices;
+using SerialIO;
+
 
 namespace BmpSort
 {
@@ -33,6 +35,8 @@ namespace BmpSort
         private Machine M;
 
         private int progress = 0;
+
+        private ArduinoIO AIO;
 
         /// <summary>
         /// Initializes a new instance of the MainWindow class.
@@ -50,16 +54,9 @@ namespace BmpSort
         /// <param name="e">event arguments</param>
         private void WindowLoaded(object sender, RoutedEventArgs e)
         {
-            kinect = new Kinect();
-            kinect.Sensor.ColorFrameReady += SensorColorFrameReady;
-            IP = new ImageProcessing();
-            //M = new Machine(System.IO.Path.GetFullPath(System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "..\\..\\", "Images\\Background")));
-            kinect.Sp.DataReceived += portReceiveData; // Add DataReceived Event Handler
-            kinect.Sp.Open();
-            // Set the image we display to point to the bitmap where we'll put the image data
-            Image1.Source = kinect.ColorBitmap;
+            IP = new ImageProcessing();   
+            M = new Machine();         
             ProgressBarARFF.Value = progress;
-            // Add an event handler to be called whenever there is new color frame data
         }
 
         /// <summary>
@@ -132,7 +129,7 @@ namespace BmpSort
             }
         }
 
-
+        /*
         private void portReceiveData(object sender, SerialDataReceivedEventArgs e)
         {
             // Serial port from arduino assigned
@@ -163,7 +160,7 @@ namespace BmpSort
                 }
             }
         }
-
+*/
         public void takePictureRAM()
         {
             //Check access to UI Thread.
@@ -272,6 +269,16 @@ namespace BmpSort
         {
             ARFFGenerator arff = new ARFFGenerator(M);
             arff.generate_arff_file(ref progress);
+        }
+
+        private void ConnectButton_Click(object sender, RoutedEventArgs e)
+        {
+            kinect = new Kinect();
+            kinect.Sensor.ColorFrameReady += SensorColorFrameReady;
+            AIO = new ArduinoIO("COM3");
+            // Set the image we display to point to the bitmap where we'll put the image data
+            Image1.Source = kinect.ColorBitmap;
+            
         }
     }
 }

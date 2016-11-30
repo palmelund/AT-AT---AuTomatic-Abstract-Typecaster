@@ -209,7 +209,7 @@ namespace BmpSort
 
         public int cornerdetect(Bitmap input)
         {
-            Accord.Imaging.SusanCornersDetector susanCorners = new SusanCornersDetector();
+            Accord.Imaging.SusanCornersDetector susanCorners = new SusanCornersDetector(1,10);
             List<Accord.IntPoint> points = susanCorners.ProcessImage(input);
             return points.Count;
         }
