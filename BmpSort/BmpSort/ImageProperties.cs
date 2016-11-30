@@ -55,6 +55,8 @@ namespace BmpSort
             return result;
         }
 
+
+        // Fjern Blob+Corner detection og flyt i ny funktion
         private System.Drawing.Image clean_background(System.Drawing.Image inputImage)
         {
             int i = 0;

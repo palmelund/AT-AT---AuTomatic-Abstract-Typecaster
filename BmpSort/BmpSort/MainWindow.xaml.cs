@@ -55,7 +55,11 @@ namespace BmpSort
         private void WindowLoaded(object sender, RoutedEventArgs e)
         {
             IP = new ImageProcessing();   
-            M = new Machine();         
+
+            //Fix Machine constructor og flyt funktionalitet over til billeder fra ram.
+           // M = new Machine();         
+
+
             ProgressBarARFF.Value = progress;
         }
 
