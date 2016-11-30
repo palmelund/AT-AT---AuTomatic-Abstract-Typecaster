@@ -5,7 +5,7 @@ const int16_t test_count = 20;
 #ifdef COMPONENT_TEST_MOTOR_COAST
 void component_test_motor_coast(Motor* motor) 
 {
-  for (int16_t i = 0; i < test_count; i++) 
+  for (int16_t i = 0; i < test_count; ++i) 
   {
     motor->base.degrees = 0;
     motor_turn_degrees(motor, 360);
@@ -24,7 +24,7 @@ void component_test_motor_coast(Motor* motor)
 #ifdef COMPONENT_TEST_MOTOR_TIME
 void component_test_motor_time(Motor* motor) 
 {
-  for (int16_t i = 0; i < test_count; i++) 
+  for (int16_t i = 0; i < test_count; ++i) 
   {
     motor->degrees = 0;
     unsigned int32_t t_start = millis();
@@ -105,7 +105,7 @@ void component_test_interupt_cost(Advanced_Motor* motor)
   Serial.print("| with       | without    | delta      | count      ");
   Serial.println("| est cost   | est cost % |");
 
-  for (int16_t i = 0; i < test_count + 1; i++)
+  for (int16_t i = 0; i < test_count + 1; ++i)
   {
     time_start = micros();
     for (volatile int32_t j = 0; j < iterations; j++);
@@ -162,7 +162,7 @@ void component_test_interupt_cost(Advanced_Motor* motor)
   
   delay(2500); //HACK: this makes it so micros() gives us currect result on first iteration for some reason...
   // run measurements without a motor running
-  for (int16_t i = 0; i < test_count; i++){  
+  for (int16_t i = 0; i < test_count; ++i){  
     time_start = micros();
     for (volatile int32_t j = 0; j < iterations; j++);
     time_end = micros();
@@ -172,7 +172,7 @@ void component_test_interupt_cost(Advanced_Motor* motor)
   // run measurements with a motor running
   motor_turn(&motor1, COUNTERCLOCKWISE);
   delay(2500);
-  for (int16_t i = 0; i < test_count; i++){
+  for (int16_t i = 0; i < test_count; ++i){
     interrupt_count_start = motor1.deg;
     time_start = micros();
     for (volatile int32_t j = 0; j < iterations; j++);
@@ -189,7 +189,7 @@ void component_test_interupt_cost(Advanced_Motor* motor)
 
   // print16_t result table
   Serial.println("| with       | without    | delta      | count      | est cost   | est cost % |");
-  for (int16_t i = 0; i < test_count; i++){
+  for (int16_t i = 0; i < test_count; ++i){
     delta = interrupt_times[i] - no_interrupt_times[i];
     print_table_row(interrupt_times[i], no_interrupt_times[i], delta, interrupt_counts[i],
                     delta / (double)interrupt_counts[i], delta / (double)interrupt_times[i]);

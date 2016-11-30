@@ -1,58 +1,34 @@
 #ifndef _SRC_H_
 #define _SRC_H_
 
-#include <math.h>
-#include <limits.h>
 #include "defines.h"
 #include "motor_api.h"
 #include "distance_sensor_api.h"
 #include "SparkFunISL29125.h"
 #include "io_api.h"
+#include "colors.h"
+#include "segments.h"
+#include "tasks.h"
+#include <stdint.h>
 
-#define COLOR_COUNT 4
+#define MOTOR_CONVEYOR_PIN 27           // Power conveyor motor
+#define MOTOR_FEEDER_PIN 29             // Power feeder motor
+#define MOTOR_SEPARATOR_PIN1 25         // Control separator motor direction
+#define MOTOR_SEPARATOR_PIN2 23         // Control separator motor direction
 
-// Ball colors
-#define GREEN_BALL 0
-#define YELLOW_BALL 1
-#define RED_BALL 2
-#define BLUE_BALL 3
-#define GARBAGE 4
-// TODO: Empty segment?
+#define MOTOR_CONVEYOR_INT_PIN 2        // Interrupt conveyor motor
+#define MOTOR_FEEDER_INT_PIN 18         // Interrupt feeder motor
+#define MOTOR_SEPARATOR_INT_PIN1 3      // Interrupt separator motor
+#define MOTOR_SEPARATOR_DATA_PIN 51     // Used to read direction, not an actual 
+                                        // interrupt
 
-// The bucket locations
-#define BUCKET_COUNT 5
-#define BLUE_BUCKET 0
-#define GREEN_BUCKET 50
-#define YELLOW_BUCKET 100
-#define RED_BUCKET 260
-#define GARBAGE_BUCKET 310
+#define BUTTON_INT_PIN 19               // Emergency stop int port
 
-struct Segment
-{
-    bool is_occupied = false;
-    uint8_t object_type;
+#define RANGE_ECHO 53                   // Read distance
+#define RANGE_TRIG 31                   // Start the sensor
 
-    // NOTE: A union might be needed in the future for expanding this types
-    //       functionallity.
-};
-
-struct Segment_Queue
-{
-    Segment data[QUEUE_SIZE] = {NOT_BALL};
-    uint8_t index = 0;
-};
-
-struct RGB
-{
-    uint16_t red;
-    uint16_t green;
-    uint16_t blue;
-};
-
-struct Delta_RGB
-{
-    RGB rgb;
-    uint16_t delta;
-};
+#define LED_YELLOW_PIN
+#define LED_GREEN_PIN
+#define LED_RED_PIN
 
 #endif // _SRC_H_

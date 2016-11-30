@@ -51,7 +51,8 @@ void io_send_message(Out_Message *sending_message)
         Serial.write(OUT_SIZE_DISTANCE);
         Serial.write(OUT_MESSAGE_DISTANCE);
 
-        for (int i = 0; i < OUT_SIZE_DISTANCE - 1; i++)
+        // TODO: Don't use loop
+        for (int i = 0; i < OUT_SIZE_DISTANCE - 1; ++i)
             Serial.write(sending_message->data[i]);
         break;
 
