@@ -15,6 +15,7 @@ namespace BmpSort
 
         int counter = 0;
         int blobs = 0;
+        int corners = 0;
         int filesLoaded = 0;
         int whitePixels = 0;
         int[] properties;
@@ -35,10 +36,10 @@ namespace BmpSort
 
         #endregion Properties
 
-        public ImageProperties(string backgroundpath)
+        public ImageProperties(string fileName)
         {
             backgrounds.Add(0, 0);
-            load_background_colors(backgroundpath);
+            load_background_colors_textfile(fileName);
         }
 
         public int[] trainingOutput { get; set; }
@@ -47,10 +48,11 @@ namespace BmpSort
 
         public int[] get_properties(System.Drawing.Image inputImage)
         {
-            int[] result = {0, 0};
+            int[] result = {0, 0, 0};
             inputImage = clean_background(inputImage);
             result[0] = whitePixels;
             result[1] = blobs;
+            result[2] = corners;
 
             return result;
         }
@@ -83,6 +85,7 @@ namespace BmpSort
 
             imageMaker.Convert(newImage, out currentBitmap);
             blobs = blobdetect(currentBitmap);
+            corners = cornerdetect(currentBitmap);
             return currentBitmap;
         }
 
@@ -93,6 +96,17 @@ namespace BmpSort
             {
                 System.Drawing.Image image = System.Drawing.Image.FromFile(fil);
                 add_ignore_colors(image);
+            }
+        }
+
+        private void load_background_colors_textfile(string fileName)
+        {
+            int temp;
+            StreamReader sr = new StreamReader(fileName);
+            while (!sr.EndOfStream)
+            {
+                temp = Int32.Parse(sr.ReadLine());
+                backgrounds.Add(temp, temp);
             }
         }
 

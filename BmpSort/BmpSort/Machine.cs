@@ -20,9 +20,9 @@ namespace BmpSort
 
         Accord.MachineLearning.Bayes.NaiveBayes nb;
 
-        public Machine(string backgroundpath)
+        public Machine(string fileName)
         {
-            properties = new ImageProperties(backgroundpath);
+            properties = new ImageProperties(fileName);
         }
 
         private int[][] _input; //image variables
