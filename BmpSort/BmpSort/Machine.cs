@@ -40,13 +40,23 @@ namespace BmpSort
             get { return _output; }
             set { _output = value; }
         }
+        public void load_model_from_file(string inputfile)
+        {
+            Accord.IO.Serializer.Load<Accord.MachineLearning.Bayes.NaiveBayes>(inputfile);           
+        }
+        public void save_model_from_file(string outputfile)
+        {
+            Accord.IO.Serializer.Save<Accord.MachineLearning.Bayes.NaiveBayes>(nb,outputfile);
+        }
 
         public void train_model(string ball, string empty, string error)
         {
+            
             properties.load_ball_training(ball);
             properties.load_empty_training(empty);
             properties.load_error_training(error);
             nb = naiveBayes.Learn(properties.trainingInput, properties.trainingOutput);
+            save_model_from_file("naivebayes.mod");
         }
 
         public int decide(System.Drawing.Image image)
