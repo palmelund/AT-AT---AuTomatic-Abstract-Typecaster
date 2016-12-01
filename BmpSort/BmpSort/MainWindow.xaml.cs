@@ -61,7 +61,7 @@ namespace BmpSort
         private void WindowLoaded(object sender, RoutedEventArgs e)
         {
             IP = new ImageProcessing();
-            M = new Machine("backgroundColors.txt");
+            M = new Machine("colors.txt");
             
 
         ProgressBarARFF.Value = progress;
@@ -268,9 +268,22 @@ namespace BmpSort
         private void Trainbutton_Click(object sender, RoutedEventArgs e)
         {
             string path =
-                System.IO.Path.GetFullPath(System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory,
-                    "..\\..\\", "Images"));
+                System.IO.Path.GetFullPath(System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Images"));
             M.train_model(System.IO.Path.Combine(path, "Ball"), System.IO.Path.Combine(path, "Empty"),
+                System.IO.Path.Combine(path, "Error"));
+        }
+        private void Trainbutton2_Click(object sender, RoutedEventArgs e)
+        {
+            string path =
+                System.IO.Path.GetFullPath(System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Images"));
+            M.train_model2(System.IO.Path.Combine(path, "Ball"), System.IO.Path.Combine(path, "Empty"),
+                System.IO.Path.Combine(path, "Error"));
+        }
+        private void Trainbutton3_Click(object sender, RoutedEventArgs e)
+        {
+            string path =
+                System.IO.Path.GetFullPath(System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Images"));
+            M.train_model3(System.IO.Path.Combine(path, "Ball"), System.IO.Path.Combine(path, "Empty"),
                 System.IO.Path.Combine(path, "Error"));
         }
 

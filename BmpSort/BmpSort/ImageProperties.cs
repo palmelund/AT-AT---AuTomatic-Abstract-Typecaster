@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Accord.Imaging;
 using System.Drawing;
 using System.IO;
+using System.Windows;
 
 namespace BmpSort
 {
@@ -41,6 +42,10 @@ namespace BmpSort
             backgrounds.Add(0, 0);
             load_background_colors_textfile(fileName);
         }
+
+        private List<int> outputList = new List<int>();
+        private List<int[]> inputList = new List<int[]>();
+
 
         public int[] trainingOutput { get; set; }
         public int[][] trainingInput { get; set; }
@@ -106,7 +111,11 @@ namespace BmpSort
             while (!sr.EndOfStream)
             {
                 temp = Int32.Parse(sr.ReadLine());
-                backgrounds.Add(temp, temp);
+                if (!backgrounds.ContainsKey(temp))
+                {
+                    backgrounds.Add(temp, temp);
+                }
+                
             }
         }
 
@@ -135,8 +144,10 @@ namespace BmpSort
                 running[0] = whitePixels;
                 running[1] = blobdetect(currentBitmap);
                 running[2] = cornerdetect(currentBitmap);
-                trainingOutput[arrayCounter] = 0;
-                trainingInput[arrayCounter] = running;
+                outputList.Add(0);
+                //trainingOutput[arrayCounter] = 0;
+                inputList.Add(running);
+                //trainingInput[arrayCounter] = running;
                 arrayCounter++;
             }
         }
@@ -152,8 +163,10 @@ namespace BmpSort
                 running[0] = whitePixels;
                 running[1] = blobdetect(currentBitmap);
                 running[2] = cornerdetect(currentBitmap);
-                trainingOutput[arrayCounter] = 1;
-                trainingInput[arrayCounter] = running;
+                outputList.Add(1);
+                //trainingOutput[arrayCounter] = 1;
+                inputList.Add(running);
+                //trainingInput[arrayCounter] = running;
                 arrayCounter++;
             }
         }
@@ -169,10 +182,19 @@ namespace BmpSort
                 running[0] = whitePixels;
                 running[1] = blobdetect(currentBitmap);
                 running[2] = cornerdetect(currentBitmap);
-                trainingOutput[arrayCounter] = 2;
-                trainingInput[arrayCounter] = running;
+                outputList.Add(2);
+                //trainingOutput[arrayCounter] = 2;
+                inputList.Add(running);
+                //trainingInput[arrayCounter] = running;
                 arrayCounter++;
             }
+        }
+
+        public void save_to_array()
+        {
+            trainingInput = inputList.ToArray();
+            MessageBox.Show(trainingInput[10][2].ToString());
+            trainingOutput = outputList.ToArray();
         }
 
 
@@ -195,10 +217,11 @@ namespace BmpSort
         //Bliver aldrig brugt
         public void load_files()
         {
-            emptyImages = Directory.GetFiles("images/Empty/", "*.*");
-            ballImages = Directory.GetFiles("images/Blue/", "*.*");
-            errors = Directory.GetFiles("images/Error/", "*.*");
-            background = Directory.GetFiles("images/Background/", "*.*");
+            emptyImages = Directory.GetFiles("Images/Empty/", "*.*");
+            ballImages = Directory.GetFiles("Images/Blue/", "*.*");
+            errors = Directory.GetFiles("Images/Error/", "*.*");
+            //background = Directory.GetFiles("images/Background/", "*.*");
+
         }
 
 

@@ -46,18 +46,44 @@ namespace BmpSort
         }
         public void save_model_from_file(string outputfile)
         {
-            Accord.IO.Serializer.Save<Accord.MachineLearning.Bayes.NaiveBayes>(nb,outputfile);
+            Accord.IO.Serializer.Save<Accord.MachineLearning.Bayes.NaiveBayes>(nb, System.IO.Path.GetFullPath(System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, outputfile)));
         }
 
         public void train_model(string ball, string empty, string error)
         {
             
             properties.load_ball_training(ball);
+            //properties.load_empty_training(empty);
+            //properties.load_error_training(error);
+            //properties.save_to_array();
+            //nb = naiveBayes.Learn(properties.trainingInput, properties.trainingOutput);
+            //save_model_from_file("naivebayes.mod");
+        }
+
+
+        public void train_model2(string ball, string empty, string error)
+        {
+
+            //properties.load_ball_training(ball);
             properties.load_empty_training(empty);
+            //properties.load_error_training(error);
+            //properties.save_to_array();
+            //nb = naiveBayes.Learn(properties.trainingInput, properties.trainingOutput);
+            //save_model_from_file("naivebayes.mod");
+        }
+
+        public void train_model3(string ball, string empty, string error)
+        {
+
+            //properties.load_ball_training(ball);
+            //properties.load_empty_training(empty);
             properties.load_error_training(error);
+            properties.save_to_array();
             nb = naiveBayes.Learn(properties.trainingInput, properties.trainingOutput);
             save_model_from_file("naivebayes.mod");
         }
+
+
 
         public int decide(System.Drawing.Image image)
         {
