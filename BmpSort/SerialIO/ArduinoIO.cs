@@ -231,5 +231,10 @@ namespace SerialIO
 			    return false;
 			}
 		}
+
+	    public void SendByte(byte[] b)
+	    {
+	        _port.Write(b, 0, b.Length);
+	    }
 	}
 }

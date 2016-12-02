@@ -44,6 +44,8 @@ namespace BmpSort
 
         private int classification;
 
+        private string backgroundColors = "colors.txt";
+
         /// <summary>
         /// Initializes a new instance of the MainWindow class.
         /// </summary>
@@ -61,10 +63,10 @@ namespace BmpSort
         private void WindowLoaded(object sender, RoutedEventArgs e)
         {
             IP = new ImageProcessing();
-            M = new Machine("colors.txt");
-            
+            M = new Machine(backgroundColors);
 
-        ProgressBarARFF.Value = progress;
+
+            ProgressBarARFF.Value = progress;
         }
 
         /// <summary>
@@ -106,7 +108,7 @@ namespace BmpSort
                             kinect.ColorBitmap.WritePixels(
                                 new Int32Rect(0, 0, kinect.ColorBitmap.PixelWidth, kinect.ColorBitmap.PixelHeight),
                                 kinect.ColorPixels,
-                                kinect.ColorBitmap.PixelWidth*sizeof(int),
+                                kinect.ColorBitmap.PixelWidth * sizeof(int),
                                 0);
                         }
                         catch (System.Runtime.InteropServices.COMException)
@@ -131,7 +133,7 @@ namespace BmpSort
                     kinect.ColorBitmap.WritePixels(
                         new Int32Rect(0, 0, kinect.ColorBitmap.PixelWidth, kinect.ColorBitmap.PixelHeight),
                         kinect.ColorPixels,
-                        kinect.ColorBitmap.PixelWidth*sizeof(int),
+                        kinect.ColorBitmap.PixelWidth * sizeof(int),
                         0);
                 }
             }
@@ -188,7 +190,7 @@ namespace BmpSort
 
                     // create frame from the writable bitmap and add to encoder
                     //encoder.Frames.Add(BitmapFrame.Create(this.colorBitmap));
-                   
+
 
                     // Decide on taken picture
                     classification = M.decide(IP.ToBitmap(kinect.CroppedBitmap));
@@ -297,7 +299,7 @@ namespace BmpSort
         {
             kinect = new Kinect();
             kinect.Sensor.ColorFrameReady += SensorColorFrameReady;
-            AIO = new ArduinoIO("COM3");
+            AIO = new ArduinoIO(SerialPortTextBox.Text);
             //Lav thread til Serial IO listening.
             t = Task.Run(() =>
             {
@@ -346,7 +348,23 @@ namespace BmpSort
             });
             // Set the image we display to point to the bitmap where we'll put the image data
             Image1.Source = kinect.ColorBitmap;
+
+        }
+
+        private void SendByteButton_Click(object sender, RoutedEventArgs e)
+        {
+            string[] input = SerialByteTextBox.Text.Split(' ');
+            byte[] bytes = new byte[input.Length];
             
+            for (int i = 0; i < input.Length; i++)
+            {
+                byte b;
+                bool parable = byte.TryParse(input[i], out b);
+                if (!parable) throw new ArgumentException();
+                bytes[i] = b;
+            }
+
+            AIO.SendByte(bytes);
         }
     }
 }

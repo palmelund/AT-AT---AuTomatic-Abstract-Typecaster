@@ -37,6 +37,11 @@
             <Button x:Name="Trainbutton2" Grid.ColumnSpan="2" Content="train 2" HorizontalAlignment="Left" Margin="400,770,0,0" VerticalAlignment="Top" Width="200" Click="Trainbutton2_Click"/>
             <Button x:Name="Trainbutton3" Grid.ColumnSpan="2" Content="train 3" HorizontalAlignment="Left" Margin="400,740,0,0" VerticalAlignment="Top" Width="200" Click="Trainbutton3_Click"/>
             <Button x:Name="ARFFbutton" Grid.ColumnSpan="2" Content="Train and generate ARFF." HorizontalAlignment="Left" Margin="800,800,0,0" VerticalAlignment="Top" Width="200" Click="ARFFbutton_Click"/>
+            <Label Content="COM port:" VerticalAlignment="Bottom " HorizontalAlignment="Left" Margin="30,0,0,77"></Label>
+            <TextBox x:Name="SerialPortTextBox" HorizontalAlignment="Left" VerticalAlignment="Bottom" Height="32" Width="100" Margin="100,0,0,71"></TextBox>
+            <Label Content="Send Byte:" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="205,0,0,77"></Label>
+            <TextBox x:Name="SerialByteTextBox" HorizontalAlignment="Left" VerticalAlignment="Bottom" Height="32" Width="120" Margin="275,0,0,71"></TextBox>
+            <Button x:Name="SendByteButton" VerticalAlignment="Bottom" HorizontalAlignment="Left" Content="Send Byte" Margin="275,0,0,23" Click="SendByteButton_Click"></Button>
             <Button x:Name="ConnectButton" Content="Connect" HorizontalAlignment="Left" Margin="100,800,0,0" VerticalAlignment="Top" Width="75" Click="ConnectButton_Click"/>
         </Grid>
 
