@@ -22,7 +22,7 @@ namespace BmpSort
 
         public Machine(string fileName)
         {
-            properties = new ImageProperties(fileName);
+            properties = new ImageProperties("backgrounds.txt");
         }
 
         private int[][] _input; //image variables
@@ -52,11 +52,11 @@ namespace BmpSort
         public void train_model(string ball, string empty, string error)
         {
             
-            properties.load_ball_training(ball);
+            //properties.load_ball_training(ball);
             //properties.load_empty_training(empty);
             //properties.load_error_training(error);
             //properties.save_to_array();
-            //nb = naiveBayes.Learn(properties.trainingInput, properties.trainingOutput);
+            nb = naiveBayes.Learn(properties.trainingInput, properties.trainingOutput);
             //save_model_from_file("naivebayes.mod");
         }
 
