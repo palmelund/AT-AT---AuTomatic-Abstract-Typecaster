@@ -32,7 +32,13 @@ float euclidean_distance_3d(RGB *rgb1, RGB *rgb2)
     int16_t res2 = (int16_t)rgb1->green - (int16_t)rgb2->green;
     int16_t res3 = (int16_t)rgb1->blue - (int16_t)rgb2->blue;
 
-    return (float)sqrt(pow(res1, 2) + pow(res2, 2) + pow(res3, 2));
+    float res = (float)sqrt(pow(res1, 2) + pow(res2, 2) + pow(res3, 2));
+    
+    //DEBUG_PRINT_RGB((*rgb1));
+    //DEBUG_PRINT_RGB((*rgb2));
+    //DEBUG_PRINT_VAR(res);
+    
+    return res;
 }
 
 void calibrate_color(SFE_ISL29125* RGB_sensor, Delta_RGB *result)
@@ -45,13 +51,19 @@ void calibrate_color(SFE_ISL29125* RGB_sensor, Delta_RGB *result)
         //DEBUG_PRINT_RGB(samples[i]);
     }
 
+/*
+    for (auto c : samples)
+    {
+        DEBUG_PRINT_RGB(c);
+    }
+*/
     // https://en.wikipedia.org/wiki/Bounding_sphere
     // Using Ritter's bounding sphere method.
     // We start by picking a point in 3d space
     RGB *point1 = &samples[0];
     RGB *point2;
 
-    float greatest_distance = 0;
+    float greatest_distance = -1;
 
     // Find the point furthest away from point1
     for (uint8_t i = 1; i < CALIBRACTION_ITERATIONS; ++i)
@@ -64,7 +76,7 @@ void calibrate_color(SFE_ISL29125* RGB_sensor, Delta_RGB *result)
         }
     }
 
-    greatest_distance = 0;
+    greatest_distance = -1;
 
     // Find the point furthest away from point2
     for (uint8_t i = 0; i < CALIBRACTION_ITERATIONS; ++i)
@@ -101,7 +113,7 @@ void calibrate_color(SFE_ISL29125* RGB_sensor, Delta_RGB *result)
 
     // Now we need to ensure that the sphere we just found actually
     // contains all points
-    for (;;)
+    for (;;)    
     {
         RGB *outside_point = NULL;
         float distance_to_outside_point;
@@ -156,7 +168,7 @@ void calibrate_color(SFE_ISL29125* RGB_sensor, Delta_RGB *result)
         float distance_to_moved_result = 
             euclidean_distance_3d(&result->rgb, &moved_result);
         distance_to_outside_point = 
-            euclidean_distance_3d(&result->rgb, &moved_result);
+            euclidean_distance_3d(&result->rgb, outside_point);
 
         if (distance_to_moved_result > distance_to_outside_point)
             result->delta = (uint16_t)ceil(distance_to_moved_result);
