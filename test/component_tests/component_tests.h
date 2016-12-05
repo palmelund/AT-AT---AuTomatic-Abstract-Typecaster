@@ -9,6 +9,7 @@
 //#define COMPONENT_TEST_INTERRUPT_COST
 //#define COMPONENT_TEST_MOTOR_DEGREE
 //#define API_TEST_MOTOR_TURN_DEG
+#define COMPONENT_TEST_COLOR
 
 #ifdef COMPONENT_TEST_MOTOR_COAST
 void component_test_motor_coast(Motor* motor);
@@ -28,6 +29,13 @@ void component_test_interupt_cost(Advanced_Motor* motor);
 
 #ifdef API_TEST_MOTOR_TURN_DEG
 //TODO: TEST
+#endif
+
+#ifdef COMPONENT_TEST_COLOR
+#include "SparkFunISL29125.h"
+#include "colors.h"
+void component_test_color();
+
 #endif
 
 #endif  // _COMPONENT_TESTS_H_

@@ -214,3 +214,44 @@ void component_test_interupt_cost(Advanced_Motor* motor)
 #ifdef COMPONENT_TEST_MOTOR_DEGREE
 
 #endif
+
+#ifdef COMPONENT_TEST_COLOR
+
+SFE_ISL29125 RGB_sensor;
+
+void component_test_color()
+{
+RGB_sensor.init();
+while (RGB_sensor.readRed() == 0 || RGB_sensor.readGreen() == 0 || RGB_sensor.readBlue() == 0) {}
+
+  while(true)
+  {
+    while(Serial.available() < 1) {}
+    Serial.read();
+      /*
+      uint16_t rgb[3];
+
+      rgb[0] = RGB_sensor.readRed();
+      rgb[1] = RGB_sensor.readGreen();
+      rgb[2] = RGB_sensor.readBlue();
+
+      Serial.print(rgb[0]);
+      Serial.print(" ");
+      Serial.print(rgb[1]);
+      Serial.print(" ");
+      Serial.println(rgb[2]);
+      */
+
+      Delta_RGB drgb;
+      calibrate_color(&RGB_sensor, &drgb);
+      Serial.print(drgb.rgb.red);
+      Serial.print(" ");
+      Serial.print(drgb.rgb.green);
+      Serial.print(" ");
+      Serial.print(drgb.rgb.blue);
+      Serial.print(" ");
+      Serial.println(drgb.delta);
+  }
+}
+
+#endif

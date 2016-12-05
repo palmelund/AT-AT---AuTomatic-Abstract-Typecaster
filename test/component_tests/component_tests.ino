@@ -5,6 +5,9 @@
 
 void setup()
 {
+
+  Serial.begin(9600);
+
 #ifdef COMPONENT_TEST_MOTOR_COAST
   Serial.println("Component Test: Motor Coast");
   component_test_motor_coast(&motor_conveyor);
@@ -23,6 +26,11 @@ void setup()
 #ifdef COMPONENT_TEST_MOTOR_DEGREE
   Serial.println("Component Test: Motor Degree");
   component_test_motor_degree(&adv_motor_separator);
+#endif
+
+#ifdef COMPONENT_TEST_COLOR
+  Serial.println("Component Test: Color");
+  component_test_color();
 #endif
 
 //#ifdef API_TEST_MOTOR_TURN_DEG
