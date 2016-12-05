@@ -85,7 +85,7 @@ void calibrate_color(SFE_ISL29125* RGB_sensor, Delta_RGB *result)
 
     // Then finding the radius of the sphere, by taking the distance
     // from the center to one of the two points.
-    // NOTE: We calculate both, since rounding errors gives us a pointer
+    // NOTE: We calculate both, since rounding errors gives us a point
     //       not exactly in the center
     float distance_to_point1 = euclidean_distance_3d(&result->rgb, point1);
     float distance_to_point2 = euclidean_distance_3d(&result->rgb, point2);
@@ -139,9 +139,12 @@ void calibrate_color(SFE_ISL29125* RGB_sensor, Delta_RGB *result)
         // The moved_point, will be the new point that is created from extending
         // that line.
         RGB moved_result;
-        moved_result.red = (uint16_t)ceil(result->rgb.red + delta_red);
-        moved_result.green = (uint16_t)ceil(result->rgb.green + delta_green);
-        moved_result.blue = (uint16_t)ceil(result->rgb.blue + delta_blue);
+        moved_result.red = 
+            (uint16_t)ceil(result->rgb.red + (result->delta * delta_red));
+        moved_result.green = 
+            (uint16_t)ceil(result->rgb.green + (result->delta * delta_green));
+        moved_result.blue = 
+            (uint16_t)ceil(result->rgb.blue + (result->delta * delta_blue));
 
         // We now construct the new sphere which cotains outside_point and
         // moved_result. This is the same as how we created our original sphere.
