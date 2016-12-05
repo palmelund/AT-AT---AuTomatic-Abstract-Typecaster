@@ -7,6 +7,7 @@ void setup()
 {
 
   Serial.begin(9600);
+  DEBUG_PRINTLN("Debugging ON");
 
 #ifdef COMPONENT_TEST_MOTOR_COAST
   Serial.println("Component Test: Motor Coast");

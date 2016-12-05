@@ -256,3 +256,5 @@ paket-files/
 
 # Build folder
 arduino/build
+test/unit_test/build
+test/component_tests/build

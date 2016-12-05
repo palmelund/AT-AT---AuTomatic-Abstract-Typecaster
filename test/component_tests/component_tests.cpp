@@ -228,7 +228,9 @@ while (RGB_sensor.readRed() == 0 || RGB_sensor.readGreen() == 0 || RGB_sensor.re
   {
     while(Serial.available() < 1) {}
     Serial.read();
-      /*
+      
+    Serial.println("Reading...");
+
       uint16_t rgb[3];
 
       rgb[0] = RGB_sensor.readRed();
@@ -240,7 +242,8 @@ while (RGB_sensor.readRed() == 0 || RGB_sensor.readGreen() == 0 || RGB_sensor.re
       Serial.print(rgb[1]);
       Serial.print(" ");
       Serial.println(rgb[2]);
-      */
+      
+      Serial.println("Calibrating...");
 
       Delta_RGB drgb;
       calibrate_color(&RGB_sensor, &drgb);
