@@ -89,12 +89,6 @@ namespace SerialIO
 				_port.Close ();
 
 			_port.Open ();
-			_port = new SerialPort (portName, 9600);	// "/dev/ttyACM0" is often the value used on Linux
-
-		    // We want to make sure that the port isn't in use by something else before we start using it.
-			if (_port.IsOpen)
-				_port.Close ();
-			_port.Open ();
 		}
 
 	    /// <summary>
@@ -237,5 +231,10 @@ namespace SerialIO
 			    return false;
 			}
 		}
+
+	    public void SendByte(byte[] b)
+	    {
+	        _port.Write(b, 0, b.Length);
+	    }
 	}
 }

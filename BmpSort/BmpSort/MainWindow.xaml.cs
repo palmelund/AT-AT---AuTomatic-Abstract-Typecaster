@@ -18,6 +18,8 @@ using System.Globalization;
 using Accord;
 using System.IO.Ports;
 using System.Runtime.CompilerServices;
+using SerialIO;
+
 
 namespace BmpSort
 {
@@ -33,6 +35,16 @@ namespace BmpSort
         private Machine M;
 
         private int progress = 0;
+
+        private ArduinoIO AIO;
+
+        private Task t;
+
+        private IMessage message;
+
+        private int classification;
+
+        private string backgroundColors = "colors.txt";
 
         /// <summary>
         /// Initializes a new instance of the MainWindow class.
@@ -50,16 +62,11 @@ namespace BmpSort
         /// <param name="e">event arguments</param>
         private void WindowLoaded(object sender, RoutedEventArgs e)
         {
-            kinect = new Kinect();
-            kinect.Sensor.ColorFrameReady += SensorColorFrameReady;
             IP = new ImageProcessing();
-            //M = new Machine(System.IO.Path.GetFullPath(System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "..\\..\\", "Images\\Background")));
-            kinect.Sp.DataReceived += portReceiveData; // Add DataReceived Event Handler
-            kinect.Sp.Open();
-            // Set the image we display to point to the bitmap where we'll put the image data
-            Image1.Source = kinect.ColorBitmap;
+            M = new Machine(backgroundColors);
+
+
             ProgressBarARFF.Value = progress;
-            // Add an event handler to be called whenever there is new color frame data
         }
 
         /// <summary>
@@ -73,7 +80,7 @@ namespace BmpSort
             {
                 kinect.Sensor.Stop();
             }
-            kinect.sp.Close();
+            // Hvordan lukker vi porten i ArduinoIO?
         }
 
         /// <summary>
@@ -101,7 +108,7 @@ namespace BmpSort
                             kinect.ColorBitmap.WritePixels(
                                 new Int32Rect(0, 0, kinect.ColorBitmap.PixelWidth, kinect.ColorBitmap.PixelHeight),
                                 kinect.ColorPixels,
-                                kinect.ColorBitmap.PixelWidth*sizeof(int),
+                                kinect.ColorBitmap.PixelWidth * sizeof(int),
                                 0);
                         }
                         catch (System.Runtime.InteropServices.COMException)
@@ -126,13 +133,13 @@ namespace BmpSort
                     kinect.ColorBitmap.WritePixels(
                         new Int32Rect(0, 0, kinect.ColorBitmap.PixelWidth, kinect.ColorBitmap.PixelHeight),
                         kinect.ColorPixels,
-                        kinect.ColorBitmap.PixelWidth*sizeof(int),
+                        kinect.ColorBitmap.PixelWidth * sizeof(int),
                         0);
                 }
             }
         }
 
-
+        /*
         private void portReceiveData(object sender, SerialDataReceivedEventArgs e)
         {
             // Serial port from arduino assigned
@@ -163,15 +170,13 @@ namespace BmpSort
                 }
             }
         }
-
+*/
         public void takePictureRAM()
         {
             //Check access to UI Thread.
             if (Application.Current.Dispatcher.CheckAccess())
             {
                 // create a png bitmap encoder which knows how to save a .png file
-                BitmapEncoder encoder = new PngBitmapEncoder();
-
                 if (null == kinect.Sensor)
                 {
                     //this.statusBarText.Text = Properties.Resources.ConnectDeviceFirst;
@@ -185,9 +190,15 @@ namespace BmpSort
 
                     // create frame from the writable bitmap and add to encoder
                     //encoder.Frames.Add(BitmapFrame.Create(this.colorBitmap));
-                    encoder.Frames.Add(BitmapFrame.Create(kinect.CroppedBitmap));
 
-                    // add frame to the window
+
+                    // Decide on taken picture
+                    // classification = M.decide(IP.ToBitmap(kinect.CroppedBitmap));
+                    classification = 1;
+
+                    // Add picture to UI
+                    BitmapEncoder encoder = new BmpBitmapEncoder();
+                    encoder.Frames.Add(BitmapFrame.Create(kinect.CroppedBitmap));
                     this.Image2.Source = encoder.Frames.ElementAt(encoder.Frames.Count - 1);
                 });
             }
@@ -255,16 +266,27 @@ namespace BmpSort
             }
         }
 
+
+
         private void Trainbutton_Click(object sender, RoutedEventArgs e)
         {
-            M =
-                new Machine(
-                    System.IO.Path.GetFullPath(System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory,
-                        "..\\..\\", "Images\\Background")));
             string path =
-                System.IO.Path.GetFullPath(System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory,
-                    "..\\..\\", "Images"));
+                System.IO.Path.GetFullPath(System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Images"));
             M.train_model(System.IO.Path.Combine(path, "Ball"), System.IO.Path.Combine(path, "Empty"),
+                System.IO.Path.Combine(path, "Error"));
+        }
+        private void Trainbutton2_Click(object sender, RoutedEventArgs e)
+        {
+            string path =
+                System.IO.Path.GetFullPath(System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Images"));
+            M.train_model2(System.IO.Path.Combine(path, "Ball"), System.IO.Path.Combine(path, "Empty"),
+                System.IO.Path.Combine(path, "Error"));
+        }
+        private void Trainbutton3_Click(object sender, RoutedEventArgs e)
+        {
+            string path =
+                System.IO.Path.GetFullPath(System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Images"));
+            M.train_model3(System.IO.Path.Combine(path, "Ball"), System.IO.Path.Combine(path, "Empty"),
                 System.IO.Path.Combine(path, "Error"));
         }
 
@@ -272,6 +294,78 @@ namespace BmpSort
         {
             ARFFGenerator arff = new ARFFGenerator(M);
             arff.generate_arff_file(ref progress);
+        }
+
+        private void ConnectButton_Click(object sender, RoutedEventArgs e)
+        {
+            kinect = new Kinect();
+            kinect.Sensor.ColorFrameReady += SensorColorFrameReady;
+            AIO = new ArduinoIO(SerialPortTextBox.Text);
+            //Lav thread til Serial IO listening.
+            t = Task.Run(() =>
+            {
+                while (true)
+                {
+                    AIO.AwaitMessage(out message);
+                    if (message is CommandMessage)
+                    {
+                        takePictureRAM();
+                    }
+                    else if (message is RequestMessage)
+                    {
+                        switch (classification)
+                        {
+                            case 0:
+                                {
+                                    AIO.SendObject(SerialIO.Shape.Ball);
+                                    break;
+                                }
+                            case 1:
+                                {
+                                    AIO.SendObject(SerialIO.Shape.NotBall);
+                                    break;
+                                }
+                            case 2:
+                                {   //M
+                                    AIO.SendObject(SerialIO.Shape.NotBall);
+                                    break;
+                                }
+                            default:
+                                {
+                                    AIO.SendObject(SerialIO.Shape.NotBall);
+                                    break;
+                                }
+                        }
+                    }
+                    else if (message is ColorMessage)
+                    {
+                        //Do color stuff
+                    }
+                    else if (message is DistanceMessage)
+                    {
+                        //Do Distance stuff
+                    }
+                }
+            });
+            // Set the image we display to point to the bitmap where we'll put the image data
+            Image1.Source = kinect.ColorBitmap;
+
+        }
+
+        private void SendByteButton_Click(object sender, RoutedEventArgs e)
+        {
+            string[] input = SerialByteTextBox.Text.Split(' ');
+            byte[] bytes = new byte[input.Length];
+            
+            for (int i = 0; i < input.Length; i++)
+            {
+                byte b;
+                bool parable = byte.TryParse(input[i], out b);
+                if (!parable) throw new ArgumentException();
+                bytes[i] = b;
+            }
+
+            AIO.SendByte(bytes);
         }
     }
 }

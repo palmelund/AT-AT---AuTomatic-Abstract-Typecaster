@@ -79,7 +79,7 @@ namespace BmpSort
             writer.WriteLine("@ATTRIBUTE whitepixels NUMERIC");
             writer.WriteLine("@ATTRIBUTE blobcount NUMERIC");
             writer.WriteLine("@ATTRIBUTE cornercount NUMERIC");
-            writer.WriteLine("@ATTRIBUTE class {ball, empty,error}");
+            writer.WriteLine("@ATTRIBUTE class {ball,empty,error,ignore}");
             writer.WriteLine(" ");
             writer.WriteLine("@DATA");
             foreach (string line in stringlist)

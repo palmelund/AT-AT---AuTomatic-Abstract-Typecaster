@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -26,6 +28,24 @@ namespace BmpSort
             tmp.WritePixels(destinationRoi, data, stride, 0);
             return tmp;
             //return tmp.Gray(); //Use this to return grayscale
+        }
+
+        /// <summary>
+        /// Converting WriteableBitmap to Bitmap
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public Bitmap ToBitmap(WriteableBitmap input)
+        {
+            System.Drawing.Bitmap bmp;
+            using (MemoryStream outStream = new MemoryStream())
+            {
+                BitmapEncoder enc = new BmpBitmapEncoder();
+                enc.Frames.Add(BitmapFrame.Create((BitmapSource)input));
+                enc.Save(outStream);
+                bmp = new System.Drawing.Bitmap(outStream);
+            }
+            return bmp;
         }
     }
 }
