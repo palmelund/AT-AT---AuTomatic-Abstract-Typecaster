@@ -40,17 +40,46 @@ namespace BmpSort
         public ImageProperties(string fileName)
         {
             backgrounds.Add(0, 0);
-            load_background_colors_textfile(fileName);
+            load_background_colors_textfile("backgrounds.txt");
+            load_model_from_dat();
         }
+        private void load_model_from_dat()
+        {
+            StreamReader incstream = new StreamReader("model3.dat");
+            List<string> datastrings = new List<string>();
+            while (!incstream.EndOfStream)
+            {
+                datastrings.Add(incstream.ReadLine());
+            }
+            trainingInput = new int[datastrings.Count()][];
+            trainingOutput = new int[datastrings.Count()];
+            string[] temp3long = new string[3];  //HUSK AT LAVE PÆN !!
 
+
+            counter = 0;
+            foreach (string linje in datastrings)
+            {
+                temp3long = linje.Split('|');
+                add_training_input(int.Parse(temp3long[0]), int.Parse(temp3long[1]), counter);
+                trainingOutput[counter] = int.Parse(temp3long[3]);
+                counter++;
+                //build_model();
+            }
+            incstream.Close();
+
+        }
         private List<int> outputList = new List<int>();
         private List<int[]> inputList = new List<int[]>();
+        private void add_training_input(int a, int b, int place)
+        {
+            int[] temp = new int[] { a, b, };
 
+            trainingInput[place] = temp;
+        }
 
         public int[] trainingOutput { get; set; }
         public int[][] trainingInput { get; set; }
         public int arrayCounter { get; set; }
-
         public int[] get_properties(System.Drawing.Image inputImage)
         {
             int[] result = {0, 0, 0};
@@ -61,8 +90,6 @@ namespace BmpSort
 
             return result;
         }
-
-
         // Fjern Blob+Corner detection og flyt i ny funktion
         private System.Drawing.Image clean_background(System.Drawing.Image inputImage)
         {
@@ -90,7 +117,7 @@ namespace BmpSort
 
             imageMaker.Convert(newImage, out currentBitmap);
             blobs = blobdetect(currentBitmap);
-            corners = cornerdetect(currentBitmap);
+            corners = 0; // cornerdetect(currentBitmap);
             return currentBitmap;
         }
 
@@ -196,15 +223,11 @@ namespace BmpSort
             MessageBox.Show(trainingInput[10][2].ToString());
             trainingOutput = outputList.ToArray();
         }
-
-
         //Bliver aldrig brugt
         public void load_background_image(System.Drawing.Image inputImage)
         {
             add_ignore_colors(inputImage);
         }
-
-
         //Bliver aldrig brugt
         public void load_image(System.Drawing.Image input)
         {
@@ -212,8 +235,6 @@ namespace BmpSort
             properties = new int[5];
             counter++;
         }
-
-
         //Bliver aldrig brugt
         public void load_files()
         {
@@ -230,7 +251,7 @@ namespace BmpSort
         {
             properties[0] = blobdetect(currentBitmap); //no of blobs detected
             properties[1] = whitePixels; //no of white pixels in image
-            properties[2] = cornerdetect(currentBitmap); //no of corners detected
+            properties[2] = 0; //cornerdetect(currentBitmap); //no of corners detected
         }
 
         public int blobdetect(Bitmap input)
