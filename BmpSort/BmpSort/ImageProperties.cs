@@ -220,7 +220,6 @@ namespace BmpSort
         public void save_to_array()
         {
             trainingInput = inputList.ToArray();
-            MessageBox.Show(trainingInput[10][2].ToString());
             trainingOutput = outputList.ToArray();
         }
         //Bliver aldrig brugt
@@ -269,7 +268,7 @@ namespace BmpSort
 
         public int cornerdetect(Bitmap input)
         {
-            Accord.Imaging.SusanCornersDetector susanCorners = new SusanCornersDetector(1,10);
+            Accord.Imaging.SusanCornersDetector susanCorners = new SusanCornersDetector(25,10); // (25, 10) (30, 10) (25, 5) (30, 5)
             List<Accord.IntPoint> points = susanCorners.ProcessImage(input);
             return points.Count;
         }
