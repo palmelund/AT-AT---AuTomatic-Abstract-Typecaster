@@ -78,7 +78,7 @@ namespace BmpSort
             //properties.load_ball_training(ball);
             //properties.load_empty_training(empty);
             properties.load_error_training(error);
-            properties.save_to_array();
+            //properties.save_to_array();
             nb = naiveBayes.Learn(properties.trainingInput, properties.trainingOutput);
             save_model_from_file("naivebayes.mod");
         }
