@@ -19,67 +19,59 @@ namespace BmpSort
         int corners = 0;
         int filesLoaded = 0;
         int whitePixels = 0;
-        int[] properties;
-
+        public int[] trainingOutput { get; set; }
+        public int[][] trainingInput { get; set; }
+        public int arrayCounter { get; set; }
 
         string[] emptyImages;
         string[] background;
         string[] ballImages;
         string[] errors;
 
-
         Bitmap currentBitmap;
         Accord.Imaging.Converters.ImageToArray arrayMaker = new Accord.Imaging.Converters.ImageToArray();
         Accord.Imaging.Converters.ArrayToImage imageMaker = new Accord.Imaging.Converters.ArrayToImage(400, 200);
 
-        //List<double[]> valueList = new List<double[]>();
         Dictionary<int, int> backgrounds = new Dictionary<int, int>();
 
         #endregion Properties
 
-        public ImageProperties(string fileName)
+        public ImageProperties(string fileName)//constructor
         {
             backgrounds.Add(0, 0);
             load_background_colors_textfile("backgrounds.txt");
             load_model_from_dat();
         }
-        private void load_model_from_dat()
+
+        private void load_model_from_dat() //loads the model data from .dat file
         {
             StreamReader incstream = new StreamReader("model3.dat");
             List<string> datastrings = new List<string>();
-            while (!incstream.EndOfStream)
-            {
+
+            while (!incstream.EndOfStream){
                 datastrings.Add(incstream.ReadLine());
             }
+
             trainingInput = new int[datastrings.Count()][];
             trainingOutput = new int[datastrings.Count()];
-            string[] temp3long = new string[3];  //HUSK AT LAVE PÆN !!
-
-
+            string[] temp3long = new string[3];
             counter = 0;
-            foreach (string linje in datastrings)
-            {
+
+            foreach (string linje in datastrings){
                 temp3long = linje.Split('|');
                 add_training_input(int.Parse(temp3long[0]), int.Parse(temp3long[1]), counter);
                 trainingOutput[counter] = int.Parse(temp3long[3]);
                 counter++;
-                //build_model();
             }
             incstream.Close();
-
         }
-        private List<int> outputList = new List<int>();
-        private List<int[]> inputList = new List<int[]>();
         private void add_training_input(int a, int b, int place)
         {
             int[] temp = new int[] { a, b, };
 
             trainingInput[place] = temp;
         }
-
-        public int[] trainingOutput { get; set; }
-        public int[][] trainingInput { get; set; }
-        public int arrayCounter { get; set; }
+  
         public int[] get_properties(System.Drawing.Image inputImage)
         {
             int[] result = {0, 0, 0};
@@ -89,9 +81,8 @@ namespace BmpSort
             result[2] = corners;
 
             return result;
-        }
-        // Fjern Blob+Corner detection og flyt i ny funktion
-        private System.Drawing.Image clean_background(System.Drawing.Image inputImage)
+        }//gets image properties for new images
+        private System.Drawing.Image clean_background(System.Drawing.Image inputImage)//removes background and makes black/white
         {
             int i = 0;
             Bitmap bitmap = new Bitmap(inputImage);
@@ -114,21 +105,18 @@ namespace BmpSort
                 }
                 i++;
             }
-
+            if ((whitePixels > 4000) && (whitePixels < 8000))
+                {
+                    whitePixels = 1;
+            }
+            else
+            {
+                whitePixels = 0;
+            }
             imageMaker.Convert(newImage, out currentBitmap);
             blobs = blobdetect(currentBitmap);
-            corners = 0; // cornerdetect(currentBitmap);
+            corners = 1; // cornerdetect(currentBitmap);
             return currentBitmap;
-        }
-
-        private void load_background_colors(string path)
-        {
-            background = Directory.GetFiles(path, "*.*");
-            foreach (string fil in background)
-            {
-                System.Drawing.Image image = System.Drawing.Image.FromFile(fil);
-                add_ignore_colors(image);
-            }
         }
 
         private void load_background_colors_textfile(string fileName)
@@ -144,9 +132,17 @@ namespace BmpSort
                 }
                 
             }
-        }
-
-        private void add_ignore_colors(System.Drawing.Image image)
+        }//load backgroundcolors from file
+        private void load_background_colors(string path)
+        {
+            background = Directory.GetFiles(path, "*.*");
+            foreach (string fil in background)
+            {
+                System.Drawing.Image image = System.Drawing.Image.FromFile(fil);
+                add_ignore_colors(image);
+            }
+        }//load backgroundcolors from images
+        private void add_ignore_colors(System.Drawing.Image image)//adds entire image to background colors
         {
             Bitmap bitmap = new Bitmap(image);
             Color[] colors = new Color[80000];
@@ -160,6 +156,12 @@ namespace BmpSort
             }
         }
 
+        public void load_files() //gets training image filenames from folders
+        {
+            emptyImages = Directory.GetFiles("Images/Empty/", "*.*");
+            ballImages = Directory.GetFiles("Images/Blue/", "*.*");
+            errors = Directory.GetFiles("Images/Error/", "*.*");
+        }
         public void load_ball_training(string path)
         {
             int[] running = {0, 0, 0};
@@ -171,14 +173,13 @@ namespace BmpSort
                 running[0] = whitePixels;
                 running[1] = blobdetect(currentBitmap);
                 running[2] = cornerdetect(currentBitmap);
-                outputList.Add(0);
+                //outputList.Add(0);
                 //trainingOutput[arrayCounter] = 0;
-                inputList.Add(running);
+                //inputList.Add(running);
                 //trainingInput[arrayCounter] = running;
                 arrayCounter++;
             }
         }
-
         public void load_empty_training(string path)
         {
             int[] running = {0, 0, 0};
@@ -190,14 +191,13 @@ namespace BmpSort
                 running[0] = whitePixels;
                 running[1] = blobdetect(currentBitmap);
                 running[2] = cornerdetect(currentBitmap);
-                outputList.Add(1);
+                //outputList.Add(1);
                 //trainingOutput[arrayCounter] = 1;
-                inputList.Add(running);
+                //inputList.Add(running);
                 //trainingInput[arrayCounter] = running;
                 arrayCounter++;
             }
         }
-
         public void load_error_training(string path)
         {
             int[] running = {0, 0, 0};
@@ -209,51 +209,15 @@ namespace BmpSort
                 running[0] = whitePixels;
                 running[1] = blobdetect(currentBitmap);
                 running[2] = cornerdetect(currentBitmap);
-                outputList.Add(2);
+                //outputList.Add(2);
                 //trainingOutput[arrayCounter] = 2;
-                inputList.Add(running);
+                //inputList.Add(running);
                 //trainingInput[arrayCounter] = running;
                 arrayCounter++;
             }
-        }
+        } 
 
-        public void save_to_array()
-        {
-            trainingInput = inputList.ToArray();
-            MessageBox.Show(trainingInput[10][2].ToString());
-            trainingOutput = outputList.ToArray();
-        }
-        //Bliver aldrig brugt
-        public void load_background_image(System.Drawing.Image inputImage)
-        {
-            add_ignore_colors(inputImage);
-        }
-        //Bliver aldrig brugt
-        public void load_image(System.Drawing.Image input)
-        {
-            whitePixels = 0;
-            properties = new int[5];
-            counter++;
-        }
-        //Bliver aldrig brugt
-        public void load_files()
-        {
-            emptyImages = Directory.GetFiles("Images/Empty/", "*.*");
-            ballImages = Directory.GetFiles("Images/Blue/", "*.*");
-            errors = Directory.GetFiles("Images/Error/", "*.*");
-            //background = Directory.GetFiles("images/Background/", "*.*");
-
-        }
-
-
-        //Bliver aldrig brugt 
-        public void get_properties()
-        {
-            properties[0] = blobdetect(currentBitmap); //no of blobs detected
-            properties[1] = whitePixels; //no of white pixels in image
-            properties[2] = 0; //cornerdetect(currentBitmap); //no of corners detected
-        }
-
+        #region detectors
         public int blobdetect(Bitmap input)
         {
             Accord.Imaging.BlobCounter blobs = new BlobCounter();
@@ -263,15 +227,25 @@ namespace BmpSort
             blobs.MinWidth = 35;
 
             blobs.ProcessImage(input);
-
-            return (blobs.ObjectsCount);
+            if (blobs.ObjectsCount == 1)
+            {
+                return 1;
+            }
+            else
+            {
+                return 0;
+            }
+            
         }
-
         public int cornerdetect(Bitmap input)
         {
+            return 1;
+            /*
             Accord.Imaging.SusanCornersDetector susanCorners = new SusanCornersDetector(1,10);
             List<Accord.IntPoint> points = susanCorners.ProcessImage(input);
             return points.Count;
-        }
+            */
+        } 
+        #endregion detectors
     }
 }

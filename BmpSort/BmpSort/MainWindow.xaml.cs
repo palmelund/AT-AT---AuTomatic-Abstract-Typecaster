@@ -317,17 +317,12 @@ namespace BmpSort
                         {
                             case 0:
                                 {
-                                    AIO.SendObject(SerialIO.Shape.Ball);
+                                    AIO.SendObject(SerialIO.Shape.NotBall);
                                     break;
                                 }
                             case 1:
                                 {
-                                    AIO.SendObject(SerialIO.Shape.NotBall);
-                                    break;
-                                }
-                            case 2:
-                                {   //M
-                                    AIO.SendObject(SerialIO.Shape.NotBall);
+                                    AIO.SendObject(SerialIO.Shape.Ball);
                                     break;
                                 }
                             default:
