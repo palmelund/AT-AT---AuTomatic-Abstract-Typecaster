@@ -215,7 +215,18 @@ namespace BmpSort
                 //trainingInput[arrayCounter] = running;
                 arrayCounter++;
             }
-        } 
+
+        }      
+
+
+        //Bliver aldrig brugt 
+        public void get_properties()
+        {
+            properties[0] = blobdetect(currentBitmap); //no of blobs detected
+            properties[1] = whitePixels; //no of white pixels in image
+            properties[2] = 0; //cornerdetect(currentBitmap); //no of corners detected
+        }
+
 
         #region detectors
         public int blobdetect(Bitmap input)
@@ -234,17 +245,11 @@ namespace BmpSort
             else
             {
                 return 0;
-            }
-            
+            }          
         }
         public int cornerdetect(Bitmap input)
         {
             return 1;
-            /*
-            Accord.Imaging.SusanCornersDetector susanCorners = new SusanCornersDetector(1,10);
-            List<Accord.IntPoint> points = susanCorners.ProcessImage(input);
-            return points.Count;
-            */
         } 
         #endregion detectors
     }
