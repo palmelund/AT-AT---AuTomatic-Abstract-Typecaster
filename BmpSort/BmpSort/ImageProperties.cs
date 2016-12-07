@@ -83,7 +83,7 @@ namespace BmpSort
             inputImage = clean_background(inputImage);
             result[0] = whitePixels;
             result[1] = blobs;
-            result[2] = corners;
+            result[2] = squaredetected;
 
             return result;
         }//returns properties for input image, used for model.decide() function
@@ -169,6 +169,7 @@ namespace BmpSort
             emptyImages = Directory.GetFiles("Images/Empty/", "*.*");
             ballImages = Directory.GetFiles("Images/Blue/", "*.*");
             errors = Directory.GetFiles("Images/Error/", "*.*");
+            filesLoaded = (emptyImages.Length + ballImages.Length + errors.Length);
         }
         public void load_ball_training(string path)
         {
@@ -181,10 +182,6 @@ namespace BmpSort
                 running[0] = whitePixels;
                 running[1] = blobdetect(currentBitmap);
                 running[2] = squaredetected;
-                //outputList.Add(0);
-                //trainingOutput[arrayCounter] = 0;
-                //inputList.Add(running);
-                //trainingInput[arrayCounter] = running;
                 arrayCounter++;
             }
         }
@@ -199,10 +196,6 @@ namespace BmpSort
                 running[0] = whitePixels;
                 running[1] = blobdetect(currentBitmap);
                 running[2] = squaredetected;
-                //outputList.Add(1);
-                //trainingOutput[arrayCounter] = 1;
-                //inputList.Add(running);
-                //trainingInput[arrayCounter] = running;
                 arrayCounter++;
             }
         }
@@ -217,10 +210,6 @@ namespace BmpSort
                 running[0] = whitePixels;
                 running[1] = blobdetect(currentBitmap);
                 running[2] = squaredetected;
-                //outputList.Add(2);
-                //trainingOutput[arrayCounter] = 2;
-                //inputList.Add(running);
-                //trainingInput[arrayCounter] = running;
                 arrayCounter++;
             }
 

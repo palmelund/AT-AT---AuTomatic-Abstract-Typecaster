@@ -194,6 +194,7 @@ namespace BmpSort
 
                     // Decide on taken picture
                     // classification = M.decide(IP.ToBitmap(kinect.CroppedBitmap));
+               
                     classification = 1;
 
                     // Add picture to UI
@@ -268,27 +269,8 @@ namespace BmpSort
 
 
 
-        private void Trainbutton_Click(object sender, RoutedEventArgs e)
-        {
-            string path =
-                System.IO.Path.GetFullPath(System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Images"));
-            M.train_model(System.IO.Path.Combine(path, "Ball"), System.IO.Path.Combine(path, "Empty"),
-                System.IO.Path.Combine(path, "Error"));
-        }
-        private void Trainbutton2_Click(object sender, RoutedEventArgs e)
-        {
-            string path =
-                System.IO.Path.GetFullPath(System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Images"));
-            M.train_model2(System.IO.Path.Combine(path, "Ball"), System.IO.Path.Combine(path, "Empty"),
-                System.IO.Path.Combine(path, "Error"));
-        }
-        private void Trainbutton3_Click(object sender, RoutedEventArgs e)
-        {
-            string path =
-                System.IO.Path.GetFullPath(System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Images"));
-            M.train_model3(System.IO.Path.Combine(path, "Ball"), System.IO.Path.Combine(path, "Empty"),
-                System.IO.Path.Combine(path, "Error"));
-        }
+        
+        
 
         private void ARFFbutton_Click(object sender, RoutedEventArgs e)
         {
