@@ -31,16 +31,16 @@ void task_check_first_segment(Ultra_Sound_Sensor* distance_sensor,
 {
     int32_t test_dist = distance_sensor_measure_distance(distance_sensor);
 
-    DEBUG_PRINT_VAR(test_dist);
-    DEBUG_PRINT(" ");
-    DEBUG_PRINTLN_VAR(distance_to_wall);
+    //DEBUG_PRINT_VAR(test_dist);
+    //DEBUG_PRINT(" ");
+    //DEBUG_PRINTLN_VAR(distance_to_wall);
 
     Segment* first_segment = queue_next(segment_queue);
 
     // Tests if a ball is in front of sensor
     if (test_dist < distance_to_wall)
     {
-        //DEBUG_PRINTLN("Segment was occupied");
+        DEBUG_PRINTLN("Segment was occupied");
         first_segment->is_occupied = true;
         first_segment->object_type = BALL;
         first_segment->color = UNKNOWN;
@@ -72,10 +72,21 @@ void task_determin_color(SFE_ISL29125* color_sensor,
 
     if (segment->is_occupied && segment->object_type == BALL)
     {
-        RGB color;
-        read_color(color_sensor, &color);
-        uint8_t determined_color = determin_color(known_colors, &color);
-        segment->color = determined_color;
+        for (int i = 0; i  < 10; i++)
+        {
+            RGB color;
+            read_color(color_sensor, &color);
+            uint8_t determined_color = determin_color(known_colors, &color);
+            DEBUG_PRINT_RGB(color);
+            DEBUG_PRINT("C: ");
+            DEBUG_PRINTLN(get_color_name(determined_color));
+            if (determined_color < 4)
+            {
+                        segment->color = determined_color;
+                        break;
+            }
+            delay(5);
+        }
 
         //DEBUG_PRINT("Ball was: ");
         //DEBUG_PRINTLN(get_color_name(determined_color));
@@ -139,7 +150,7 @@ void task_rotate_seperator(Advanced_Motor* separator, Segment_Queue* queue)
     }
     else
     {
-        position = COLOR_COUNT;
+        position = COLOR_COUNT - 1;
     }
 
     if (position != last_position)

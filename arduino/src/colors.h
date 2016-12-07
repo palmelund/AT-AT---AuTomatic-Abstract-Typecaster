@@ -9,7 +9,7 @@
 #include <limits.h>
 #include <stdint.h>
 
-#define COLOR_COUNT 4
+#define COLOR_COUNT 5
 
 #define RED 0
 #define GREEN 1
