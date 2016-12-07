@@ -109,23 +109,6 @@ void setup()
     }
 #endif
 
-    /*
-    while (true)
-    {
-        task_check_first_segment(&distance_sensor, distance_to_wall, &segment_queue);
-
-        RGB color;
-        read_color(color_sensor, &color);
-        //uint8_t determined_color = determin_color(known_colors, &color);
-        DEBUG_PRINT_RGB(color);
-        //DEBUG_PRINT("C: ");
-        //DEBUG_PRINTLN(get_color_name(determined_color));
-
-        while (motor_get_degrees(&motor_conveyor) < conveyor_target)
-            ;
-        conveyor_target += SEGMENT_DEGREE_LENGTH;
-    }
-    */
     motor_turn(&motor_conveyor);
     advanced_motor_turn_to_degree(&adv_motor_separator, GARBAGE_BUCKET);
 
@@ -153,31 +136,6 @@ void setup()
 
     DEBUG_PRINTLN("Done!");
 #endif
-
-    //wce_task_check_first_segment();
-    /*
-    Delta_RGB red;
-    calibrate_color(&red);
-
-    while (true)
-    {
-        RGB color;
-        read_color(&color);
-        uint16_t delta = euclidean_distance_3d(&color, &red.rgb);
-
-        DEBUG_PRINT_RGB(color);
-        DEBUG_PRINT_RGB(red.rgb);
-        DEBUG_PRINTLN_VAR(red.delta);
-        DEBUG_PRINTLN_VAR(delta);
-
-        if (delta < red.delta)
-            DEBUG_PRINTLN("Yay");
-        else
-            DEBUG_PRINTLN("Nay");
-
-        delay(300);
-    }
-    */
 }
 
 void loop()
