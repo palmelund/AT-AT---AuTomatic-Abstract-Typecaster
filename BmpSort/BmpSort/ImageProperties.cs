@@ -218,16 +218,6 @@ namespace BmpSort
 
         }      
 
-
-        //Bliver aldrig brugt 
-        public void get_properties()
-        {
-            properties[0] = blobdetect(currentBitmap); //no of blobs detected
-            properties[1] = whitePixels; //no of white pixels in image
-            properties[2] = 0; //cornerdetect(currentBitmap); //no of corners detected
-        }
-
-
         #region detectors
         public int blobdetect(Bitmap input)
         {
