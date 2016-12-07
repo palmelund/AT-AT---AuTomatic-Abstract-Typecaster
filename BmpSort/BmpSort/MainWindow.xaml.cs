@@ -191,15 +191,11 @@ namespace BmpSort
 
 
                     // Decide on taken picture
-<<<<<<< HEAD
-                    // classification = M.decide(IP.ToBitmap(kinect.CroppedBitmap));
-               
-                    classification = 1;
-=======
+
                     classification = M.decide(IP.ToBitmap(kinect.CroppedBitmap));
                     //classification = 1;
                     ClassificationLabel.Content = "Class: " + classification;
->>>>>>> refs/remotes/origin/master
+
 
                     // Add picture to UI
                     BitmapEncoder encoder = new BmpBitmapEncoder();
