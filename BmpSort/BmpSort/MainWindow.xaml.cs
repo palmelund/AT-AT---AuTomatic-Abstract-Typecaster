@@ -76,11 +76,8 @@ namespace BmpSort
         /// <param name="e">event arguments</param>
         private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (null != kinect.Sensor)
-            {
-                kinect.Sensor.Stop();
-            }
-            // Hvordan lukker vi porten i ArduinoIO?
+            kinect?.Sensor?.Stop();
+            AIO?.CloseConnection();
         }
 
         /// <summary>
@@ -193,8 +190,9 @@ namespace BmpSort
 
 
                     // Decide on taken picture
-                    // classification = M.decide(IP.ToBitmap(kinect.CroppedBitmap));
-                    classification = 1;
+                    classification = M.decide(IP.ToBitmap(kinect.CroppedBitmap));
+                    //classification = 1;
+                    ClassificationLabel.Content = "Class: " + classification;
 
                     // Add picture to UI
                     BitmapEncoder encoder = new BmpBitmapEncoder();
