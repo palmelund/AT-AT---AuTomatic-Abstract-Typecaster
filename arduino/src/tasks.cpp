@@ -29,7 +29,24 @@ int32_t task_calibrate_ultra_sound_sensor(Ultra_Sound_Sensor *distance_sensor)
 void task_check_first_segment(Ultra_Sound_Sensor *distance_sensor,
                               uint16_t distance_to_wall, Segment_Queue *segment_queue)
 {
+    Segment *first_segment = queue_next(segment_queue);
 
+    // Tell the computer to take a picture
+    Out_Message take_picture_message;
+    take_picture_message.type = OUT_MESSAGE_COMMAND;
+    take_picture_message.command.type = OUT_COMMAND_TAKE_PICURE;
+
+    io_send_message(&take_picture_message);
+
+
+    // TODO: Computer will probably send both color and shape. Make it work!
+    In_Message response;
+    io_await_message(&response);
+
+    first_segment->object_type = message.object.type;
+
+
+/*
     Segment *first_segment = queue_next(segment_queue);
 
     // DEBUG
@@ -55,19 +72,7 @@ void task_check_first_segment(Ultra_Sound_Sensor *distance_sensor,
             first_segment->is_occupied = false;
         }
     }
-}
-
-void task_send_take_picture(Segment_Queue *queue)
-{
-    Segment *segment = get_segment(queue, KINECT_SEGMENT_INDEX);
-    if (segment->is_occupied)
-    {
-        Out_Message message;
-        message.type = OUT_MESSAGE_COMMAND;
-        message.command.type = OUT_COMMAND_TAKE_PICURE;
-
-        io_send_message(&message);
-    }
+*/
 }
 
 void task_determin_color(SFE_ISL29125 *color_sensor,
@@ -77,7 +82,7 @@ void task_determin_color(SFE_ISL29125 *color_sensor,
 
     if (segment->is_occupied && segment->object_type == BALL)
     {
-        uint8_t results[COLOR_COUNT] = {0};
+        uint8_t results[COLOR_COUNT] = { 0 };
 
         for (uint8_t i = 0; i < SENSOR_PINGS; ++i)
         {
@@ -101,6 +106,92 @@ void task_determin_color(SFE_ISL29125 *color_sensor,
 
         DEBUG_PRINT("C: ");
         DEBUG_PRINTLN(get_color_name(determined_color));
+    }
+}
+
+void task_feed_ball(Motor *feeder)
+{
+    static uint8_t feed_counter = FEEDER_ITERATION;
+    static int16_t deg = FEEDER_DEGREES;
+
+    // We only feed a ball every x iterations
+    if (feed_counter == FEEDER_ITERATION)
+    {
+        motor_turn_to_degree(feeder, deg);
+
+        deg += FEEDER_DEGREES;
+        if (deg == 360)
+            deg = 0;
+
+        feed_counter = 0;
+    }
+
+    feed_counter++;
+}
+
+void task_rotate_seperator(Advanced_Motor *separator, Segment_Queue *queue)
+{
+    static uint8_t last_position = GARBAGE_BUCKET;
+    static int16_t bucket_position[BUCKET_COUNT] = {
+        RED_BUCKET,
+        GREEN_BUCKET,
+        BLUE_BUCKET,
+        YELLOW_BUCKET,
+        GARBAGE_BUCKET
+    };
+
+    Segment *segment = get_segment(queue, LAST_INDEX);
+    uint8_t position;
+
+    if (segment->is_occupied && segment->object_type == BALL)
+    {
+        position = segment->color;
+    }
+    else
+    {
+        position = UNKNOWN;
+    }
+
+    if (position != last_position)
+    {
+        advanced_motor_turn_to_degree(separator, bucket_position[position]);
+        last_position = position;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+void task_send_take_picture(Segment_Queue *queue)
+{
+    Segment *segment = get_segment(queue, KINECT_SEGMENT_INDEX);
+    if (segment->is_occupied)
+    {
+        Out_Message message;
+        message.type = OUT_MESSAGE_COMMAND;
+        message.command.type = OUT_COMMAND_TAKE_PICURE;
+
+        io_send_message(&message);
     }
 }
 
@@ -128,53 +219,4 @@ void task_request_object_info(Segment_Queue *segment_queue)
     }
 
     ASSERT(false);
-}
-
-void task_feed_ball(Motor *feeder)
-{
-    static uint8_t feed_counter = FEEDER_ITERATION;
-    static int16_t deg = FEEDER_DEGREES;
-
-    // We only feed a ball every x iterations
-    if (feed_counter == FEEDER_ITERATION)
-    {
-        motor_turn_to_degree(feeder, deg);
-
-        deg += FEEDER_DEGREES;
-        if (deg == 360)
-            deg = 0;
-
-        feed_counter = 0;
-    }
-
-    feed_counter++;
-}
-
-void task_rotate_seperator(Advanced_Motor *separator, Segment_Queue *queue)
-{
-    static int16_t bucket_pos[BUCKET_COUNT] = {
-        RED_BUCKET,
-        GREEN_BUCKET,
-        BLUE_BUCKET,
-        YELLOW_BUCKET,
-        GARBAGE_BUCKET};
-
-    Segment *segment = get_segment(queue, LAST_INDEX);
-    static uint8_t last_position = GARBAGE_BUCKET;
-    uint8_t position;
-
-    if (segment->is_occupied && segment->object_type == BALL)
-    {
-        position = segment->color;
-    }
-    else
-    {
-        position = UNKNOWN;
-    }
-
-    if (position != last_position)
-    {
-        advanced_motor_turn_to_degree(separator, bucket_pos[position]);
-        last_position = position;
-    }
 }
