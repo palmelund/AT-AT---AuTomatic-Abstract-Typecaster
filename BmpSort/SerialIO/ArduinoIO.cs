@@ -1,61 +1,10 @@
 ﻿using System;
 using System.IO.Ports;
 using System.Linq;
+using System.Text;
 
 namespace SerialIO
 {
-    /// <summary>
-    /// Commands that can be send to the Arduino.
-    /// </summary>
-	public enum ArduinoCommand : byte
-	{
-		CalibrateRed = 0,
-		CalibrateGreen = 1,
-		CalibrateBlue = 2,
-	    CalibrateYellow = 3,
-		CalibrateDistance = 4,
-		Start = 5,
-		Stop = 6
-	}
-
-    /// <summary>
-    /// Comands that the Arduino can send to the Computer
-    /// Currently only to take pictures for image processing.
-    /// </summary>
-	public enum ComputerCommand : byte
-	{
-		TakePicture = 0,
-	}
-
-    /// <summary>
-    /// Requests for the computer to send data to the Arduino
-    /// Currently only objectinfo
-    /// </summary>
-	public enum ComputerRequest : byte
-	{
-		ObjectInfo = 0
-	}
-
-    /// <summary>
-    /// Is the shape we have seen a ball or not?
-    /// </summary>
-	public enum Shape : byte
-	{
-		Ball = 0,
-		NotBall = 1
-	}
-
-    /// <summary>
-    /// One of the three RGB values.
-    /// </summary>
-	public enum Color : byte
-	{
-		Green  = 0,
-		Yellow = 1,
-		Red    = 2,
-		Blue   = 3,
-	}
-
     /// <summary>
     /// The ArduinoIO calss contains methods for sending and recieving data to and from the Arduino.
     /// </summary>
@@ -75,6 +24,11 @@ namespace SerialIO
 		const byte OUT_COLOR    = 0x02;
 		const byte OUT_DISTNACE = 0x03;
 
+        public event SerialDataReceivedEventHandler DataRecived {
+            add { _port.DataReceived += value; }
+            remove { _port.DataReceived -= value; }
+        }
+
 	    private readonly SerialPort _port;
 
 	    /// <summary>
@@ -83,13 +37,15 @@ namespace SerialIO
 	    /// <param name="portName">The port the Arduino is connected to by USB. This variable can change depending on OS and number of connected devices.</param>
 		public ArduinoIO(string portName)
 		{
-			_port = new SerialPort (portName, 9600);	//"/dev/ttyACM0"
+		    _port = new SerialPort(portName, 9600) {Encoding = Encoding.ASCII}; //"/dev/ttyACM0"
 
-			if (_port.IsOpen)
+		    if (_port.IsOpen)
 				_port.Close ();
 
 			_port.Open ();
 		}
+
+	    public string ReadExistingBytes() => _port.ReadExisting();
 
 	    /// <summary>
 	    /// Sends a command to the arduino.
@@ -232,9 +188,24 @@ namespace SerialIO
 			}
 		}
 
+        /// <summary>
+        /// Sends an array of bytes to the Arduino
+        /// This does NOT include a command start byte, and thus should be treated with care in a runnin system.
+        /// </summary>
+        /// <param name="b">The EXACT senquence of bytes to send</param>
 	    public void SendByte(byte[] b)
 	    {
 	        _port.Write(b, 0, b.Length);
+	    }
+
+	    public void CloseConnection()
+	    {
+	        _port.Close();
+	    }
+
+	    public int ReadBuffer()
+	    {
+	        return _port.ReadByte();
 	    }
 	}
 }

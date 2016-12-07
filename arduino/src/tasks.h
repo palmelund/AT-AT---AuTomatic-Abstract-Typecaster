@@ -12,6 +12,7 @@
 #include "motor_api.h"
 #include <stdint.h>
 
+#define SENSOR_PINGS 20
 #define FEEDER_ITERATION 8              // The iterations between each feed
 #define FEEDER_DEGREES 90               // The degrees the feeder needs to turn
                                         // to feed a ball.

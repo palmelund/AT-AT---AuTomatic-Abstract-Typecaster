@@ -187,7 +187,7 @@ void calibrate_color(SFE_ISL29125* RGB_sensor, Delta_RGB *result)
     }
 
     // Just to add some extra in case of noise
-    result->delta += 100;
+    result->delta += 200;
 }
 
 uint8_t determin_color(Delta_RGB* known_colors, RGB *color)

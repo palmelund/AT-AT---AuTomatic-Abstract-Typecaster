@@ -213,8 +213,12 @@ namespace BmpSort
                 arrayCounter++;
             }
 
+<<<<<<< HEAD
         }
         #endregion Load images for Testdata
+=======
+        }      
+>>>>>>> refs/remotes/origin/master
 
         #region detectors
         public int blobdetect(Bitmap input)
