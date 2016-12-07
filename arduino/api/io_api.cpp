@@ -79,6 +79,7 @@ void io_await_message(In_Message *received_message)
 
     ASSERT(begin_message == BEGIN_MESSAGE);
     ASSERT(message_size > 0);
+
     while (Serial.available() < message_size)
         ;
 

@@ -84,7 +84,7 @@ void task_determin_color(SFE_ISL29125 *color_sensor,
         uint8_t determined_color;
         int8_t max = -1;
         for (uint8_t i = 0; i < COLOR_COUNT; ++i)
-        {  
+        {
             if (results[i] > max)
             {
                 max = results[i];
@@ -101,15 +101,24 @@ void task_determin_color(SFE_ISL29125 *color_sensor,
 
 void task_request_object_info(Segment_Queue *segment_queue)
 {
-    In_Message message;
-    io_await_message(&message);
-
-    if (message.type == IN_MESSAGE_OBJECT)
+    Segment *segment = get_segment(segment_queue, KINECT_SEGMENT_INDEX);
+    if (segment->is_occupied)
     {
-        Segment *segment =
-            get_segment(segment_queue, KINECT_SEGMENT_INDEX);
 
-        segment->object_type = message.object.type;
+        In_Message message;
+        io_await_message(&message);
+
+        if (message.type == IN_MESSAGE_OBJECT)
+        {
+            Segment *segment =
+                get_segment(segment_queue, KINECT_SEGMENT_INDEX);
+
+            segment->object_type = message.object.type;
+            return;
+        }
+    }
+    else
+    {
         return;
     }
 

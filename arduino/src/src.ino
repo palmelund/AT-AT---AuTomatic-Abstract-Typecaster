@@ -44,14 +44,12 @@ BELT: colors[i].delta: 235 - colors[i].rgb r: 708 g: 1087 b: 940
 // 2: BLUE
 // 3: YELLOW
 Delta_RGB colors[COLOR_COUNT] = {
-    { { 941, 1147, 951 }, 204 },
-    { { 699, 1154, 978 }, 225 },
-    { { 698, 1122, 1134 }, 234 },
-    { { 1204, 1699, 1099 }, 452 },
-    { { 708, 1087, 940 }, 235 }
-};
+    {{941, 1147, 951}, 204},
+    {{699, 1154, 978}, 225},
+    {{698, 1122, 1134}, 234},
+    {{1204, 1699, 1099}, 452},
+    {{708, 1087, 940}, 235}};
 Segment_Queue segment_queue;
-
 
 int32_t conveyor_target;
 
@@ -72,11 +70,6 @@ void setup()
     DEBUG_PRINTLN("- Ultra sound sensor...");
     distance_sensor_init(&distance_sensor, RANGE_TRIG, RANGE_ECHO);
 
-    DEBUG_PRINTLN("--- Calibrating...");
-    distance_to_wall = task_calibrate_ultra_sound_sensor(&distance_sensor);
-    DEBUG_PRINT("---");
-    DEBUG_PRINTLN_VAR(distance_to_wall);
-
     DEBUG_PRINTLN("- Motors...");
     motor_init(&motor_conveyor, 0.36, MOTOR_CONVEYOR_PIN, MOTOR_CONVEYOR_INT_PIN,
                motor_conveyor_interrupt);
@@ -92,13 +85,28 @@ void setup()
            RGB_sensor.readGreen() == 0 ||
            RGB_sensor.readBlue() == 0)
         ;
+    motor_stop(&motor_conveyor);
 
 #if DEBUGGING
-    motor_stop(&motor_conveyor);
+
     DEBUG_PRINTLN("Ready!");
 
-    while (Serial.available() <= 0) ;
+    while (Serial.available() <= 0)
+        ;
     Serial.read();
+#else
+    for (;;)
+    {
+        In_Message message;
+        io_await_message(&message);
+        if (message.type == IN_MESSAGE_COMMAND)
+        {
+            if (message.command.type == IN_COMMAND_START)
+            {
+                break;
+            }
+        }
+    }
 #endif
 
     /*
@@ -138,11 +146,16 @@ void setup()
         conveyor_target += SEGMENT_DEGREE_LENGTH * 2;
     }
 
+    DEBUG_PRINTLN("--- Calibrating...");
+    distance_to_wall = task_calibrate_ultra_sound_sensor(&distance_sensor);
+    DEBUG_PRINT("---");
+    DEBUG_PRINTLN_VAR(distance_to_wall);
+
     DEBUG_PRINTLN("Done!");
 #endif
 
     //wce_task_check_first_segment();
-/*
+    /*
     Delta_RGB red;
     calibrate_color(&red);
 
@@ -180,7 +193,7 @@ void loop()
             motor_turn(&motor_conveyor);
         }
 
-        else if (c == 'e')  // END
+        else if (c == 'e') // END
         {
             run = false;
             motor_stop(&motor_conveyor);
@@ -190,10 +203,11 @@ void loop()
     if (run == false)
         return;
 
-
     task_check_first_segment(&distance_sensor, distance_to_wall, &segment_queue);
+    task_send_take_picture(&segment_queue);
     //print_queue();
     task_determin_color(&RGB_sensor, &segment_queue, colors);
+    //task_request_object_info(&segment_queue);
     task_rotate_seperator(&adv_motor_separator, &segment_queue);
     task_feed_ball(&motor_feeder);
 
@@ -219,17 +233,6 @@ void adv_motor_separator_interrupt1()
 {
     advanced_motor_update_degrees(&adv_motor_separator);
 }
-
-
-
-
-
-
-
-
-
-
-
 
 void startup_helper()
 {
@@ -291,8 +294,8 @@ void print_queue()
     for (int8_t i = QUEUE_SIZE - 1; i >= 0; --i)
     {
         Serial.print("|");
-        Segment* segment = get_segment(&segment_queue, i);
-        
+        Segment *segment = get_segment(&segment_queue, i);
+
         if (segment->is_occupied)
         {
             if (segment->object_type == BALL)

@@ -1,4 +1,6 @@
-﻿using System;
+﻿//#define BUFFERDEBUG
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -45,7 +47,7 @@ namespace BmpSort
         private int classification;
 
         private string backgroundColors = "colors.txt";
-
+       
         /// <summary>
         /// Initializes a new instance of the MainWindow class.
         /// </summary>
@@ -53,8 +55,7 @@ namespace BmpSort
         {
             InitializeComponent();
         }
-
-
+        
         /// <summary>
         /// Execute startup tasks
         /// </summary>
@@ -77,7 +78,7 @@ namespace BmpSort
         private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             kinect?.Sensor?.Stop();
-            AIO?.CloseConnection();
+            //AIO?.CloseConnection();
         }
 
         /// <summary>
@@ -300,6 +301,13 @@ namespace BmpSort
             kinect.Sensor.ColorFrameReady += SensorColorFrameReady;
             AIO = new ArduinoIO(SerialPortTextBox.Text);
             //Lav thread til Serial IO listening.
+
+#if (BUFFERDEBUG)
+            AIO.DataRecived += (o, args) =>
+            {
+                Console.Write(AIO.ReadExistingBytes());
+            };
+#else
             t = Task.Run(() =>
             {
                 while (true)
@@ -340,6 +348,8 @@ namespace BmpSort
                     }
                 }
             });
+#endif
+            
             // Set the image we display to point to the bitmap where we'll put the image data
             Image1.Source = kinect.ColorBitmap;
 
@@ -348,17 +358,21 @@ namespace BmpSort
         private void SendByteButton_Click(object sender, RoutedEventArgs e)
         {
             string[] input = SerialByteTextBox.Text.Split(' ');
+            
             byte[] bytes = new byte[input.Length];
             
             for (int i = 0; i < input.Length; i++)
             {
                 byte b;
-                bool parable = byte.TryParse(input[i], out b);
-                if (!parable) throw new ArgumentException();
+                bool parsable = byte.TryParse(input[i], out b);
+                if (!parsable) throw new ArgumentException();
                 bytes[i] = b;
             }
 
-            AIO.SendByte(bytes);
+            List<byte> msg = new List<byte> {0x62, (byte) bytes.Length};
+            msg.AddRange(bytes);
+            
+            AIO.SendByte(msg.ToArray());
         }
     }
 }

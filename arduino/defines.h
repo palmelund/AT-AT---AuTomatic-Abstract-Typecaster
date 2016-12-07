@@ -7,7 +7,7 @@
 #include <stddef.h>
 #include "Arduino.h"
 
-#define DEBUGGING 1
+#define DEBUGGING 0
 
 #define CALIBRACTION_ITERATIONS 100
 
@@ -48,7 +48,17 @@ if (!(logic)) {                                 \
     abort();                                    \
 }
 #else
-#define ASSERT(logic)
+#define ASSERT(logic) \
+if (!(logic)) {                                 \
+pinMode(42, OUTPUT); \
+while (true) \
+{ \
+    digitalWrite(42, HIGH); \
+    delay(500); \
+    digitalWrite(42, LOW); \
+    delay(500); \
+}   \
+}
 #endif
 
 #endif // _DEFINES_H_

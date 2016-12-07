@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO.Ports;
 using System.Linq;
+using System.Text;
 
 namespace SerialIO
 {
@@ -23,6 +24,11 @@ namespace SerialIO
 		const byte OUT_COLOR    = 0x02;
 		const byte OUT_DISTNACE = 0x03;
 
+        public event SerialDataReceivedEventHandler DataRecived {
+            add { _port.DataReceived += value; }
+            remove { _port.DataReceived -= value; }
+        }
+
 	    private readonly SerialPort _port;
 
 	    /// <summary>
@@ -31,13 +37,15 @@ namespace SerialIO
 	    /// <param name="portName">The port the Arduino is connected to by USB. This variable can change depending on OS and number of connected devices.</param>
 		public ArduinoIO(string portName)
 		{
-			_port = new SerialPort (portName, 9600);	//"/dev/ttyACM0"
+		    _port = new SerialPort(portName, 9600) {Encoding = Encoding.ASCII}; //"/dev/ttyACM0"
 
-			if (_port.IsOpen)
+		    if (_port.IsOpen)
 				_port.Close ();
 
 			_port.Open ();
 		}
+
+	    public string ReadExistingBytes() => _port.ReadExisting();
 
 	    /// <summary>
 	    /// Sends a command to the arduino.
@@ -193,6 +201,11 @@ namespace SerialIO
 	    public void CloseConnection()
 	    {
 	        _port.Close();
+	    }
+
+	    public int ReadBuffer()
+	    {
+	        return _port.ReadByte();
 	    }
 	}
 }
