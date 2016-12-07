@@ -71,7 +71,7 @@ void setup()
     distance_sensor_init(&distance_sensor, RANGE_TRIG, RANGE_ECHO);
 
     DEBUG_PRINTLN("- Motors...");
-    motor_init(&motor_conveyor, 0.36, MOTOR_CONVEYOR_PIN, MOTOR_CONVEYOR_INT_PIN,
+    motor_init(&motor_conveyor, 0.20, MOTOR_CONVEYOR_PIN, MOTOR_CONVEYOR_INT_PIN,
                motor_conveyor_interrupt);
     motor_init(&motor_feeder, 1.0, MOTOR_FEEDER_PIN, MOTOR_FEEDER_INT_PIN,
                motor_feeder_interrupt);

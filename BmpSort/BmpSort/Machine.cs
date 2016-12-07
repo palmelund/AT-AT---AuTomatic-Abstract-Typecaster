@@ -23,6 +23,7 @@ namespace BmpSort
         public Machine(string fileName)
         {
             properties = new ImageProperties("backgrounds.txt");
+            train_model();
         }
 
         private int[][] _input; //image variables
@@ -49,7 +50,7 @@ namespace BmpSort
             Accord.IO.Serializer.Save<Accord.MachineLearning.Bayes.NaiveBayes>(nb, System.IO.Path.GetFullPath(System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, outputfile)));
         }
 
-        public void train_model(string ball, string empty, string error)
+        public void train_model()
         {
             
             //properties.load_ball_training(ball);

@@ -32,6 +32,11 @@ void task_check_first_segment(Ultra_Sound_Sensor *distance_sensor,
 
     Segment *first_segment = queue_next(segment_queue);
 
+    // DEBUG
+    first_segment->is_occupied = true;
+    first_segment->object_type = BALL;
+    return;
+
     for (uint8_t i = 0; i < SENSOR_PINGS; ++i)
     {
         int32_t test_dist = distance_sensor_measure_distance(distance_sensor);

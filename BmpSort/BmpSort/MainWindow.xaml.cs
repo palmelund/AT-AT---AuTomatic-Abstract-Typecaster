@@ -77,7 +77,7 @@ namespace BmpSort
         /// <param name="e">event arguments</param>
         private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            kinect?.Sensor?.Stop();
+            //kinect?.Sensor?.Stop();
             //AIO?.CloseConnection();
         }
 
@@ -204,7 +204,7 @@ namespace BmpSort
             else
             {
                 //Other wise re-invoke the method with UI thread access
-                Application.Current.Dispatcher.Invoke(new System.Action(() => takePictureRAM()));
+                //Application.Current.Dispatcher.Invoke(new System.Action(() => takePictureRAM()));
             }
         }
 
@@ -217,7 +217,7 @@ namespace BmpSort
                 BitmapEncoder encoder = new BmpBitmapEncoder();
                 string time = System.DateTime.Now.ToString("hh'-'mm'-'ss", CultureInfo.CurrentUICulture.DateTimeFormat);
 
-                string myPhotos = "C:/Users/bogi1/Desktop/UNI/S5/Projekt/TrainingData/Background";
+                string myPhotos = ".";
 
                 string path = System.IO.Path.Combine(myPhotos, "Background-" + time + ".bmp");
 
@@ -271,8 +271,8 @@ namespace BmpSort
         {
             string path =
                 System.IO.Path.GetFullPath(System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Images"));
-            M.train_model(System.IO.Path.Combine(path, "Ball"), System.IO.Path.Combine(path, "Empty"),
-                System.IO.Path.Combine(path, "Error"));
+            //M.train_model(System.IO.Path.Combine(path, "Ball"), System.IO.Path.Combine(path, "Empty"),
+            //    System.IO.Path.Combine(path, "Error"));
         }
         private void Trainbutton2_Click(object sender, RoutedEventArgs e)
         {
@@ -315,7 +315,8 @@ namespace BmpSort
                     AIO.AwaitMessage(out message);
                     if (message is CommandMessage)
                     {
-                        takePictureRAM();
+                        takePictureSAVE();
+                        //takePictureRAM();
                     }
                     else if (message is RequestMessage)
                     {
