@@ -11,6 +11,8 @@
 #include "tasks.h"
 #include <stdint.h>
 
+#define CALIBRATE_COLORS 1
+
 #define MOTOR_CONVEYOR_PIN 27           // Power conveyor motor
 #define MOTOR_FEEDER_PIN 29             // Power feeder motor
 #define MOTOR_SEPARATOR_PIN1 25         // Control separator motor direction

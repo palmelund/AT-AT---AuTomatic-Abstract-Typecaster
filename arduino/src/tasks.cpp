@@ -3,7 +3,7 @@
 // -------------------------------
 // Setup tasks
 // -------------------------------
-int32_t task_calibrate_ultra_sound_sensor(Ultra_Sound_Sensor* distance_sensor)
+int32_t task_calibrate_ultra_sound_sensor(Ultra_Sound_Sensor *distance_sensor)
 {
     int32_t min = distance_sensor_measure_distance(distance_sensor);
     int32_t current;
@@ -11,7 +11,7 @@ int32_t task_calibrate_ultra_sound_sensor(Ultra_Sound_Sensor* distance_sensor)
     {
         // We delay a little, because it seems that calling measure_distance
         // to rapidly, affects the results.
-        delay(5); 
+        delay(5);
 
         //DEBUG_PRINTLN_VAR(min);
         current = distance_sensor_measure_distance(distance_sensor);
@@ -26,35 +26,35 @@ int32_t task_calibrate_ultra_sound_sensor(Ultra_Sound_Sensor* distance_sensor)
 // -------------------------------
 // Task that are executed by the cyclic executive
 // -------------------------------
-void task_check_first_segment(Ultra_Sound_Sensor* distance_sensor, 
-    uint16_t distance_to_wall, Segment_Queue* segment_queue)
+void task_check_first_segment(Ultra_Sound_Sensor *distance_sensor,
+                              uint16_t distance_to_wall, Segment_Queue *segment_queue)
 {
-    int32_t test_dist = distance_sensor_measure_distance(distance_sensor);
 
-    //DEBUG_PRINT_VAR(test_dist);
-    //DEBUG_PRINT(" ");
-    //DEBUG_PRINTLN_VAR(distance_to_wall);
+    Segment *first_segment = queue_next(segment_queue);
 
-    Segment* first_segment = queue_next(segment_queue);
-
-    // Tests if a ball is in front of sensor
-    if (test_dist < distance_to_wall)
+    for (uint8_t i = 0; i < SENSOR_PINGS; ++i)
     {
-        DEBUG_PRINTLN("Segment was occupied");
-        first_segment->is_occupied = true;
-        first_segment->object_type = BALL;
-        first_segment->color = UNKNOWN;
-    }
-    else
-    {
-        //DEBUG_PRINTLN("Segment was empty");
-        first_segment->is_occupied = false;
+        int32_t test_dist = distance_sensor_measure_distance(distance_sensor);
+
+        // Tests if a ball is in front of sensor
+        if (test_dist < distance_to_wall)
+        {
+            DEBUG_PRINTLN("Segment was occupied");
+            first_segment->is_occupied = true;
+            first_segment->object_type = BALL;
+            first_segment->color = UNKNOWN;
+            break;
+        }
+        else
+        {
+            first_segment->is_occupied = false;
+        }
     }
 }
 
-void task_send_take_picture(Segment_Queue* queue)
+void task_send_take_picture(Segment_Queue *queue)
 {
-    Segment* segment = get_segment(queue, KINECT_SEGMENT_INDEX);
+    Segment *segment = get_segment(queue, KINECT_SEGMENT_INDEX);
     if (segment->is_occupied)
     {
         Out_Message message;
@@ -65,42 +65,48 @@ void task_send_take_picture(Segment_Queue* queue)
     }
 }
 
-void task_determin_color(SFE_ISL29125* color_sensor,
-    Segment_Queue* segment_queue, Delta_RGB* known_colors)
+void task_determin_color(SFE_ISL29125 *color_sensor,
+                         Segment_Queue *segment_queue, Delta_RGB *known_colors)
 {
-    Segment* segment = get_segment(segment_queue, COLOR_SENSOR_SEGMENT_INDEX);
+    Segment *segment = get_segment(segment_queue, COLOR_SENSOR_SEGMENT_INDEX);
 
     if (segment->is_occupied && segment->object_type == BALL)
     {
-        for (int i = 0; i  < 10; i++)
+        uint8_t results[COLOR_COUNT] = {0};
+
+        for (uint8_t i = 0; i < SENSOR_PINGS; ++i)
         {
             RGB color;
             read_color(color_sensor, &color);
-            uint8_t determined_color = determin_color(known_colors, &color);
-            DEBUG_PRINT_RGB(color);
-            DEBUG_PRINT("C: ");
-            DEBUG_PRINTLN(get_color_name(determined_color));
-            if (determined_color < 4)
-            {
-                        segment->color = determined_color;
-                        break;
-            }
-            delay(5);
+            results[determin_color(known_colors, &color)] += 1;
         }
 
-        //DEBUG_PRINT("Ball was: ");
-        //DEBUG_PRINTLN(get_color_name(determined_color));
+        uint8_t determined_color;
+        int8_t max = -1;
+        for (uint8_t i = 0; i < COLOR_COUNT; ++i)
+        {  
+            if (results[i] > max)
+            {
+                max = results[i];
+                determined_color = i;
+            }
+        }
+
+        segment->color = determined_color;
+
+        DEBUG_PRINT("C: ");
+        DEBUG_PRINTLN(get_color_name(determined_color));
     }
 }
 
-void task_request_object_info(Segment_Queue* segment_queue)
+void task_request_object_info(Segment_Queue *segment_queue)
 {
     In_Message message;
     io_await_message(&message);
 
     if (message.type == IN_MESSAGE_OBJECT)
     {
-        Segment* segment = 
+        Segment *segment =
             get_segment(segment_queue, KINECT_SEGMENT_INDEX);
 
         segment->object_type = message.object.type;
@@ -110,7 +116,7 @@ void task_request_object_info(Segment_Queue* segment_queue)
     ASSERT(false);
 }
 
-void task_feed_ball(Motor* feeder)
+void task_feed_ball(Motor *feeder)
 {
     static uint8_t feed_counter = FEEDER_ITERATION;
     static int16_t deg = FEEDER_DEGREES;
@@ -130,17 +136,16 @@ void task_feed_ball(Motor* feeder)
     feed_counter++;
 }
 
-void task_rotate_seperator(Advanced_Motor* separator, Segment_Queue* queue)
+void task_rotate_seperator(Advanced_Motor *separator, Segment_Queue *queue)
 {
-    static int16_t bucket_pos[BUCKET_COUNT] = { 
-        RED_BUCKET, 
-        GREEN_BUCKET, 
-        BLUE_BUCKET, 
-        YELLOW_BUCKET, 
-        GARBAGE_BUCKET
-    };
+    static int16_t bucket_pos[BUCKET_COUNT] = {
+        RED_BUCKET,
+        GREEN_BUCKET,
+        BLUE_BUCKET,
+        YELLOW_BUCKET,
+        GARBAGE_BUCKET};
 
-    Segment* segment = get_segment(queue, LAST_INDEX);
+    Segment *segment = get_segment(queue, LAST_INDEX);
     static uint8_t last_position = GARBAGE_BUCKET;
     uint8_t position;
 
@@ -150,7 +155,7 @@ void task_rotate_seperator(Advanced_Motor* separator, Segment_Queue* queue)
     }
     else
     {
-        position = COLOR_COUNT - 1;
+        position = UNKNOWN;
     }
 
     if (position != last_position)

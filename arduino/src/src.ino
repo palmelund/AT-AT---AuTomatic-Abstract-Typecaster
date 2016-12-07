@@ -31,6 +31,12 @@ RED: 957, 1139, 966 - 106
 GREEN: 707, 1183, 1030 - 156
 BLUE: 716, 1110, 1228 - 153
 YELLOW: 1246, 1799, 1173 - 309
+
+RED: colors[i].delta: 204 - colors[i].rgb r: 941 g: 1147 b: 951
+GREEN: colors[i].delta: 225 - colors[i].rgb r: 699 g: 1154 b: 978
+BLUE: colors[i].delta: 234 - colors[i].rgb r: 698 g: 1122 b: 1134
+YELLOW: colors[i].delta: 452 - colors[i].rgb r: 1204 g: 1699 b: 1099
+BELT: colors[i].delta: 235 - colors[i].rgb r: 708 g: 1087 b: 940
 */
 
 // 0: RED
@@ -38,10 +44,11 @@ YELLOW: 1246, 1799, 1173 - 309
 // 2: BLUE
 // 3: YELLOW
 Delta_RGB colors[COLOR_COUNT] = {
-    { { 967, 1067, 835 }, 100 },
-    { { 602, 1040, 853 }, 100 },
-    { { 566, 936, 1156 }, 100 },
-    { { 1513, 2045, 1116 }, 100 }
+    { { 941, 1147, 951 }, 204 },
+    { { 699, 1154, 978 }, 225 },
+    { { 698, 1122, 1134 }, 234 },
+    { { 1204, 1699, 1099 }, 452 },
+    { { 708, 1087, 940 }, 235 }
 };
 Segment_Queue segment_queue;
 
@@ -94,9 +101,28 @@ void setup()
     Serial.read();
 #endif
 
-    conveyor_target = SEGMENT_DEGREE_LENGTH * 2;
-    advanced_motor_turn_to_degree(&adv_motor_separator, GARBAGE_BUCKET);
+    /*
+    while (true)
+    {
+        task_check_first_segment(&distance_sensor, distance_to_wall, &segment_queue);
+
+        RGB color;
+        read_color(color_sensor, &color);
+        //uint8_t determined_color = determin_color(known_colors, &color);
+        DEBUG_PRINT_RGB(color);
+        //DEBUG_PRINT("C: ");
+        //DEBUG_PRINTLN(get_color_name(determined_color));
+
+        while (motor_get_degrees(&motor_conveyor) < conveyor_target)
+            ;
+        conveyor_target += SEGMENT_DEGREE_LENGTH;
+    }
+    */
     motor_turn(&motor_conveyor);
+    advanced_motor_turn_to_degree(&adv_motor_separator, GARBAGE_BUCKET);
+
+#if CALIBRATE_COLORS
+    conveyor_target = SEGMENT_DEGREE_LENGTH * 2;
 
     DEBUG_PRINTLN("Calibrating colors...");
     for (uint8_t i = 0; i < COLOR_COUNT; ++i)
@@ -113,6 +139,7 @@ void setup()
     }
 
     DEBUG_PRINTLN("Done!");
+#endif
 
     //wce_task_check_first_segment();
 /*
