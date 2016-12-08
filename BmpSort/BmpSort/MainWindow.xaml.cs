@@ -224,8 +224,8 @@ namespace BmpSort
                 Dispatcher.Invoke(() =>
                 {
                     kinect.CroppedBitmap = IP.CopyPixelsTo(kinect.ColorBitmap,
-                        new Int32Rect(265, 100, 400, 200),
-                        new Int32Rect(0, 0, 110, 200));
+                        new Int32Rect(140, 100, 400, 200),
+                        new Int32Rect(125, 0, 110, 200));
 
                     // create frame from the writable bitmap and add to encoder
                     //encoder.Frames.Add(BitmapFrame.Create(this.colorBitmap));
