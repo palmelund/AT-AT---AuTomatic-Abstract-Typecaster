@@ -10,21 +10,21 @@
 #define BEGIN_MESSAGE 0x62
 
 // Types of messages that can be received
-#define MESSAGE_TYPE_COMMAND 0
-#define MESSAGE_TYPE_OBJECT 1
+#define MESSAGE_TYPE_COMMAND 0x00
+#define MESSAGE_TYPE_OBJECT 0x01
 
-// Input message sizes
-#define MESSAGE_SIZE_COMMAND 2
-#define MESSAGE_SIZE_OBJECT 3
+// Message sizes
+#define MESSAGE_SIZE_COMMAND 0x02
+#define MESSAGE_SIZE_OBJECT 0x03
 
 // Command types
-#define MESSAGE_COMMAND_TAKE_PICURE 0
-#define MESSAGE_COMMAND_START 1
-#define MESSAGE_COMMAND_STOP 2
+#define MESSAGE_COMMAND_TAKE_PICURE 0x00
+#define MESSAGE_COMMAND_START 0x01
+#define MESSAGE_COMMAND_STOP 0x02
 
 // Shapes
-#define MESSAGE_SHAPE_BALL 0
-#define MESSAGE_SHAPE_NOTBALL 1
+#define MESSAGE_SHAPE_BALL 0x00
+#define MESSAGE_SHAPE_NOTBALL 0x01
 
 struct Message
 {

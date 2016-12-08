@@ -2,17 +2,18 @@
 
 namespace SerialIO
 {
-	public class CommandMessage : IMessage
+	public class CommandMessage : Message
 	{
 	    /// <summary>
 	    /// The command that was sent by the Arduino to execute on the computer
 	    /// </summary>
-		public ComputerCommand Command { get; set; }
+		public Command Command { get; }
 
 	    /// <summary>
 	    /// The command that was sent by the Arduino to execute on the computer
 	    /// </summary>
-	    public CommandMessage (ComputerCommand command)
+		public CommandMessage (MessageType type, Command command)
+			: base(type)
 		{
 			Command = command;
 		}

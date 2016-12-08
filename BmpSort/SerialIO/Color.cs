@@ -11,9 +11,10 @@ namespace SerialIO
     /// </summary>
     public enum Color : byte
     {
-        Green = 0,
-        Yellow = 1,
-        Red = 2,
-        Blue = 3,
+        Green = 0x00,
+		Yellow = 0x01,
+		Red = 0x02,
+		Blue = 0x03,
+		Unknown = 0x04
     }
 }

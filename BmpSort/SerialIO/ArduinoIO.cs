@@ -14,15 +14,12 @@ namespace SerialIO
 	    // 0x62 is defined as the <start-of-message> byte, and must be present at the beginning of all sent messages
 	    private const byte Begin = 0x62;
 
-		const byte IN_COMMAND  = 0x00;
-		const byte IN_REQUEST  = 0x01;
-		const byte IN_COLOR    = 0x02;
-		const byte IN_DISTANCE = 0x03;
+		const byte MESSAGE_TYPE_COMMAND = 0x00;
+		const byte MESSAGE_TYPE_OBJECT = 0x01;
 
-		const byte OUT_COMMAND  = 0x00;
-		const byte OUT_OBJECT   = 0x01;
-		const byte OUT_COLOR    = 0x02;
-		const byte OUT_DISTNACE = 0x03;
+		const byte MESSAGE_SIZE_COMMAND = 0x02;
+		const byte MESSAGE_SIZE_OBJECT = 0x03;
+	
 
         public event SerialDataReceivedEventHandler DataRecived {
             add { _port.DataReceived += value; }
@@ -51,13 +48,13 @@ namespace SerialIO
 	    /// Sends a command to the arduino.
 	    /// </summary>
 	    /// <param name="command">The Command that should be sent to the Arduino.</param>
-		public void SendCommand(ArduinoCommand command)
+		public void SendCommand(Command command)
 		{
 		    // Begin is constant start symbol
 		    // 0x02 is the number of bytes of information sent to the Arduino, currently always 2 for a command
 		    // 0x00 is the Arduino type for the command message
 		    // command is the byte representation for the command argument
-			var b = new byte[] { Begin, 0x02, OUT_COMMAND, (byte)command };
+			var b = new byte[] { Begin, MESSAGE_SIZE_COMMAND, MESSAGE_TYPE_COMMAND, (byte)command };
 			_port.Write (b, 0, b.Length);
 		}
 
@@ -66,55 +63,13 @@ namespace SerialIO
 	    /// This is used to send the result from object recognition.
 	    /// </summary>
 	    /// <param name="shape">The shape of the object</param>
-		public void SendObject(Shape shape)
+		public void SendObject(Shape shape, Color color = Color.Unknown)
 		{
 		    // Begin is the constant start symbol
 		    // 0x02 is the number of bytes of information sent to the Arduino, currently always 2 for an object
 		    // 0x01 is the Arduino type for the object message
 		    // shape is the byte representation for the shape argument
-			var b = new byte[] { Begin, 0x02, OUT_OBJECT, (byte)shape };
-			_port.Write (b, 0, b.Length);
-		}
-
-	    /// <summary>
-	    /// Sends a color to the Arduino
-	    /// Used to set a predefined color as the default color.
-	    /// This is part of a RGB color, and has to be sent three times to send the entire color
-	    /// </summary>
-	    /// <param name="color">One of the three RGB colors</param>
-	    /// <param name="redIntensity">The red intensity of the color</param>
-	    /// <param name="greenIntensity">The green intensity of the color</param>
-	    /// <param name="blueIntensity">The blue intensity of the color</param>
-	    public void SendColor(Color color, ushort redIntensity, ushort greenIntensity, ushort blueIntensity)
-		{
-		    // Begin is the constant start symbol
-		    // 0x04 is the number of bytes of information sent to the Arduino, currently always 4 for a color
-		    // 0x02 is the Arduino type for the color message
-		    // color is the color that has to be set in the RGB value.
-		    // intensity is the intensity of the color, and is split into two bytes to be transmitted correctly.
-		    var b = new byte[] { Begin, 0x08, OUT_COLOR, (byte)color, (byte)(redIntensity >> 8), (byte)redIntensity, (byte)(greenIntensity >> 8), (byte)greenIntensity, (byte)(blueIntensity >> 8), (byte)blueIntensity };    // TODO: Make human readable
-			_port.Write (b, 0, b.Length);
-		    Console.Write("Sent message: ");
-		    foreach (var i in b)
-		    {
-                Console.Write(i +" ");
-		    }
-
-		    Console.WriteLine();
-		}
-
-	    /// <summary>
-	    /// Sends a distance to the Arduino
-	    /// This distance will override the default value measured on startup
-	    /// </summary>
-	    /// <param name="distance">Distance in mm</param>    // TODO: Ensure correct unit of measurment
-		public void SendDistance(ushort distance)
-		{
-		    // Begin is the constant start symbol
-		    // 0x03 is the number of bytes of information sent to the Arduino, currently always 3 for a distance
-		    // 0x04 is the Arduino type for the distance message
-		    // distance is the distance in mm, and is split into two bytes to be transmitted correctly.
-		    var b = new byte[] { Begin, 0x03, OUT_DISTNACE, (byte)(distance >> 8), (byte)distance };
+			var b = new byte[] { Begin, MESSAGE_SIZE_OBJECT, MESSAGE_TYPE_OBJECT, (byte)shape, (byte)color };
 			_port.Write (b, 0, b.Length);
 		}
 
@@ -123,7 +78,7 @@ namespace SerialIO
 	    /// </summary>
 	    /// <returns>A message from the arduino. Has to be read type checked later to get message</returns>
 	    /// <exception cref="ArgumentException">If the arduino sends a message that doesn't follow the defined values or arguments, an exception is thrown</exception>
-		public bool AwaitMessage(out IMessage message)
+		public bool AwaitMessage(out Message message)
 		{
 		    message = null;
 
@@ -165,23 +120,8 @@ namespace SerialIO
 		    //Console.WriteLine("Data[0]:" + data[0] + "\nLength: " + data.Length);
 
 			switch (data [0]) {
-			case IN_COMMAND:
-				message = new CommandMessage ((ComputerCommand)data [1]);
-			    return true;
-			case IN_REQUEST:
-				message = new RequestMessage ((ComputerRequest)data [1]);
-			    return true;
-			case IN_COLOR:
-				//Console.Write ("Bytes recieved: ");
-				//foreach (var i in data) {
-				//	Console.Write (i + " ");
-				//}
-				//Console.WriteLine ();
-
-				message = new ColorMessage ((Color)data [1], BitConverter.ToUInt16(data, 2), BitConverter.ToUInt16(data, 4), BitConverter.ToUInt16(data,6));
-				    return true;
-			    case IN_DISTANCE:
-				message = new DistanceMessage (BitConverter.ToUInt16(data, 1));
+			case MESSAGE_TYPE_COMMAND:
+				message = new CommandMessage ((Command)data [1]);
 			    return true;
 			    default:
 			    return false;
