@@ -30,6 +30,7 @@ namespace BmpSort
     /// </summary>
     public partial class MainWindow : Window
     {
+        #region Properties
         private Kinect kinect;
 
         private ImageProcessing IP;
@@ -47,7 +48,8 @@ namespace BmpSort
         private int classification;
 
         private string backgroundColors = "colors.txt";
-       
+        #endregion Properties
+
         /// <summary>
         /// Initializes a new instance of the MainWindow class.
         /// </summary>
@@ -169,7 +171,7 @@ namespace BmpSort
             }
         }
 */
-        public void takePictureRAM()
+        public void takePictureRAMOld()
         {
             //Check access to UI Thread.
             if (Application.Current.Dispatcher.CheckAccess())
@@ -191,9 +193,50 @@ namespace BmpSort
 
 
                     // Decide on taken picture
+
                     classification = M.decide(IP.ToBitmap(kinect.CroppedBitmap));
                     //classification = 1;
                     ClassificationLabel.Content = "Class: " + classification;
+
+
+                    // Add picture to UI
+                    BitmapEncoder encoder = new BmpBitmapEncoder();
+                    encoder.Frames.Add(BitmapFrame.Create(kinect.CroppedBitmap));
+                    this.Image2.Source = encoder.Frames.ElementAt(encoder.Frames.Count - 1);
+                });
+            }
+            else
+            {
+                //Other wise re-invoke the method with UI thread access
+                Application.Current.Dispatcher.Invoke(new System.Action(() => takePictureRAM()));
+            }
+        }
+
+        public void takePictureRAM()
+        {
+            //Check access to UI Thread.
+            if (Application.Current.Dispatcher.CheckAccess())
+            {
+                // create a png bitmap encoder which knows how to save a .png file
+                if (null == kinect.Sensor)
+                {
+                    //this.statusBarText.Text = Properties.Resources.ConnectDeviceFirst;
+                    return;
+                }
+                Dispatcher.Invoke(() =>
+                {
+                    cropImage();
+
+                    // create frame from the writable bitmap and add to encoder
+                    //encoder.Frames.Add(BitmapFrame.Create(this.colorBitmap));
+
+
+                    // Decide on taken picture
+
+                    //classification = M.decide(IP.ToBitmap(kinect.CroppedBitmap));
+                    classification = 1;
+                    ClassificationLabel.Content = "Class: " + classification;
+
 
                     // Add picture to UI
                     BitmapEncoder encoder = new BmpBitmapEncoder();
@@ -217,9 +260,9 @@ namespace BmpSort
                 BitmapEncoder encoder = new BmpBitmapEncoder();
                 string time = System.DateTime.Now.ToString("hh'-'mm'-'ss", CultureInfo.CurrentUICulture.DateTimeFormat);
 
-                string myPhotos = ".";
+                string myPhotos = "C:/Users/bogi1/Desktop/UNI/S5/Projekt/TrainingData/Background";
 
-                string path = System.IO.Path.Combine(myPhotos, "Background-" + time + ".bmp");
+                string path = System.IO.Path.Combine(myPhotos, "picture-" + time + ".bmp");
 
 
                 if (null == kinect.Sensor)
@@ -229,9 +272,7 @@ namespace BmpSort
                 }
                 Dispatcher.Invoke(() =>
                 {
-                    kinect.CroppedBitmap = IP.CopyPixelsTo(kinect.ColorBitmap,
-                        new Int32Rect(140, 100, 400, 200),
-                        new Int32Rect(0, 0, 400, 200));
+                    cropImage();
 
                     // create frame from the writable bitmap and add to encoder
                     //encoder.Frames.Add(BitmapFrame.Create(this.colorBitmap));
@@ -265,28 +306,11 @@ namespace BmpSort
             }
         }
 
-
-
-        private void Trainbutton_Click(object sender, RoutedEventArgs e)
+        private void cropImage()
         {
-            string path =
-                System.IO.Path.GetFullPath(System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Images"));
-            //M.train_model(System.IO.Path.Combine(path, "Ball"), System.IO.Path.Combine(path, "Empty"),
-            //    System.IO.Path.Combine(path, "Error"));
-        }
-        private void Trainbutton2_Click(object sender, RoutedEventArgs e)
-        {
-            string path =
-                System.IO.Path.GetFullPath(System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Images"));
-            M.train_model2(System.IO.Path.Combine(path, "Ball"), System.IO.Path.Combine(path, "Empty"),
-                System.IO.Path.Combine(path, "Error"));
-        }
-        private void Trainbutton3_Click(object sender, RoutedEventArgs e)
-        {
-            string path =
-                System.IO.Path.GetFullPath(System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Images"));
-            M.train_model3(System.IO.Path.Combine(path, "Ball"), System.IO.Path.Combine(path, "Empty"),
-                System.IO.Path.Combine(path, "Error"));
+            kinect.CroppedBitmap = IP.CopyPixelsTo(kinect.ColorBitmap,
+                        new Int32Rect(140, 100, 400, 200),
+                        new Int32Rect(125, 0, 110, 200));
         }
 
         private void ARFFbutton_Click(object sender, RoutedEventArgs e)
