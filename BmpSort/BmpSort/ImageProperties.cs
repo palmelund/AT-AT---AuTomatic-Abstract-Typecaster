@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Accord;
 using Accord.Imaging;
 using System.Drawing;
 using System.IO;
+using Accord.Math.Geometry;
 using System.Windows;
 
 namespace BmpSort
@@ -16,12 +18,13 @@ namespace BmpSort
 
         int counter = 0;
         int blobs = 0;
-        int corners = 0;
+        int squaredetected = 0;
         int filesLoaded = 0;
         int whitePixels = 0;
         public int[] trainingOutput { get; set; }
         public int[][] trainingInput { get; set; }
         public int arrayCounter { get; set; }
+        public int[] properties= new int[3];
 
         string[] emptyImages;
         string[] background;
@@ -29,6 +32,7 @@ namespace BmpSort
         string[] errors;
 
         Bitmap currentBitmap;
+        Accord.Imaging.BlobCounter blobscounter = new BlobCounter();
         Accord.Imaging.Converters.ImageToArray arrayMaker = new Accord.Imaging.Converters.ImageToArray();
         Accord.Imaging.Converters.ArrayToImage imageMaker = new Accord.Imaging.Converters.ArrayToImage(400, 200);
 
@@ -71,17 +75,18 @@ namespace BmpSort
 
             trainingInput[place] = temp;
         }
-  
+
+        #region Functions used when classifying an incomming image
         public int[] get_properties(System.Drawing.Image inputImage)
         {
             int[] result = {0, 0, 0};
             inputImage = clean_background(inputImage);
             result[0] = whitePixels;
             result[1] = blobs;
-            result[2] = corners;
+            result[2] = squaredetected;
 
             return result;
-        }//gets image properties for new images
+        }//returns properties for input image, used for model.decide() function
         private System.Drawing.Image clean_background(System.Drawing.Image inputImage)//removes background and makes black/white
         {
             int i = 0;
@@ -115,10 +120,11 @@ namespace BmpSort
             }
             imageMaker.Convert(newImage, out currentBitmap);
             blobs = blobdetect(currentBitmap);
-            corners = 1; // cornerdetect(currentBitmap);
             return currentBitmap;
         }
+        #endregion Functions used when classifying an incomming image
 
+        #region Functions concerning background colors
         private void load_background_colors_textfile(string fileName)
         {
             int temp;
@@ -155,12 +161,15 @@ namespace BmpSort
                 }
             }
         }
+        #endregion Functions concerning background colors
 
+        #region Load images for Testdata
         public void load_files() //gets training image filenames from folders
         {
             emptyImages = Directory.GetFiles("Images/Empty/", "*.*");
             ballImages = Directory.GetFiles("Images/Blue/", "*.*");
             errors = Directory.GetFiles("Images/Error/", "*.*");
+            filesLoaded = (emptyImages.Length + ballImages.Length + errors.Length);
         }
         public void load_ball_training(string path)
         {
@@ -172,11 +181,7 @@ namespace BmpSort
                 clean_background(image);
                 running[0] = whitePixels;
                 running[1] = blobdetect(currentBitmap);
-                running[2] = cornerdetect(currentBitmap);
-                //outputList.Add(0);
-                //trainingOutput[arrayCounter] = 0;
-                //inputList.Add(running);
-                //trainingInput[arrayCounter] = running;
+                running[2] = squaredetected;
                 arrayCounter++;
             }
         }
@@ -190,11 +195,7 @@ namespace BmpSort
                 clean_background(image);
                 running[0] = whitePixels;
                 running[1] = blobdetect(currentBitmap);
-                running[2] = cornerdetect(currentBitmap);
-                //outputList.Add(1);
-                //trainingOutput[arrayCounter] = 1;
-                //inputList.Add(running);
-                //trainingInput[arrayCounter] = running;
+                running[2] = squaredetected;
                 arrayCounter++;
             }
         }
@@ -208,27 +209,45 @@ namespace BmpSort
                 clean_background(image);
                 running[0] = whitePixels;
                 running[1] = blobdetect(currentBitmap);
-                running[2] = cornerdetect(currentBitmap);
-                //outputList.Add(2);
-                //trainingOutput[arrayCounter] = 2;
-                //inputList.Add(running);
-                //trainingInput[arrayCounter] = running;
+                running[2] = squaredetected;
                 arrayCounter++;
             }
+        }
+        #endregion Load images for Testdata
 
-        }      
 
         #region detectors
         public int blobdetect(Bitmap input)
         {
-            Accord.Imaging.BlobCounter blobs = new BlobCounter();
-            blobs.FilterBlobs = true;
-            blobs.BlobsFilter = null;
-            blobs.MinHeight = 35;
-            blobs.MinWidth = 35;
+            SimpleShapeChecker shapechecker = new SimpleShapeChecker();
+            blobscounter.FilterBlobs = true;
+            blobscounter.BlobsFilter = null;
+            blobscounter.MinHeight = 35;
+            blobscounter.MinWidth = 35;
 
-            blobs.ProcessImage(input);
-            if (blobs.ObjectsCount == 1)
+            blobscounter.ProcessImage(input);
+            Blob[] blobs = blobscounter.GetObjectsInformation();
+            for (int i = 0; i < blobs.Length; i++)
+            {
+                List<IntPoint> edgepoints = blobscounter.GetBlobsEdgePoints(blobs[i]);
+                if ((edgepoints.Count>=4)&&(blobs[i].Area >100))
+                {
+                    List<IntPoint> corners = PointsCloud.FindQuadrilateralCorners(edgepoints);
+                    if (shapechecker.IsQuadrilateral(edgepoints,out corners))
+                    {
+                        squaredetected = 1;
+                    }
+                    else
+                    {
+                        squaredetected = 0;
+                    }
+                }
+                else
+                {
+                    squaredetected = 0;
+                }
+            }
+            if (blobscounter.ObjectsCount == 1)
             {
                 return 1;
             }
@@ -236,10 +255,6 @@ namespace BmpSort
             {
                 return 0;
             }          
-        }
-        public int cornerdetect(Bitmap input)
-        {
-            return 1;
         } 
         #endregion detectors
     }
