@@ -204,7 +204,7 @@ namespace BmpSort
             else
             {
                 //Other wise re-invoke the method with UI thread access
-                //Application.Current.Dispatcher.Invoke(new System.Action(() => takePictureRAM()));
+                Application.Current.Dispatcher.Invoke(new System.Action(() => takePictureRAM()));
             }
         }
 
@@ -315,8 +315,7 @@ namespace BmpSort
                     AIO.AwaitMessage(out message);
                     if (message is CommandMessage)
                     {
-                        takePictureSAVE();
-                        //takePictureRAM();
+                        takePictureRAM();
                     }
                     else if (message is RequestMessage)
                     {
