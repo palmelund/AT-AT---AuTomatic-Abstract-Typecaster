@@ -43,7 +43,6 @@
     <Compile Include="Shape.cs" />
     <Compile Include="MessageType.cs" />
     <Compile Include="Command.cs" />
-    <Compile Include="Properties\ObjectMessage.cs" />
     <Compile Include="Message.cs" />
     <Compile Include="ObjectMessage.cs" />
   </ItemGroup>
