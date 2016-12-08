@@ -5,18 +5,13 @@
 #include <stdint.h>
 #include "colors.h"
 
-#define QUEUE_SIZE 7                    // Size of the conveyor queue
+#define QUEUE_SIZE 4                    // Size of the conveyor queue
 
-
-#define SOUND_SENSOR_SEGMENT_INDEX 0    // The index, where the sounds sensor 
-                                        // is positioned.
 #define KINECT_SEGMENT_INDEX 0          // TODO: The index, where the kinect is
                                         // positioned.
-#define COLOR_SENSOR_SEGMENT_INDEX 5    // The index, where the color sensor
+#define COLOR_SENSOR_SEGMENT_INDEX 2    // The index, where the color sensor
                                         // is positioned.
 #define LAST_INDEX QUEUE_SIZE - 1       // The index of the last segment.
-
-
 
 #define SEGMENT_DEGREE_LENGTH 72        // The number of degrees it takes for 
                                         // the conveyor belt motor to move one

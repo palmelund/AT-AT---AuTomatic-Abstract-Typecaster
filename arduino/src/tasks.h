@@ -16,22 +16,25 @@
 #define FEEDER_ITERATION 1              // The iterations between each feed
 #define FEEDER_DEGREES 90               // The degrees the feeder needs to turn
                                         // to feed a ball.
+#define FEEDER_MAX_DEGREES 360
+#define FEEDER_START_DEGREES 0
                                         
 int32_t task_calibrate_ultra_sound_sensor(Ultra_Sound_Sensor* distance_sensor);
 
 
-void task_check_first_segment(Ultra_Sound_Sensor* distance_sensor, 
-    uint16_t distance_to_wall, Segment_Queue* segment_queue);
-
-void task_send_take_picture(Segment_Queue* queue);
+void task_check_first_segment(Segment_Queue* segment_queue);
 
 void task_determin_color(SFE_ISL29125* color_sensor,
     Segment_Queue* segment_queue, Delta_RGB* known_colors);
 
-void task_request_object_info(Segment_Queue* segment_queue);
-
 void task_feed_ball(Motor* feeder);
 
 void task_rotate_seperator(Advanced_Motor* separator, Segment_Queue* queue);
+
+
+
+
+//void task_send_take_picture(Segment_Queue* queue);
+//void task_request_object_info(Segment_Queue* segment_queue);
 
 //#endif // _TASKS_H_

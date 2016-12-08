@@ -22,44 +22,16 @@ inline uint8_t read_byte()
 /********************
  * Public functions *
  ********************/
-void io_send_message(Out_Message *sending_message)
+void io_send_message(Message* sending_message)
 {
     Serial.write(BEGIN_MESSAGE);
 
     switch (sending_message->type)
     {
-    case OUT_MESSAGE_COLOR:
-        Serial.write(OUT_SIZE_COLOR);
-        Serial.write(OUT_MESSAGE_COLOR);
-
-        Serial.write(sending_message->color.type);
-        Serial.write((uint8_t)(sending_message->color.red_value & 0x00FF));
-        Serial.write((uint8_t)(sending_message->color.red_value >> 8));
-        Serial.write((uint8_t)(sending_message->color.green_value & 0x00FF));
-        Serial.write((uint8_t)(sending_message->color.green_value >> 8));
-        Serial.write((uint8_t)(sending_message->color.blue_value & 0x00FF));
-        Serial.write((uint8_t)(sending_message->color.blue_value >> 8));
-        break;
-
-    case OUT_MESSAGE_COMMAND:
-        Serial.write(OUT_SIZE_COMMAND);
-        Serial.write(OUT_MESSAGE_COMMAND);
+    case MESSAGE_TYPE_COMMAND:
+        Serial.write(MESSAGE_SIZE_COMMAND);
+        Serial.write(sending_message->type);
         Serial.write(sending_message->command.type);
-        break;
-
-    case OUT_MESSAGE_DISTANCE:
-        Serial.write(OUT_SIZE_DISTANCE);
-        Serial.write(OUT_MESSAGE_DISTANCE);
-
-        // TODO: Don't use loop
-        for (int i = 0; i < OUT_SIZE_DISTANCE - 1; ++i)
-            Serial.write(sending_message->data[i]);
-        break;
-
-    case OUT_MESSAGE_REQUEST:
-        Serial.write(OUT_SIZE_REQUEST);
-        Serial.write(OUT_MESSAGE_REQUEST);
-        Serial.write(sending_message->request.type);
         break;
 
     default:
@@ -68,16 +40,19 @@ void io_send_message(Out_Message *sending_message)
     }
 }
 
-void io_await_message(In_Message *received_message)
+void io_await_message(Message* received_message)
 {
     // Wait until data has been received by the Arduino
-    while (Serial.available() < 2)
+    while (Serial.available() < 1)
         ;
 
     uint8_t begin_message = read_byte();
-    uint8_t message_size = read_byte();
-
     ASSERT(begin_message == BEGIN_MESSAGE);
+
+    while (Serial.available() < 1)
+        ;
+
+    uint8_t message_size = read_byte();
     ASSERT(message_size > 0);
 
     while (Serial.available() < message_size)
@@ -87,42 +62,17 @@ void io_await_message(In_Message *received_message)
 
     switch (received_message->type)
     {
-    case IN_MESSAGE_COLOR:
-        ASSERT(message_size == IN_SIZE_COLOR);
-
-        received_message->color.type = read_byte();
-
-        received_message->color.red_value = read_byte();
-        received_message->color.red_value <<= 8;
-        received_message->color.red_value |= read_byte();
-
-        received_message->color.green_value = read_byte();
-        received_message->color.green_value <<= 8;
-        received_message->color.green_value |= read_byte();
-
-        received_message->color.blue_value = read_byte();
-        received_message->color.blue_value <<= 8;
-        received_message->color.blue_value |= read_byte();
-        break;
-
-    case IN_MESSAGE_COMMAND:
-        ASSERT(message_size == IN_SIZE_COMMAND);
+    case MESSAGE_TYPE_COMMAND:
+        ASSERT(message_size == MESSAGE_SIZE_COMMAND);
 
         received_message->command.type = read_byte();
         break;
 
-    case IN_MESSAGE_DISTANCE:
-        ASSERT(message_size == IN_SIZE_DISTANCE);
-
-        received_message->distance.value = read_byte();
-        received_message->distance.value <<= 8;
-        received_message->distance.value |= read_byte();
-        break;
-
-    case IN_MESSAGE_OBJECT:
-        ASSERT(message_size == IN_SIZE_OBJECT);
+    case MESSAGE_TYPE_OBJECT:
+        ASSERT(message_size == MESSAGE_SIZE_OBJECT);
 
         received_message->object.type = read_byte();
+        received_message->object.color = read_byte();
         break;
 
     default:
