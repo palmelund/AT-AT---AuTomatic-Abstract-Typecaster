@@ -169,7 +169,7 @@ namespace BmpSort
             }
         }
 */
-        public void takePictureRAM()
+        public void takePictureRAMOld()
         {
             //Check access to UI Thread.
             if (Application.Current.Dispatcher.CheckAccess())
@@ -194,6 +194,47 @@ namespace BmpSort
 
                     classification = M.decide(IP.ToBitmap(kinect.CroppedBitmap));
                     //classification = 1;
+                    ClassificationLabel.Content = "Class: " + classification;
+
+
+                    // Add picture to UI
+                    BitmapEncoder encoder = new BmpBitmapEncoder();
+                    encoder.Frames.Add(BitmapFrame.Create(kinect.CroppedBitmap));
+                    this.Image2.Source = encoder.Frames.ElementAt(encoder.Frames.Count - 1);
+                });
+            }
+            else
+            {
+                //Other wise re-invoke the method with UI thread access
+                Application.Current.Dispatcher.Invoke(new System.Action(() => takePictureRAM()));
+            }
+        }
+
+        public void takePictureRAM()
+        {
+            //Check access to UI Thread.
+            if (Application.Current.Dispatcher.CheckAccess())
+            {
+                // create a png bitmap encoder which knows how to save a .png file
+                if (null == kinect.Sensor)
+                {
+                    //this.statusBarText.Text = Properties.Resources.ConnectDeviceFirst;
+                    return;
+                }
+                Dispatcher.Invoke(() =>
+                {
+                    kinect.CroppedBitmap = IP.CopyPixelsTo(kinect.ColorBitmap,
+                        new Int32Rect(265, 100, 400, 200),
+                        new Int32Rect(0, 0, 110, 200));
+
+                    // create frame from the writable bitmap and add to encoder
+                    //encoder.Frames.Add(BitmapFrame.Create(this.colorBitmap));
+
+
+                    // Decide on taken picture
+
+                    //classification = M.decide(IP.ToBitmap(kinect.CroppedBitmap));
+                    classification = 1;
                     ClassificationLabel.Content = "Class: " + classification;
 
 
