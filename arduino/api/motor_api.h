@@ -63,23 +63,23 @@ void advanced_motor_init(Advanced_Motor* motor, float degree_ratio,
 /*
  * Turns an advanced motor to an angle
  */
-void advanced_motor_turn_to_degree(Advanced_Motor* motor, uint16_t degree);
+bool advanced_motor_turn_to_degree(Advanced_Motor* motor, uint16_t degree);
 
 /*
  * Turns an advanced motor a number of degrees in a certin direction
  */
-void advanced_motor_turn_degrees(Advanced_Motor* motor, uint16_t degrees,
+bool advanced_motor_turn_degrees(Advanced_Motor* motor, uint16_t degrees,
                                  int8_t direction);
 
 /*
  * Turns a motor to an angle
  */
-void motor_turn_to_degree(Motor* motor, uint16_t degree);
+bool motor_turn_to_degree(Motor* motor, uint16_t degree);
 
 /*
  * Turns a motor a number of degrees
  */
-void motor_turn_degrees(Motor* motor, uint16_t degrees);
+bool motor_turn_degrees(Motor* motor, uint16_t degrees);
 
 /*
  * Tries to stop an advanced motor with minimum coasting
