@@ -23,6 +23,28 @@ int32_t task_calibrate_ultra_sound_sensor(Ultra_Sound_Sensor *distance_sensor)
     return min - 8;
 }
 
+void task_calibrate_colors(int32_t* conveyor_target, Motor* conveyor, 
+    SFE_ISL29125* rgb_sensor, Delta_RGB colors[COLOR_COUNT])
+{
+    (*conveyor_target) = SEGMENT_DEGREE_LENGTH * 2;
+
+    DEBUG_PRINTLN("Calibrating colors...");
+    for (uint8_t i = 0; i < COLOR_COUNT; ++i)
+    {
+        calibrate_color(rgb_sensor, &colors[i]);
+
+        DEBUG_PRINT_VAR(colors[i].delta);
+        DEBUG_PRINT(" - ");
+        DEBUG_PRINT_RGB(colors[i].rgb);
+
+        while (motor_get_degrees(conveyor) < (*conveyor_target))
+            ;
+        (*conveyor_target) += SEGMENT_DEGREE_LENGTH * 2;
+    }
+
+    DEBUG_PRINTLN("Done!");
+}
+
 // -------------------------------
 // Task that are executed by the cyclic executive
 // -------------------------------

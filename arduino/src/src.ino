@@ -19,7 +19,7 @@
  *  * Multiple code things
  */
 
-SFE_ISL29125 RGB_sensor;
+SFE_ISL29125 rgb_sensor;
 Motor motor_conveyor, motor_feeder;
 Advanced_Motor adv_motor_separator;
 
@@ -49,7 +49,7 @@ void setup()
         ;
 
     // Initialize color sensor
-    RGB_sensor.init();
+    rgb_sensor.init();
 
     DEBUG_PRINTLN("Initializing all components...");
 
@@ -64,9 +64,9 @@ void setup()
                         adv_motor_separator_interrupt1);
 
     DEBUG_PRINTLN("- Color sensor...");
-    while (RGB_sensor.readRed() == 0 ||
-           RGB_sensor.readGreen() == 0 ||
-           RGB_sensor.readBlue() == 0)
+    while (rgb_sensor.readRed() == 0 ||
+           rgb_sensor.readGreen() == 0 ||
+           rgb_sensor.readBlue() == 0)
         ;
     motor_stop(&motor_conveyor);
 
@@ -94,23 +94,8 @@ void setup()
     advanced_motor_turn_to_degree(&adv_motor_separator, GARBAGE_BUCKET);
 
 #if CALIBRATE_COLORS
-    conveyor_target = SEGMENT_DEGREE_LENGTH * 2;
-
-    DEBUG_PRINTLN("Calibrating colors...");
-    for (uint8_t i = 0; i < COLOR_COUNT; ++i)
-    {
-        calibrate_color(&RGB_sensor, &colors[i]);
-
-        DEBUG_PRINT_VAR(colors[i].delta);
-        DEBUG_PRINT(" - ");
-        DEBUG_PRINT_RGB(colors[i].rgb);
-
-        while (motor_get_degrees(&motor_conveyor) < conveyor_target)
-            ;
-        conveyor_target += SEGMENT_DEGREE_LENGTH * 2;
-    }
-
-    DEBUG_PRINTLN("Done!");
+    task_calibrate_colors(&conveyor_target, &motor_conveyor, &rgb_sensor, 
+        colors);
 #endif
 }
 
@@ -140,7 +125,7 @@ void loop()
 */
 
     task_check_first_segment(&segment_queue);
-    task_determin_color(&RGB_sensor, &segment_queue, colors);
+    task_determin_color(&rgb_sensor, &segment_queue, colors);
     task_rotate_seperator(&adv_motor_separator, &segment_queue);
     task_feed_ball(&motor_feeder);
 
@@ -183,7 +168,7 @@ void startup_helper()
             switch (message.command.type)
             {
             case IN_COMMAND_CALIBRATE_RED:
-                calibrate_color(&RGB_sensor, &colors[RED]);
+                calibrate_color(&rgb_sensor, &colors[RED]);
 
                 //read_color(&colors[RED].rgb);
 
@@ -198,13 +183,13 @@ void startup_helper()
 
                 continue;
             case IN_COMMAND_CALIBRATE_GREEN:
-                calibrate_color(&RGB_sensor, &colors[GREEN]);
+                calibrate_color(&rgb_sensor, &colors[GREEN]);
                 continue;
             case IN_COMMAND_CALIBRATE_BLUE:
-                calibrate_color(&RGB_sensor, &colors[BLUE]);
+                calibrate_color(&rgb_sensor, &colors[BLUE]);
                 continue;
             case IN_COMMAND_CALIBRATE_DISTANCE:
-                calibrate_color(&RGB_sensor, &colors[YELLOW]);
+                calibrate_color(&rgb_sensor, &colors[YELLOW]);
                 continue;
             case IN_COMMAND_START:
                 start = true;
