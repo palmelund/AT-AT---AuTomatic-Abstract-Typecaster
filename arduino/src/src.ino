@@ -32,8 +32,7 @@ Delta_RGB colors[COLOR_COUNT] = {
     {{699, 1154, 978}, 225},
     {{698, 1122, 1134}, 234},
     {{1204, 1699, 1099}, 452},
-    {{708, 1087, 940}, 235}
-};
+    {{708, 1087, 940}, 235}};
 
 Segment_Queue segment_queue;
 int32_t conveyor_target;
@@ -82,7 +81,7 @@ void setup()
     {
         Message message;
         io_await_message(&message);
-        if (message.type == MESSAGE_TYPE_COMMAND && 
+        if (message.type == MESSAGE_TYPE_COMMAND &&
             message.command.type == MESSAGE_COMMAND_START)
         {
             break;
@@ -94,14 +93,14 @@ void setup()
     advanced_motor_turn_to_degree(&adv_motor_separator, GARBAGE_BUCKET);
 
 #if CALIBRATE_COLORS
-    task_calibrate_colors(&conveyor_target, &motor_conveyor, &rgb_sensor, 
-        colors);
+    task_calibrate_colors(&conveyor_target, &motor_conveyor, &rgb_sensor,
+                          colors);
 #endif
 }
 
 void loop()
 {
-/*
+    /*
     static bool run = true;
 
     if (Serial.available() > 0)
@@ -127,7 +126,16 @@ void loop()
     task_check_first_segment(&segment_queue);
     task_determin_color(&rgb_sensor, &segment_queue, colors);
     task_rotate_seperator(&adv_motor_separator, &segment_queue);
-    task_feed_ball(&motor_feeder);
+
+    static bool skip_counter = true;
+    if (skip_counter)
+    {
+        skip_counter = false;
+    }
+    else
+    {
+        task_feed_ball(&motor_feeder);
+    }
 
     while (motor_get_degrees(&motor_conveyor) < conveyor_target)
         ;

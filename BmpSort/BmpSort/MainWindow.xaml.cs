@@ -260,8 +260,8 @@ namespace BmpSort
                 BitmapEncoder encoder = new BmpBitmapEncoder();
                 string time = System.DateTime.Now.ToString("hh'-'mm'-'ss", CultureInfo.CurrentUICulture.DateTimeFormat);
 
-                string myPhotos = "C:/Users/bogi1/Desktop/UNI/S5/Projekt/TrainingData/Background";
-
+                string myPhotos = "";
+               
                 string path = System.IO.Path.Combine(myPhotos, "picture-" + time + ".bmp");
 
 
@@ -302,8 +302,9 @@ namespace BmpSort
             else
             {
                 //Other wise re-invoke the method with UI thread access
-                Application.Current.Dispatcher.Invoke(new System.Action(() => takePictureSAVE()));
+                Application.Current.Dispatcher.Invoke(takePictureSAVE);
             }
+            
         }
 
         private void cropImage()
@@ -339,7 +340,7 @@ namespace BmpSort
                     AIO.AwaitMessage(out message);
                     if (message is CommandMessage)
                     {
-                        takePictureRAM();
+                        takePictureSAVE();
                     }
                     else if (message is RequestMessage)
                     {
