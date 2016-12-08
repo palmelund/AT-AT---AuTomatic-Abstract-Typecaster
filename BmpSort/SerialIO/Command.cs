@@ -10,8 +10,10 @@ namespace SerialIO
     /// Comands that the Arduino can send to the Computer
     /// Currently only to take pictures for image processing.
     /// </summary>
-    public enum ComputerCommand : byte
+    public enum Command : byte
     {
-        TakePicture = 0,
+        TakePicture = 0x00,
+		Start = 0x01,
+		Stop = 0x02
     }
 }

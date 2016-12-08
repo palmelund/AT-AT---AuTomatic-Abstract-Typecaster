@@ -43,8 +43,6 @@ namespace BmpSort
 
         private Task t;
 
-        private IMessage message;
-
         private int classification;
 
         private string backgroundColors = "colors.txt";
@@ -336,41 +334,15 @@ namespace BmpSort
             t = Task.Run(() =>
             {
                 while (true)
-                {
+				{
+					Message message;
                     AIO.AwaitMessage(out message);
-                    if (message is CommandMessage)
-                    {
-                        takePictureSAVE();
-                    }
-                    else if (message is RequestMessage)
-                    {
-                        switch (classification)
-                        {
-                            case 0:
-                                {
-                                    AIO.SendObject(SerialIO.Shape.NotBall);
-                                    break;
-                                }
-                            case 1:
-                                {
-                                    AIO.SendObject(SerialIO.Shape.Ball);
-                                    break;
-                                }
-                            default:
-                                {
-                                    AIO.SendObject(SerialIO.Shape.NotBall);
-                                    break;
-                                }
-                        }
-                    }
-                    else if (message is ColorMessage)
-                    {
-                        //Do color stuff
-                    }
-                    else if (message is DistanceMessage)
-                    {
-                        //Do Distance stuff
-                    }
+					
+					if (message.Type == MessageType.Command && 
+					    (message as CommandMessage).Command == Command.TakePicture)
+					{
+						takePictureRAM();
+					}
                 }
             });
 #endif

@@ -11,7 +11,7 @@ namespace SerialIO
     /// </summary>
     public enum Shape : byte
     {
-        Ball = 0,
-        NotBall = 1
+		Ball = 0x00,
+		NotBall = 0x01
     }
 }
