@@ -31,7 +31,15 @@ void task_calibrate_colors(int32_t* conveyor_target, Motor* conveyor,
     DEBUG_PRINTLN("Calibrating colors...");
     for (uint8_t i = 0; i < COLOR_COUNT; ++i)
     {
-        calibrate_color(rgb_sensor, &colors[i]);
+        // Read samples to calibrate from
+        RGB samples[CALIBRACTION_ITERATIONS];
+        for (uint8_t i = 0; i < CALIBRACTION_ITERATIONS; ++i)
+        {
+            read_color(rgb_sensor, &samples[i]);
+            //DEBUG_PRINT_RGB(samples[i]);
+        }
+
+        determin_bounding_sphere(samples, CALIBRACTION_ITERATIONS, &colors[i]);
 
         DEBUG_PRINT_VAR(colors[i].delta);
         DEBUG_PRINT(" - ");

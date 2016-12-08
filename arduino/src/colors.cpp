@@ -41,16 +41,10 @@ float euclidean_distance_3d(RGB *rgb1, RGB *rgb2)
     return res;
 }
 
-void calibrate_color(SFE_ISL29125* RGB_sensor, Delta_RGB *result)
+void determin_bounding_sphere(RGB* samples, uint8_t sample_count, 
+    Delta_RGB *result)
 {
-    // Read samples to calibrate from
-    RGB samples[CALIBRACTION_ITERATIONS];
-    for (uint8_t i = 0; i < CALIBRACTION_ITERATIONS; ++i)
-    {
-        read_color(RGB_sensor, &samples[i]);
-        //DEBUG_PRINT_RGB(samples[i]);
-    }
-
+    ASSERT(sample_count > 1);
 /*
     for (auto c : samples)
     {
@@ -66,7 +60,7 @@ void calibrate_color(SFE_ISL29125* RGB_sensor, Delta_RGB *result)
     float greatest_distance = -1;
 
     // Find the point furthest away from point1
-    for (uint8_t i = 1; i < CALIBRACTION_ITERATIONS; ++i)
+    for (uint8_t i = 1; i < sample_count; ++i)
     {
         float distance = euclidean_distance_3d(point1, &samples[i]);
         if (distance > greatest_distance)
@@ -79,7 +73,7 @@ void calibrate_color(SFE_ISL29125* RGB_sensor, Delta_RGB *result)
     greatest_distance = -1;
 
     // Find the point furthest away from point2
-    for (uint8_t i = 0; i < CALIBRACTION_ITERATIONS; ++i)
+    for (uint8_t i = 0; i < sample_count; ++i)
     {
         float distance = euclidean_distance_3d(point2, &samples[i]);
         if (distance > greatest_distance)
@@ -119,7 +113,7 @@ void calibrate_color(SFE_ISL29125* RGB_sensor, Delta_RGB *result)
         float distance_to_outside_point;
 
         // Checking if all points are contained
-        for (uint8_t i = 0; i < CALIBRACTION_ITERATIONS; ++i)
+        for (uint8_t i = 0; i < sample_count; ++i)
         {
             distance_to_outside_point = 
                 euclidean_distance_3d(&result->rgb, &samples[i]);

@@ -21,6 +21,8 @@
                                         
 int32_t task_calibrate_ultra_sound_sensor(Ultra_Sound_Sensor* distance_sensor);
 
+void task_calibrate_colors(int32_t* conveyor_target, Motor* conveyor, 
+    SFE_ISL29125* rgb_sensor, Delta_RGB colors[COLOR_COUNT]);
 
 void task_check_first_segment(Segment_Queue* segment_queue);
 
