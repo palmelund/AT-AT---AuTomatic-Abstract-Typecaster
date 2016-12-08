@@ -30,6 +30,7 @@ namespace BmpSort
     /// </summary>
     public partial class MainWindow : Window
     {
+        #region Properties
         private Kinect kinect;
 
         private ImageProcessing IP;
@@ -47,7 +48,8 @@ namespace BmpSort
         private int classification;
 
         private string backgroundColors = "colors.txt";
-       
+        #endregion Properties
+
         /// <summary>
         /// Initializes a new instance of the MainWindow class.
         /// </summary>
@@ -223,9 +225,7 @@ namespace BmpSort
                 }
                 Dispatcher.Invoke(() =>
                 {
-                    kinect.CroppedBitmap = IP.CopyPixelsTo(kinect.ColorBitmap,
-                        new Int32Rect(265, 100, 400, 200),
-                        new Int32Rect(0, 0, 110, 200));
+                    cropImage();
 
                     // create frame from the writable bitmap and add to encoder
                     //encoder.Frames.Add(BitmapFrame.Create(this.colorBitmap));
@@ -260,9 +260,9 @@ namespace BmpSort
                 BitmapEncoder encoder = new BmpBitmapEncoder();
                 string time = System.DateTime.Now.ToString("hh'-'mm'-'ss", CultureInfo.CurrentUICulture.DateTimeFormat);
 
-                string myPhotos = "C:/Users/bogi1/Desktop/UNI/S5/Projekt/TrainingData/Background";
+                string myPhotos = "TrainingData/";
 
-                string path = System.IO.Path.Combine(myPhotos, "Background-" + time + ".bmp");
+                string path = System.IO.Path.Combine(myPhotos, "picture-" + time + ".bmp");
 
 
                 if (null == kinect.Sensor)
@@ -272,9 +272,7 @@ namespace BmpSort
                 }
                 Dispatcher.Invoke(() =>
                 {
-                    kinect.CroppedBitmap = IP.CopyPixelsTo(kinect.ColorBitmap,
-                        new Int32Rect(140, 100, 400, 200),
-                        new Int32Rect(0, 0, 400, 200));
+                    cropImage();
 
                     // create frame from the writable bitmap and add to encoder
                     //encoder.Frames.Add(BitmapFrame.Create(this.colorBitmap));
@@ -308,10 +306,12 @@ namespace BmpSort
             }
         }
 
-
-
-        
-        
+        private void cropImage()
+        {
+            kinect.CroppedBitmap = IP.CopyPixelsTo(kinect.ColorBitmap,
+                        new Int32Rect(140, 100, 400, 200),
+                        new Int32Rect(125, 0, 110, 200));
+        }
 
         private void ARFFbutton_Click(object sender, RoutedEventArgs e)
         {
