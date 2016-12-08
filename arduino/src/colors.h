@@ -11,11 +11,11 @@
 
 #define COLOR_COUNT 5
 
-#define RED 0
-#define GREEN 1
-#define BLUE 2
-#define YELLOW 3
-#define UNKNOWN 4
+#define RED 0x00
+#define GREEN 0x01
+#define BLUE 0x02
+#define YELLOW 0x03
+#define UNKNOWN 0x04
 
 struct RGB
 {

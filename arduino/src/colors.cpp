@@ -107,24 +107,9 @@ void determin_bounding_sphere(RGB* samples, uint8_t sample_count,
 
     // Then finding the radius of the sphere, by taking the distance
     // from the center to one of the two points.
-    // NOTE: We calculate both, since rounding errors gives us a point
-    //       not exactly in the center
-    float distance_to_point1 = euclidean_distance_3d(
-         result_red, result_green, result_blue, 
-         point1->red, point1->green, point1->blue);
-    float distance_to_point2 = euclidean_distance_3d(
+    float result_delta = euclidean_distance_3d(
          result_red, result_green, result_blue, 
          point2->red, point2->green, point2->blue);
-    float result_delta;
-
-    // Choose the greatest radius, ensures that both points are in the sphere
-    if (distance_to_point1 > distance_to_point2)
-        result_delta = distance_to_point1;
-    else
-        result_delta = distance_to_point2;
-
-    ASSERT(result_delta >= distance_to_point1);
-    ASSERT(result_delta >= distance_to_point2);
 
     // Now we need to ensure that the sphere we just found actually
     // contains all points
@@ -176,23 +161,10 @@ void determin_bounding_sphere(RGB* samples, uint8_t sample_count,
         result_green = (edge_green + outside_point->green) / 2;
         result_blue = (edge_blue + outside_point->blue) / 2;
 
-        float distance_to_moved_result = 
-            euclidean_distance_3d(
-                result_red, result_green, result_blue, 
-                edge_red, edge_green, edge_blue);
-        distance_to_outside_point = 
-            euclidean_distance_3d(
-                result_red, result_green, result_blue, 
-                outside_point->red, outside_point->green, outside_point->blue);
         float prev_delta = result_delta;
-
-        if (distance_to_moved_result > distance_to_outside_point)
-            result_delta = distance_to_moved_result;
-        else
-            result_delta = distance_to_outside_point;
-
-        ASSERT(result_delta >= distance_to_moved_result);
-        ASSERT(result_delta >= distance_to_outside_point);
+        result_delta = euclidean_distance_3d(
+            result_red, result_green, result_blue, 
+            outside_point->red, outside_point->green, outside_point->blue);
 
         DEBUG_PRINTLN_VAR(result_delta);
         DEBUG_PRINTLN_VAR(prev_delta);

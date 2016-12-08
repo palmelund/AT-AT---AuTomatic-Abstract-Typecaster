@@ -110,7 +110,7 @@ void task_determin_color(SFE_ISL29125 *color_sensor,
 {
     Segment *segment = get_segment(segment_queue, COLOR_SENSOR_SEGMENT_INDEX);
 
-    if (segment->is_occupied && segment->object_type == BALL)
+    if (segment->object_type == BALL)
     {
         uint8_t results[COLOR_COUNT] = { 0 };
 
@@ -173,7 +173,7 @@ void task_rotate_seperator(Advanced_Motor *separator, Segment_Queue *queue)
     Segment *segment = get_segment(queue, LAST_INDEX);
     uint8_t position;
 
-    if (segment->is_occupied && segment->object_type == BALL)
+    if (segment->object_type == BALL)
     {
         position = segment->color;
     }

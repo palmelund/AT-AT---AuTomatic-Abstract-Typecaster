@@ -144,32 +144,53 @@ void motor_turn_to_degree(Motor* motor, uint16_t degree)
     motor_turn_degrees(motor, goal - current_pos);
 }
 
+bool lesser_than(int32_t value1, int32_t value2)
+{
+    return value1 < value2;
+}
+
+bool greater_than(int32_t value1, int32_t value2)
+{
+    return value1 > value2;
+}
+
 void advanced_motor_turn_degrees(Advanced_Motor* motor, uint16_t degrees,
                                  int8_t direction)
 {
     // Calculate the goal that the motor should reach
     int32_t read_degrees = advanced_motor_get_degrees(motor);
     int32_t goal = read_degrees + ((int32_t)degrees * direction);
+    bool (*compare_to)(int32_t, int32_t);
 
     advanced_motor_turn(motor, direction);
-
-    bool running = true;
-
+    
     // Wait for the motor to reach the goal
     switch (direction)
     {
     case FORWARD:
-        while (goal < advanced_motor_get_degrees(motor))
-            ;
+        compare_to = lesser_than;
         break;
     case BACKWARD:
-        while (goal > advanced_motor_get_degrees(motor))
-            ;
+        compare_to = greater_than;
         break;
     default:
         ASSERT(false);
         break;
     }
+
+    int32_t previouse_read_degrees;
+    uint32_t error_timeout = millis() + 500;
+
+
+    do {
+        previouse_read_degrees = read_degrees;
+        read_degrees = advanced_motor_get_degrees(motor);
+
+        if (previouse_read_degrees != read_degrees)
+            error_timeout = millis() + 500;
+        else if (error_timeout < millis())
+            ASSERT(false);
+    } while (compare_to(goal, read_degrees));
 
     advanced_motor_stop(motor);
 }
@@ -177,13 +198,25 @@ void advanced_motor_turn_degrees(Advanced_Motor* motor, uint16_t degrees,
 void motor_turn_degrees(Motor* motor, uint16_t degrees)
 {
     // Calculate the goal that the motor should reach
-    int32_t goal = motor_get_degrees(motor) + degrees;
+    int32_t read_degrees = motor_get_degrees(motor);
+    int32_t goal = read_degrees + degrees;
+    int32_t previouse_read_degrees;
+    uint32_t error_timeout = millis() + 500;
 
     motor_turn(motor);
 
+    do {
+        previouse_read_degrees = read_degrees;
+        read_degrees = motor_get_degrees(motor);
+
+        if (previouse_read_degrees != read_degrees)
+            error_timeout = millis() + 500;
+        else if (error_timeout < millis())
+            ASSERT(false);
+
+    } while (goal > read_degrees);
+
     // Wait for the motor to reach the goal
-    while (goal > motor_get_degrees(motor))
-        ;
 
     motor_stop(motor);
 }

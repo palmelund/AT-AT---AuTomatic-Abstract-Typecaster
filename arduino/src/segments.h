@@ -31,7 +31,6 @@
 
 struct Segment
 {
-    bool is_occupied = false;
     uint8_t object_type = GARBAGE;
     uint8_t color = UNKNOWN;
 
