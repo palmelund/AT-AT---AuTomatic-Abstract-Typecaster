@@ -70,7 +70,7 @@ void task_check_first_segment(Segment_Queue *segment_queue)
 
     // TODO: Computer will probably send both color and shape. Make it work!
     Message response;
-    io_await_message(&response);
+    //io_await_message(&response);
 
     first_segment->object_type = response.object.type;
     first_segment->color = response.object.color;

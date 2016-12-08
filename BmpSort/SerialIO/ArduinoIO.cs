@@ -121,7 +121,7 @@ namespace SerialIO
 
 			switch (data [0]) {
 			case MESSAGE_TYPE_COMMAND:
-				message = new CommandMessage ((Command)data [1]);
+				message = new CommandMessage (MessageType.Command, (Command)data [1]);
 			    return true;
 			    default:
 			    return false;
