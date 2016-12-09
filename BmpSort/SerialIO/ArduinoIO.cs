@@ -38,7 +38,7 @@ namespace SerialIO
 
 		    if (_port.IsOpen)
 				_port.Close ();
-
+            
 			_port.Open ();
 		}
 

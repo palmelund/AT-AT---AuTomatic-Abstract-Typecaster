@@ -21,6 +21,8 @@ using Accord;
 using System.IO.Ports;
 using System.Runtime.CompilerServices;
 using SerialIO;
+using Color = SerialIO.Color;
+using Shape = SerialIO.Shape;
 
 
 namespace BmpSort
@@ -232,9 +234,10 @@ namespace BmpSort
                     // Decide on taken picture
 
                     classification = M.decide(IP.ToBitmap(kinect.CroppedBitmap));
-                    classification = 1;
-                    //ClassificationLabel.Content = "Class: " + classification;
+                    //classification = 1;
+                    ClassificationLabel.Content = "Class: " + classification;
 
+                    AIO.SendObject(classification == 1 ? Shape.Ball : Shape.NotBall, Color.Unknown); // TODO: Update when the kinect supports color recognition
 
                     // Add picture to UI
                     BitmapEncoder encoder = new BmpBitmapEncoder();
@@ -341,8 +344,8 @@ namespace BmpSort
 				    if (message?.Type == MessageType.Command && 
 					    (message as CommandMessage).Command == Command.TakePicture)
 					{
-						//takePictureRAM();
-                        takePictureSAVE();
+						takePictureRAM();
+                        //takePictureSAVE();
 					}
                 }
             });
