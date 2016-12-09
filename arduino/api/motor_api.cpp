@@ -3,7 +3,7 @@
 /************************
  * Non public functions *
  ************************/
-int32_t base_motor_get_degrees(Base_Motor* motor)
+int32_t base_motor_get_degrees(Base_Motor *motor)
 {
     int32_t res;
 
@@ -12,7 +12,7 @@ int32_t base_motor_get_degrees(Base_Motor* motor)
     res = motor->degrees;
 
     // Just to make sure motor->degrees never changes when reading = true
-    ASSERT(res == motor->degrees); 
+    ASSERT(res == motor->degrees);
     motor->reading = false;
 
     return res * motor->degree_ratio;
@@ -21,7 +21,7 @@ int32_t base_motor_get_degrees(Base_Motor* motor)
 /********************
  * Public functions *
  ********************/
-void motor_init(Motor* motor, float degree_ratio, uint8_t pin,
+void motor_init(Motor *motor, float degree_ratio, uint8_t pin,
                 uint8_t interrupt_pin, void (*interrupt_handler)(void))
 {
     motor->pin = pin;
@@ -36,8 +36,8 @@ void motor_init(Motor* motor, float degree_ratio, uint8_t pin,
                     CHANGE);
 }
 
-void advanced_motor_init(Advanced_Motor* motor, float degree_ratio,
-                         uint8_t pin1, uint8_t pin2, uint8_t interrupt_pin1, 
+void advanced_motor_init(Advanced_Motor *motor, float degree_ratio,
+                         uint8_t pin1, uint8_t pin2, uint8_t interrupt_pin1,
                          uint8_t interrupt_pin2,
                          void (*interrupt_handler1)(void))
 {
@@ -58,7 +58,7 @@ void advanced_motor_init(Advanced_Motor* motor, float degree_ratio,
                     CHANGE);
 }
 
-void advanced_motor_turn_to_degree(Advanced_Motor* motor, uint16_t degree)
+bool advanced_motor_turn_to_degree(Advanced_Motor *motor, uint16_t degree)
 {
     // Turn to degree should only accept a degree value between
     // 0 and 359 inclusive
@@ -120,12 +120,12 @@ void advanced_motor_turn_to_degree(Advanced_Motor* motor, uint16_t degree)
 
     // Choose which direction to turn based on which distance is shortest
     if (distance_forward < distance_backward)
-        advanced_motor_turn_degrees(motor, distance_forward, FORWARD);
+        return advanced_motor_turn_degrees(motor, distance_forward, FORWARD);
     else
-        advanced_motor_turn_degrees(motor, distance_backward, BACKWARD);
+        return advanced_motor_turn_degrees(motor, distance_backward, BACKWARD);
 }
 
-void motor_turn_to_degree(Motor* motor, uint16_t degree)
+bool motor_turn_to_degree(Motor *motor, uint16_t degree)
 {
     // Turn to degree should only accept a degree value between
     // 0 and 359 inclusive
@@ -141,7 +141,7 @@ void motor_turn_to_degree(Motor* motor, uint16_t degree)
         goal = 360 * (turns + 1) + degree;
 
     // Turn motor by the distance to the goal
-    motor_turn_degrees(motor, goal - current_pos);
+    return motor_turn_degrees(motor, goal - current_pos);
 }
 
 bool lesser_than(int32_t value1, int32_t value2)
@@ -154,7 +154,7 @@ bool greater_than(int32_t value1, int32_t value2)
     return value1 > value2;
 }
 
-void advanced_motor_turn_degrees(Advanced_Motor* motor, uint16_t degrees,
+bool advanced_motor_turn_degrees(Advanced_Motor *motor, uint16_t degrees,
                                  int8_t direction)
 {
     // Calculate the goal that the motor should reach
@@ -163,7 +163,7 @@ void advanced_motor_turn_degrees(Advanced_Motor* motor, uint16_t degrees,
     bool (*compare_to)(int32_t, int32_t);
 
     advanced_motor_turn(motor, direction);
-    
+
     // Wait for the motor to reach the goal
     switch (direction)
     {
@@ -181,21 +181,26 @@ void advanced_motor_turn_degrees(Advanced_Motor* motor, uint16_t degrees,
     int32_t previouse_read_degrees;
     uint32_t error_timeout = millis() + 500;
 
-
-    do {
+    bool retval = true;
+    do
+    {
         previouse_read_degrees = read_degrees;
         read_degrees = advanced_motor_get_degrees(motor);
 
         if (previouse_read_degrees != read_degrees)
             error_timeout = millis() + 500;
         else if (error_timeout < millis())
-            ASSERT(false);
+        {
+            retval = false;
+            break;
+        }
     } while (compare_to(goal, read_degrees));
 
     advanced_motor_stop(motor);
+    return retval;
 }
 
-void motor_turn_degrees(Motor* motor, uint16_t degrees)
+bool motor_turn_degrees(Motor *motor, uint16_t degrees)
 {
     // Calculate the goal that the motor should reach
     int32_t read_degrees = motor_get_degrees(motor);
@@ -205,23 +210,28 @@ void motor_turn_degrees(Motor* motor, uint16_t degrees)
 
     motor_turn(motor);
 
-    do {
+    bool retval = true;
+    do
+    {
         previouse_read_degrees = read_degrees;
         read_degrees = motor_get_degrees(motor);
 
         if (previouse_read_degrees != read_degrees)
             error_timeout = millis() + 500;
         else if (error_timeout < millis())
-            ASSERT(false);
-
+        {
+            retval = false;
+            break;
+        }
     } while (goal > read_degrees);
 
     // Wait for the motor to reach the goal
 
     motor_stop(motor);
+    return retval;
 }
 
-void advanced_motor_stop(Advanced_Motor* motor)
+void advanced_motor_stop(Advanced_Motor *motor)
 {
     // HACK: To break, we turn the motor in the other direction for a
     // fix amount of time.
@@ -237,12 +247,12 @@ void advanced_motor_stop(Advanced_Motor* motor)
     delay(100); // give the motor time to stop coasting
 }
 
-void motor_stop(Motor* motor)
+void motor_stop(Motor *motor)
 {
     digitalWrite(motor->pin, LOW);
 }
 
-void advanced_motor_turn(Advanced_Motor* motor, int8_t direction)
+void advanced_motor_turn(Advanced_Motor *motor, int8_t direction)
 {
     switch (direction)
     {
@@ -260,22 +270,22 @@ void advanced_motor_turn(Advanced_Motor* motor, int8_t direction)
     }
 }
 
-void motor_turn(Motor* motor)
+void motor_turn(Motor *motor)
 {
     digitalWrite(motor->pin, HIGH);
 }
 
-int32_t motor_get_degrees(Motor* motor)
+int32_t motor_get_degrees(Motor *motor)
 {
     return base_motor_get_degrees(&motor->base);
 }
 
-int32_t advanced_motor_get_degrees(Advanced_Motor* motor)
+int32_t advanced_motor_get_degrees(Advanced_Motor *motor)
 {
     return base_motor_get_degrees(&motor->base);
 }
 
-void motor_update_degrees(Motor* motor)
+void motor_update_degrees(Motor *motor)
 {
     // If degrees are being read, update a buffer instead to avoid race condtions
     if (motor->base.reading)
@@ -291,7 +301,7 @@ void motor_update_degrees(Motor* motor)
     }
 }
 
-void advanced_motor_update_degrees(Advanced_Motor* motor)
+void advanced_motor_update_degrees(Advanced_Motor *motor)
 {
     byte pattern = digitalRead(motor->interrupt_pin1);
     pattern |= (digitalRead(motor->interrupt_pin2) << 1);

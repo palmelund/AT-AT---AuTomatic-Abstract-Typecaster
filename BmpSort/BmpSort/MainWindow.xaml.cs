@@ -21,6 +21,8 @@ using Accord;
 using System.IO.Ports;
 using System.Runtime.CompilerServices;
 using SerialIO;
+using Color = SerialIO.Color;
+using Shape = SerialIO.Shape;
 
 
 namespace BmpSort
@@ -231,10 +233,11 @@ namespace BmpSort
 
                     // Decide on taken picture
 
-                    //classification = M.decide(IP.ToBitmap(kinect.CroppedBitmap));
-                    classification = 1;
+                    classification = M.decide(IP.ToBitmap(kinect.CroppedBitmap));
+                    //classification = 1;
                     ClassificationLabel.Content = "Class: " + classification;
 
+                    AIO.SendObject(classification == 1 ? Shape.Ball : Shape.NotBall, Color.Unknown); // TODO: Update when the kinect supports color recognition
 
                     // Add picture to UI
                     BitmapEncoder encoder = new BmpBitmapEncoder();
@@ -337,11 +340,12 @@ namespace BmpSort
 				{
 					Message message;
                     AIO.AwaitMessage(out message);
-					
-					if (message.Type == MessageType.Command && 
+
+				    if (message?.Type == MessageType.Command && 
 					    (message as CommandMessage).Command == Command.TakePicture)
 					{
 						takePictureRAM();
+                        //takePictureSAVE();
 					}
                 }
             });
@@ -366,9 +370,19 @@ namespace BmpSort
                 bytes[i] = b;
             }
 
-            List<byte> msg = new List<byte> {0x62, (byte) bytes.Length};
+            SendByteArray(bytes);
+        }
+
+        private void SendStartCommandButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            SendByteArray(new byte[]{0x00, 0x01});
+        }
+
+        private void SendByteArray(byte[] bytes)
+        {
+            List<byte> msg = new List<byte> { 0x62, (byte)bytes.Length };
             msg.AddRange(bytes);
-            
+
             AIO.SendByte(msg.ToArray());
         }
     }

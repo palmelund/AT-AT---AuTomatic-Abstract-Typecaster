@@ -23,8 +23,8 @@ int32_t task_calibrate_ultra_sound_sensor(Ultra_Sound_Sensor *distance_sensor)
     return min - 8;
 }
 
-void task_calibrate_colors(int32_t* conveyor_target, Motor* conveyor, 
-    SFE_ISL29125* rgb_sensor, Delta_RGB colors[COLOR_COUNT])
+void task_calibrate_colors(int32_t *conveyor_target, Motor *conveyor,
+                           SFE_ISL29125 *rgb_sensor, Delta_RGB colors[COLOR_COUNT])
 {
     (*conveyor_target) = SEGMENT_DEGREE_LENGTH * 2;
 
@@ -67,16 +67,14 @@ void task_check_first_segment(Segment_Queue *segment_queue)
 
     io_send_message(&take_picture_message);
 
-
     // TODO: Computer will probably send both color and shape. Make it work!
     Message response;
-    //io_await_message(&response);
+    io_await_message(&response);
 
     first_segment->object_type = response.object.type;
     first_segment->color = response.object.color;
 
-
-/*
+    /*
     Segment *first_segment = queue_next(segment_queue);
 
     // DEBUG
@@ -112,7 +110,7 @@ void task_determin_color(SFE_ISL29125 *color_sensor,
 
     if (segment->object_type == BALL)
     {
-        uint8_t results[COLOR_COUNT] = { 0 };
+        uint8_t results[COLOR_COUNT] = {0};
 
         for (uint8_t i = 0; i < SENSOR_PINGS; ++i)
         {
@@ -147,7 +145,9 @@ void task_feed_ball(Motor *feeder)
     // We only feed a ball every x iterations
     if (feed_counter == FEEDER_ITERATION)
     {
-        motor_turn_to_degree(feeder, deg);
+        bool turn_status = motor_turn_to_degree(feeder, deg);
+
+        ASSERT(turn_status);
 
         deg += FEEDER_DEGREES;
         if (deg == FEEDER_MAX_DEGREES)
@@ -167,8 +167,7 @@ void task_rotate_seperator(Advanced_Motor *separator, Segment_Queue *queue)
         GREEN_BUCKET,
         BLUE_BUCKET,
         YELLOW_BUCKET,
-        GARBAGE_BUCKET
-    };
+        GARBAGE_BUCKET};
 
     Segment *segment = get_segment(queue, LAST_INDEX);
     uint8_t position;
@@ -188,27 +187,6 @@ void task_rotate_seperator(Advanced_Motor *separator, Segment_Queue *queue)
         last_position = position;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /*
 

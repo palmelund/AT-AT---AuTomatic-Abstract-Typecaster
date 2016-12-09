@@ -124,9 +124,12 @@ void loop()
 */
 
     task_check_first_segment(&segment_queue);
+    
     task_determin_color(&rgb_sensor, &segment_queue, colors);
     task_rotate_seperator(&adv_motor_separator, &segment_queue);
 
+    // This ensures that the feeder only turns 90 degrees, 
+    // as it otherwise rotate more than that on startup.
     static bool skip_counter = true;
     if (skip_counter)
     {
