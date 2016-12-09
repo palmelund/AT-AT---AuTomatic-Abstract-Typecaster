@@ -107,9 +107,11 @@ void determin_bounding_sphere(RGB* samples, uint8_t sample_count,
 
     // Then finding the radius of the sphere, by taking the distance
     // from the center to one of the two points.
-    float result_delta = euclidean_distance_3d(
-         result_red, result_green, result_blue, 
-         point2->red, point2->green, point2->blue);
+    float result_delta = greatest_distance / 2;
+    
+    //euclidean_distance_3d(
+    //     result_red, result_green, result_blue, 
+    //     point2->red, point2->green, point2->blue);
 
     // Now we need to ensure that the sphere we just found actually
     // contains all points
@@ -183,10 +185,10 @@ void determin_bounding_sphere(RGB* samples, uint8_t sample_count,
 uint8_t determin_color(Delta_RGB* known_colors, RGB *color)
 {
     uint8_t closest_color = UNKNOWN;
-    uint16_t closest_distance = USHRT_MAX;
+    float closest_distance = USHRT_MAX;
     for (uint8_t i = 0; i < COLOR_COUNT; ++i)
     {
-        uint16_t distance = euclidean_distance_3d(
+        float distance = euclidean_distance_3d(
             color->red, color->green, color->blue, known_colors[i].rgb.red, 
             known_colors[i].rgb.green, known_colors[i].rgb.blue);
         if (known_colors[i].delta > distance && closest_distance > distance)
