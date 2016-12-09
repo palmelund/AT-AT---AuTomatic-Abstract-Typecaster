@@ -137,15 +137,5 @@ namespace SerialIO
 	    {
 	        _port.Write(b, 0, b.Length);
 	    }
-
-	    public void CloseConnection()
-	    {
-	        _port.Close();
-	    }
-
-	    public int ReadBuffer()
-	    {
-	        return _port.ReadByte();
-	    }
 	}
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using PixelFormat = System.Windows.Media.PixelFormat;
 
 namespace BmpSort
 {
@@ -22,7 +24,7 @@ namespace BmpSort
 
             WriteableBitmap tmp = new WriteableBitmap(400, 200, 96.0, 96.0, PixelFormats.Bgr32, null);
             var croppedBitmap = new CroppedBitmap(sourceImage, sourceRoi);
-            int stride = croppedBitmap.PixelWidth*(croppedBitmap.Format.BitsPerPixel/8);
+            int stride = croppedBitmap.PixelWidth * (croppedBitmap.Format.BitsPerPixel / 8);
             var data = new byte[stride*croppedBitmap.PixelHeight];
             croppedBitmap.CopyPixels(data, stride, 0);
             tmp.WritePixels(destinationRoi, data, stride, 0);
@@ -31,21 +33,21 @@ namespace BmpSort
         }
 
         /// <summary>
-        /// Converting WriteableBitmap to Bitmap
+        /// Converting BitmapSource to Bitmap
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public Bitmap ToBitmap(WriteableBitmap input)
+        public Bitmap ToBitmap(BitmapSource input)
         {
-            System.Drawing.Bitmap bmp;
-            using (MemoryStream outStream = new MemoryStream())
-            {
-                BitmapEncoder enc = new BmpBitmapEncoder();
-                enc.Frames.Add(BitmapFrame.Create((BitmapSource)input));
-                enc.Save(outStream);
-                bmp = new System.Drawing.Bitmap(outStream);
-            }
-            return bmp;
+            Bitmap result = new Bitmap(input.PixelWidth, input.PixelHeight, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            BitmapData data = result.LockBits(
+                new Rectangle(System.Drawing.Point.Empty, result.Size),
+                ImageLockMode.WriteOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+
+            input.CopyPixels(new Int32Rect(0, 0, input.PixelWidth, input.PixelHeight), data.Scan0, data.Height * data.Stride, data.Stride);
+            result.UnlockBits(data);
+
+            return result;
         }
     }
 }

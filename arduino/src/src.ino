@@ -27,6 +27,7 @@ Advanced_Motor adv_motor_separator;
 // 1: GREEN
 // 2: BLUE
 // 3: YELLOW
+// 4: BACKGROUND
 Delta_RGB colors[COLOR_COUNT] = {
     {{941, 1147, 951}, 204},
     {{699, 1154, 978}, 225},
@@ -124,11 +125,11 @@ void loop()
 */
 
     task_check_first_segment(&segment_queue);
-    
+
     task_determin_color(&rgb_sensor, &segment_queue, colors);
     task_rotate_seperator(&adv_motor_separator, &segment_queue);
 
-    // This ensures that the feeder only turns 90 degrees, 
+    // This ensures that the feeder only turns 90 degrees,
     // as it otherwise rotate more than that on startup.
     static bool skip_counter = true;
     if (skip_counter)

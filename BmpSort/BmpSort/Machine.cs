@@ -20,7 +20,7 @@ namespace BmpSort
 
         Accord.MachineLearning.Bayes.NaiveBayes nb;
 
-        public Machine(string fileName)
+        public Machine()
         {
             properties = new ImageProperties("backgrounds.txt");
             train_model();
@@ -49,7 +49,7 @@ namespace BmpSort
 
         public void save_model_from_file(string outputfile)
         {
-            Accord.IO.Serializer.Save<Accord.MachineLearning.Bayes.NaiveBayes>(nb, System.IO.Path.GetFullPath(System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, outputfile)));
+            Accord.IO.Serializer.Save<Accord.MachineLearning.Bayes.NaiveBayes>(nb, Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, outputfile)));
         }
 
         public void train_model()
@@ -57,7 +57,7 @@ namespace BmpSort
             nb = naiveBayes.Learn(properties.trainingInput, properties.trainingOutput);           
         }
 
-        public int decide(System.Drawing.Image image)
+        public int decide(Image image)
         {
             return (nb.Decide(properties.get_properties(image)));
         }
