@@ -25,6 +25,13 @@ namespace BmpSort
             properties = new ImageProperties("backgrounds.txt");
             train_model();
         }
+        private Bitmap current;
+
+        public Bitmap currentpicture
+        {
+            get { return current; }
+            set { current = value; }
+        }
 
         private int[][] _input; //image variables
 
@@ -59,7 +66,9 @@ namespace BmpSort
 
         public int decide(Image image)
         {
-            return (nb.Decide(properties.get_properties(image)));
+            int result = nb.Decide(properties.get_properties(image));
+            currentpicture = properties.currentBitmap;
+            return result;
         }
     }
 }

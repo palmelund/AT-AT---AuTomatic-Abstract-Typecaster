@@ -32,7 +32,7 @@ namespace BmpSort
         string[] ballImages;
         string[] errors;
 
-        Bitmap currentBitmap;
+        public Bitmap currentBitmap;
         Accord.Imaging.BlobCounter blobscounter = new BlobCounter();
         Accord.Imaging.Converters.ImageToArray arrayMaker = new Accord.Imaging.Converters.ImageToArray();
         Accord.Imaging.Converters.ArrayToImage imageMaker = new Accord.Imaging.Converters.ArrayToImage(400, 200);

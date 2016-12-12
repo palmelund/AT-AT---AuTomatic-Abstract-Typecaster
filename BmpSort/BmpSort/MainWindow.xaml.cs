@@ -142,6 +142,7 @@ namespace BmpSort
                     // Decide on taken picture
 
                     classification = M.decide(IP.ToBitmap(image));
+                    cleanedImage.Source = GetImageStream(M.currentpicture);
                     //classification = 1;
                     ClassificationLabel.Content = "Class: " + classification;
 
@@ -195,7 +196,21 @@ namespace BmpSort
             }
 
         }
+        public static BitmapSource GetImageStream(System.Drawing.Image myImage)
+        {
+            Bitmap bitmap = new Bitmap(myImage);
+            IntPtr bmpPt = bitmap.GetHbitmap();
+            BitmapSource bitmapSource =
+             System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
+                   bmpPt,
+                   IntPtr.Zero,
+                   Int32Rect.Empty,
+                   BitmapSizeOptions.FromEmptyOptions());
 
+            //freeze bitmapSource and clear memory to avoid memory leaks
+            bitmapSource.Freeze();
+            return bitmapSource;
+        }
         private void ARFFbutton_Click(object sender, RoutedEventArgs e)
         {
             ARFFGenerator arff = new ARFFGenerator(M);
