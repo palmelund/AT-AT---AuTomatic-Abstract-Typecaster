@@ -32,12 +32,19 @@ bool within_delta(double expected, double actual, double delta)
     return expected * (1.0 - delta) <= actual && expected * (1.0 + delta) >= actual;
 }
 
-void expect_rgb_delta(Delta_RGB* expected, Delta_RGB* actual)
+void dbs_run_test(uint8_t id, RGB* data, uint8_t count, Delta_RGB* expected)
 {
-    if (!within_delta(expected->rgb.red, actual->rgb.red, DBS_EXPECTED_DELTA) ||     
-        !within_delta(expected->rgb.green, actual->rgb.green, DBS_EXPECTED_DELTA) || 
-        !within_delta(expected->rgb.blue, actual->rgb.blue, DBS_EXPECTED_DELTA) ||   
-        !within_delta(expected->delta, actual->delta, DBS_EXPECTED_DELTA))           
+    Delta_RGB actual;                                 
+    determin_bounding_sphere(data, count, &actual);     
+                                                                
+    Serial.print("Determin bounding sphere ");                  
+    Serial.print(id);                                           
+    Serial.print(" - ");                               
+
+    if (!within_delta(expected->rgb.red, actual.rgb.red, DBS_EXPECTED_DELTA) ||     
+        !within_delta(expected->rgb.green, actual.rgb.green, DBS_EXPECTED_DELTA) || 
+        !within_delta(expected->rgb.blue, actual.rgb.blue, DBS_EXPECTED_DELTA) ||   
+        !within_delta(expected->delta, actual.delta, DBS_EXPECTED_DELTA))           
     {                                                           
         Serial.println("Failed");                               
         Serial.print("- Expected: ");                           
@@ -46,7 +53,7 @@ void expect_rgb_delta(Delta_RGB* expected, Delta_RGB* actual)
         Serial.println(DBS_EXPECTED_DELTA);                                       
                                                                 
         Serial.print("- Actual: ");                             
-        print_rgb_delta(actual);                                
+        print_rgb_delta(&actual);                                
         Serial.println();               
     }
     else
@@ -55,65 +62,73 @@ void expect_rgb_delta(Delta_RGB* expected, Delta_RGB* actual)
     }
 }
 
-#define ID 1
-DBS_TEST_DECLARE_DATA(ID, 2) = {
-    {         0,         0,         0 },
-    { USHRT_MAX, USHRT_MAX, USHRT_MAX }
-};
-DBS_TEST_DECLARE_EXPECTED(ID) = {
-    { 32767, 32767, 32767 }, 56754 // TODO: FIX
-};
-
-#define ID 2
-DBS_TEST_DECLARE_DATA(ID, 2) = {
-    {         0,        0, USHRT_MAX },
-    { USHRT_MAX,        0,         0 }
-};
-DBS_TEST_DECLARE_EXPECTED(ID) = {
-    { 32767, 0, 32767 }, 46340 
-};
-
-#define ID 3
-DBS_TEST_DECLARE_DATA(ID, 2)  = {
-    {         0, USHRT_MAX, USHRT_MAX },
-    { USHRT_MAX, USHRT_MAX,         0 }
-};
-DBS_TEST_DECLARE_EXPECTED(ID) = {
-    { 32767, 65535, 32767 }, 46340
-};
-
-#define ID 4
-DBS_TEST_DECLARE_DATA(ID, 8)  = {
-    { USHRT_MAX,         0,         0 }, // 1
-    { USHRT_MAX, USHRT_MAX,         0 }, // 2
-    { USHRT_MAX,         0, USHRT_MAX }, // 3
-    { USHRT_MAX, USHRT_MAX, USHRT_MAX }, // 4
-    {         0, USHRT_MAX,         0 }, // 5
-    {         0, USHRT_MAX, USHRT_MAX }, // 6
-    {         0,         0, USHRT_MAX }, // 7
-    {         0,         0,         0 }  // 8
-};
-DBS_TEST_DECLARE_EXPECTED(ID) = {
-    { 32767, 32767, 32767 }, 56754
-};
-
-#define ID 5
-DBS_TEST_DECLARE_DATA(ID, 3)  = {
-    {  500,  500,  500 },
-    { 1000, 1200,  500 },
-    { 1500,  500,  500 }
-};
-DBS_TEST_DECLARE_EXPECTED(ID) = {
-    { 1000, 600, 500 }, 600
-};
-
 void test_determin_bounding_sphere()
 {
-    DBS_TEST_RUN(1);
-    DBS_TEST_RUN(2);
-    DBS_TEST_RUN(3);
-    DBS_TEST_RUN(4);
-    DBS_TEST_RUN(5);
+    // Test 1
+    RGB data1[2] = {
+        {         0,         0,         0 },
+        { USHRT_MAX, USHRT_MAX, USHRT_MAX }
+    };
+
+    Delta_RGB expect1 = {
+        { 32767, 32767, 32767 }, 56754
+    };
+    dbs_run_test(1, data1, sizeof(data1) / sizeof(RGB), &expect1);
+
+
+    // Test 2
+    RGB data2[2] = {
+        {         0,        0, USHRT_MAX },
+        { USHRT_MAX,        0,         0 }
+    };
+
+    Delta_RGB expect2 = {
+        { 32767, 0, 32767 }, 46340 
+    };
+    dbs_run_test(2, data2, sizeof(data2) / sizeof(RGB), &expect2);
+
+
+    // Test 3
+    RGB data3[2] = {
+        {         0, USHRT_MAX, USHRT_MAX },
+        { USHRT_MAX, USHRT_MAX,         0 }
+    };
+
+    Delta_RGB expect3 = {
+        { 32767, 65535, 32767 }, 46340 
+    };
+    dbs_run_test(3, data3, sizeof(data3) / sizeof(RGB), &expect3);
+
+
+    // Test 4
+    RGB data4[8] = {
+        { USHRT_MAX,         0,         0 }, // 1
+        { USHRT_MAX, USHRT_MAX,         0 }, // 2
+        { USHRT_MAX,         0, USHRT_MAX }, // 3
+        { USHRT_MAX, USHRT_MAX, USHRT_MAX }, // 4
+        {         0, USHRT_MAX,         0 }, // 5
+        {         0, USHRT_MAX, USHRT_MAX }, // 6
+        {         0,         0, USHRT_MAX }, // 7
+        {         0,         0,         0 }  // 8
+    };
+
+    Delta_RGB expect4 = {
+        { 32767, 32767, 32767 }, 56754 
+    };
+    dbs_run_test(4, data4, sizeof(data4) / sizeof(RGB), &expect4);
+
+
+    // Test 5
+    RGB data5[3] = {
+        {  500,  500,  500 },
+        { 1000, 1200,  500 },
+        { 1500,  500,  500 }
+    };
+
+    Delta_RGB expect5 = {
+        { 1000, 600, 500 }, 600
+    };
+    dbs_run_test(5, data5, sizeof(data5) / sizeof(RGB), &expect5);
 }
 
 

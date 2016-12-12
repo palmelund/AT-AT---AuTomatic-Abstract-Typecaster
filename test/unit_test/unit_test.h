@@ -31,19 +31,3 @@ void test_euclidean();
 
 
 #define DBS_EXPECTED_DELTA 0.001
-
-#define DBS_DATA(id) dbs_data ## id
-#define DBS_EXPECT(id) dbs_expected ## id
-#define DBS_RESULT(id) dbs_result ## id
-#define DBS_TEST_DECLARE_EXPECTED(id) Delta_RGB DBS_EXPECT(id)
-#define DBS_TEST_DECLARE_DATA(id, size) RGB DBS_DATA(id)[size]
-
-#define DBS_TEST_RUN(id)                                    \
-Delta_RGB DBS_RESULT(id);                                   \
-determin_bounding_sphere(DBS_DATA(id),                      \
-    sizeof(DBS_DATA(id)) / sizeof(RGB), &DBS_RESULT(id));   \  
-                                                            \
-Serial.print("Determin bounding sphere ");                  \
-Serial.print(id);                                           \
-Serial.print(" - ");                                        \                    
-expect_rgb_delta(&DBS_EXPECT(id), &DBS_RESULT(id)) 
