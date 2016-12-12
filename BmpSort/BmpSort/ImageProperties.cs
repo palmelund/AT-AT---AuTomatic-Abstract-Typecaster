@@ -19,6 +19,7 @@ namespace BmpSort
         int counter = 0;
         int blobs = 0;
         int squaredetected = 0;
+        int isCircle;
         int filesLoaded = 0;
         int whitePixels = 0;
         public int[] trainingOutput { get; set; }
@@ -219,11 +220,24 @@ namespace BmpSort
         #region detectors
         public int blobdetect(Bitmap input)
         {
-            SimpleShapeChecker shapechecker = new SimpleShapeChecker();
+            SimpleShapeChecker circlechecker = new SimpleShapeChecker();
+            SimpleShapeChecker squarechecker = new SimpleShapeChecker();
+            squarechecker.AngleError = 7;                  //default=7 graders tolerance
+            squarechecker.LengthError = 0.1f;               //default=0.1 (10%) siders længdeforskel
+            squarechecker.MinAcceptableDistortion = 0.6f;
+            squarechecker.RelativeDistortionLimit = 0.04f;
+
+            circlechecker.MinAcceptableDistortion = 1.1f;   //default=0.5 (in pixels)
+            circlechecker.LengthError = 0.2f;
+            circlechecker.RelativeDistortionLimit = 0.04f;  //default=0.03 (3%)
+
             blobscounter.FilterBlobs = true;
             blobscounter.BlobsFilter = null;
             blobscounter.MinHeight = 35;
             blobscounter.MinWidth = 35;
+
+            Graphics g = Graphics.FromImage(input);
+            System.Drawing.Pen redPen = new System.Drawing.Pen(System.Drawing.Color.Red, 2);
 
             blobscounter.ProcessImage(input);
             Blob[] blobs = blobscounter.GetObjectsInformation();
@@ -232,9 +246,34 @@ namespace BmpSort
                 List<IntPoint> edgepoints = blobscounter.GetBlobsEdgePoints(blobs[i]);
                 if ((edgepoints.Count>=4)&&(blobs[i].Area >100))
                 {
-                    List<IntPoint> corners = PointsCloud.FindQuadrilateralCorners(edgepoints);
-                    if (shapechecker.IsQuadrilateral(edgepoints,out corners))
+                    Accord.Point center;
+                    float radius;
+                    #region iscircle
+                    if (circlechecker.IsCircle(edgepoints, out center, out radius))
                     {
+                        isCircle = 1;
+                        g.DrawEllipse(redPen,
+                   (int)(center.X - radius),
+                   (int)(center.Y - radius),
+                   (int)(radius * 2),
+                   (int)(radius * 2));
+
+                    }
+
+                    List<IntPoint> corners = PointsCloud.FindQuadrilateralCorners(edgepoints);
+                    if (squarechecker.IsQuadrilateral(edgepoints,out corners))
+                    {
+                        System.Drawing.Point[] points = new System.Drawing.Point[4];
+                        points[0].X = corners[0].X;
+                        points[0].Y = corners[0].Y;
+                        points[1].X = corners[1].X;
+                        points[1].Y = corners[1].Y;
+                        points[2].X = corners[2].X;
+                        points[2].Y = corners[2].Y;
+                        points[3].X = corners[3].X;
+                        points[3].Y = corners[3].Y;
+
+                        g.DrawPolygon(redPen, points);
                         squaredetected = 1;
                     }
                     else

@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
 using System.IO.Ports;
 using System.Linq;
+using System.Security.RightsManagement;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -12,7 +15,9 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Accord.Imaging.Filters;
+using Accord.Statistics.Kernels;
 using Microsoft.Kinect;
+using PixelFormat = System.Drawing.Imaging.PixelFormat;
 
 namespace BmpSort
 {
@@ -28,102 +33,72 @@ namespace BmpSort
             {
                 if (potentialSensor.Status == KinectStatus.Connected)
                 {
-                    this.sensor = potentialSensor;
+                    _sensor = potentialSensor;
                     break;
                 }
             }
 
-            if (null != this.sensor)
+            if (null != _sensor)
             {
                 // Turn on the color stream to receive color frames
-                this.sensor.ColorStream.Enable(ColorImageFormat.RgbResolution640x480Fps30);
+                _sensor.ColorStream.Enable(ColorImageFormat.RgbResolution640x480Fps30);
 
                 // Allocate space to put the pixels we'll receive
-                this.colorPixels = new byte[this.sensor.ColorStream.FramePixelDataLength];
+                _colorPixels = new byte[_sensor.ColorStream.FramePixelDataLength];
 
                 // This is the bitmap we'll display on-screen
-                this.colorBitmap = new WriteableBitmap(this.sensor.ColorStream.FrameWidth,
-                    this.sensor.ColorStream.FrameHeight, 96.0, 96.0, PixelFormats.Bgr32, null);
+                ColorBitmap = new WriteableBitmap(_sensor.ColorStream.FrameWidth,
+                    _sensor.ColorStream.FrameHeight, 96.0, 96.0, PixelFormats.Bgr32, null);
 
                 // Start the sensor!
                 try
                 {
-                    this.sensor.Start();
+                    _sensor.Start();
+                    _sensor.ColorFrameReady += SensorColorPictureFrameReady;
                 }
                 catch (IOException)
                 {
-                    this.sensor = null;
+                    _sensor = null;
                 }
             }
+        }
 
-            if (null == this.sensor)
+
+        public WriteableBitmap ColorBitmap { get; set; }
+        
+        private const string PortName = "COM3";
+        private const int BaudRate = 9600;
+        private SerialPort _sp = new SerialPort(PortName, BaudRate, Parity.None, 8, StopBits.One);
+        private readonly KinectSensor _sensor;
+        private readonly byte[] _colorPixels;
+
+        public BitmapSource TakePicture(Int32Rect cropped)
+        {
+            WriteableBitmap result = new WriteableBitmap(cropped.Width, cropped.Height, ColorBitmap.DpiX,
+                ColorBitmap.DpiY, ColorBitmap.Format, ColorBitmap.Palette);
+
+            result.WritePixels(cropped,_colorPixels, ColorBitmap.BackBufferStride, 0, 0);
+
+            return result;
+        }
+
+        private void SensorColorPictureFrameReady(object sender, ColorImageFrameReadyEventArgs e)
+        {
+            using (ColorImageFrame colorFrame = e.OpenColorImageFrame())
             {
-                // this.statusBarText.Text = Properties.Resources.NoKinectReady;
+                if (colorFrame != null)
+                {
+                    // Copy the pixel data from the image to a temporary array
+                    colorFrame.CopyPixelDataTo(_colorPixels);
+
+                    // Write the pixel data into our bitmap
+                    ColorBitmap.WritePixels(
+                        new Int32Rect(0, 0, ColorBitmap.PixelWidth, ColorBitmap.PixelHeight),
+                        _colorPixels,
+                        ColorBitmap.PixelWidth * sizeof(int),
+                        0);
+                }
             }
         }
-
-        public static string PortName
-        {
-            get { return portName; }
-            set { portName = value; }
-        }
-
-        public static int BaudRate
-        {
-            get { return baudRate; }
-            set { baudRate = value; }
-        }
-
-        public SerialPort Sp
-        {
-            get { return sp; }
-            set { sp = value; }
-        }
-
-        public KinectSensor Sensor
-        {
-            get { return sensor; }
-            set { sensor = value; }
-        }
-
-        public WriteableBitmap ColorBitmap
-        {
-            get { return colorBitmap; }
-            set { colorBitmap = value; }
-        }
-
-        public WriteableBitmap CroppedBitmap
-        {
-            get { return croppedBitmap; }
-            set { croppedBitmap = value; }
-        }
-
-        public byte[] ColorPixels
-        {
-            get { return colorPixels; }
-            set { colorPixels = value; }
-        }
-
-        private static string portName = "COM3";
-        private static int baudRate = 9600;
-        public SerialPort sp = new SerialPort(portName, baudRate, Parity.None, 8, StopBits.One);
-
-
-        /// <summary>
-        /// Active Kinect sensor
-        /// </summary>
-        private KinectSensor sensor;
-
-        /// <summary>
-        /// Bitmap that will hold color information
-        /// </summary>
-        private WriteableBitmap colorBitmap;
-
-        private WriteableBitmap croppedBitmap;
-
-        /// <summary>
-        /// Intermediate storage for the color data received from the camera
-        /// </summary>
-        private byte[] colorPixels;
     }
 }

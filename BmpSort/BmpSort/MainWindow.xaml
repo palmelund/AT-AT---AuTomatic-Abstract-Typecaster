@@ -31,15 +31,15 @@
                 <Image Name="Image1" Width="640" Height="480"/>
             </Viewbox>
             <Viewbox Grid.Column="1" Stretch="None" HorizontalAlignment="Right">
-                <Image Name="Image2" Width="400" Height="200"/>
+                <Image Name="Image2" Width="400" Height="200" Source="{Binding Path=CroppedImage}"/>
             </Viewbox>
             <Button x:Name="ARFFbutton" Grid.ColumnSpan="2" Content="Train and generate ARFF." HorizontalAlignment="Left" Margin="800,800,0,0" VerticalAlignment="Top" Width="200" Click="ARFFbutton_Click"/>
-            <Label Content="COM port:" VerticalAlignment="Bottom " HorizontalAlignment="Left" Margin="30,0,0,77"></Label>
-            <TextBox x:Name="SerialPortTextBox" HorizontalAlignment="Left" VerticalAlignment="Bottom" Height="32" Width="100" Margin="100,0,0,71"></TextBox>
-            <Label Content="Send Byte:" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="205,0,0,77"></Label>
-            <TextBox x:Name="SerialByteTextBox" HorizontalAlignment="Left" VerticalAlignment="Bottom" Height="32" Width="120" Margin="275,0,0,71"></TextBox>
-            <Button x:Name="SendByteButton" VerticalAlignment="Bottom" HorizontalAlignment="Left" Content="Send Byte" Margin="275,0,0,23" Click="SendByteButton_Click"></Button>
-            <Button x:Name="SendStartCommandButton" VerticalAlignment="Bottom" HorizontalAlignment="Left" Content="Start Cmd" Margin="342,0,0,23" Click="SendStartCommandButton_OnClick"></Button>
+            <Label Content="COM port:" VerticalAlignment="Bottom " HorizontalAlignment="Left" Margin="30,0,0,77" />
+            <TextBox x:Name="SerialPortTextBox" HorizontalAlignment="Left" VerticalAlignment="Bottom" Height="32" Width="100" Margin="100,0,0,71" />
+            <Label Content="Send Byte:" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="205,0,0,77" />
+            <TextBox x:Name="SerialByteTextBox" HorizontalAlignment="Left" VerticalAlignment="Bottom" Height="32" Width="120" Margin="275,0,0,71" />
+            <Button x:Name="SendByteButton" VerticalAlignment="Bottom" HorizontalAlignment="Left" Content="Send Byte" Margin="275,0,0,23" Click="SendByteButton_Click" />
+            <Button x:Name="SendStartCommandButton" VerticalAlignment="Bottom" HorizontalAlignment="Left" Content="Start Cmd" Margin="342,0,0,23" Click="SendStartCommandButton_OnClick" />
             <Button x:Name="ConnectButton" Content="Connect" HorizontalAlignment="Left" Margin="100,800,0,0" VerticalAlignment="Top" Width="75" Click="ConnectButton_Click"/>
             <Label x:Name="ClassificationLabel" Content="Class: n/a" HorizontalAlignment="Left" Margin="605,740,0,0" VerticalAlignment="Top" Width="66"/>
         </Grid>
@@ -51,3 +51,66 @@
         <ProgressBar Name="ProgressBarARFF" HorizontalAlignment="Left" Height="10" Margin="800,780,0,0" Grid.Row="1" VerticalAlignment="Top" Width="200" />
     </Grid>
 </Window>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
