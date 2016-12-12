@@ -25,7 +25,7 @@ namespace BmpSort
             WriteableBitmap tmp = new WriteableBitmap(400, 200, 96.0, 96.0, PixelFormats.Bgr32, null);
             var croppedBitmap = new CroppedBitmap(sourceImage, sourceRoi);
             int stride = croppedBitmap.PixelWidth * (croppedBitmap.Format.BitsPerPixel / 8);
-            var data = new byte[stride*croppedBitmap.PixelHeight];
+            var data = new byte[stride * croppedBitmap.PixelHeight];
             croppedBitmap.CopyPixels(data, stride, 0);
             tmp.WritePixels(destinationRoi, data, stride, 0);
             return tmp;
@@ -39,15 +39,15 @@ namespace BmpSort
         /// <returns></returns>
         public Bitmap ToBitmap(BitmapSource input)
         {
-            Bitmap result = new Bitmap(input.PixelWidth, input.PixelHeight, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-            BitmapData data = result.LockBits(
-                new Rectangle(System.Drawing.Point.Empty, result.Size),
-                ImageLockMode.WriteOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-
-            input.CopyPixels(new Int32Rect(0, 0, input.PixelWidth, input.PixelHeight), data.Scan0, data.Height * data.Stride, data.Stride);
-            result.UnlockBits(data);
-
-            return result;
+            Bitmap bmp;
+            using (var outStream = new MemoryStream())
+            {
+                var enc = new BmpBitmapEncoder();
+                enc.Frames.Add(BitmapFrame.Create(input));
+                enc.Save(outStream);
+                bmp = new Bitmap(outStream);
+            }
+            return bmp;
         }
     }
 }

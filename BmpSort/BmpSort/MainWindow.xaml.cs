@@ -65,7 +65,7 @@ namespace BmpSort
         {
             InitializeComponent();
         }
-        
+
         /// <summary>
         /// Execute startup tasks
         /// </summary>
@@ -131,7 +131,7 @@ namespace BmpSort
             {
                 Dispatcher.Invoke(() =>
                 {
-                    BitmapSource image = kinect.TakePicture(new Int32Rect(125, 0, 110, 200));
+                    BitmapSource image = kinect.TakePicture(new Int32Rect(262, 87, 110, 200));
                     Image2.Source = image;
 
 
@@ -154,7 +154,7 @@ namespace BmpSort
                 Application.Current.Dispatcher.Invoke(() => takePictureRAM());
             }
         }
-
+        
         public void takePictureSAVE()
         {
             //Check access to UI Thread.
@@ -164,17 +164,27 @@ namespace BmpSort
                 BitmapEncoder encoder = new BmpBitmapEncoder();
                 string time = System.DateTime.Now.ToString("hh'-'mm'-'ss", CultureInfo.CurrentUICulture.DateTimeFormat);
 
-                string myPhotos = "";
-               
+                string myPhotos = Directory.GetCurrentDirectory();
+
                 string path = System.IO.Path.Combine(myPhotos, "picture-" + time + ".bmp");
 
-                
+
                 Dispatcher.Invoke(() =>
                 {
-                    BitmapSource image = kinect.TakePicture(new Int32Rect(125, 0, 110, 200));
+                    BitmapSource image = kinect.TakePicture(new Int32Rect(262, 87, 110, 200));
                     Image2.Source = image;
+                    
+                    encoder.Frames.Add(BitmapFrame.Create(image));
+                    using (FileStream fs = new FileStream(path, FileMode.Create))
+                    {
+                        encoder.Save(fs);
+                    }
+                    AIO.SendObject(Shape.NotBall, Color.Unknown);
 
-                    image.Save(path);
+                    //image.Save(path);
+
+                    //Bitmap savableBitmap = IP.ToBitmap(image);
+                    //savableBitmap.Save(path);
                 });
             }
 
@@ -183,7 +193,7 @@ namespace BmpSort
                 //Other wise re-invoke the method with UI thread access
                 Application.Current.Dispatcher.Invoke(takePictureSAVE);
             }
-            
+
         }
 
         private void ARFFbutton_Click(object sender, RoutedEventArgs e)
@@ -207,24 +217,24 @@ namespace BmpSort
             t = Task.Run(() =>
             {
                 while (true)
-				{
+                {
 
-                    //Message message;
-                    //               AIO.AwaitMessage(out message);
+                    Message message;
+                    AIO.AwaitMessage(out message);
 
-                    //   if (message?.Type == MessageType.Command && 
-                    //    (message as CommandMessage).Command == Command.TakePicture)
-                    //{
-                    //	takePictureRAM();
-                    //                   //takePictureSAVE();
-                    //}
+                    if (message?.Type == MessageType.Command &&
+                     (message as CommandMessage).Command == Command.TakePicture)
+                    {
+                        //takePictureRAM();
+                        takePictureSAVE();
+                    }
 
-                    takePictureRAM();
-                    Thread.Sleep(1000);
+                    //takePictureRAM();
+                    //Thread.Sleep(1000);
                 }
             });
 #endif
-            
+
             // Set the image we display to point to the bitmap where we'll put the image data
             Image1.Source = kinect.ColorBitmap;
 
@@ -233,9 +243,9 @@ namespace BmpSort
         private void SendByteButton_Click(object sender, RoutedEventArgs e)
         {
             string[] input = SerialByteTextBox.Text.Split(' ');
-            
+
             byte[] bytes = new byte[input.Length];
-            
+
             for (int i = 0; i < input.Length; i++)
             {
                 byte b;
@@ -249,7 +259,7 @@ namespace BmpSort
 
         private void SendStartCommandButton_OnClick(object sender, RoutedEventArgs e)
         {
-            SendByteArray(new byte[]{0x00, 0x01});
+            SendByteArray(new byte[] { 0x00, 0x01 });
         }
 
         private void SendByteArray(byte[] bytes)
