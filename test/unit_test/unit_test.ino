@@ -39,13 +39,13 @@ void dbs_run_test(uint8_t id, RGB* data, uint8_t count, Delta_RGB* expected)
                                                                 
     Serial.print("Determin bounding sphere ");                  
     Serial.print(id);                                           
-    Serial.print(" - ");                               
+    Serial.print(" - ");
 
-    if (!within_delta(expected->rgb.red, actual.rgb.red, DBS_EXPECTED_DELTA) ||     
+    if (!within_delta(expected->rgb.red, actual.rgb.red, DBS_EXPECTED_DELTA) ||
         !within_delta(expected->rgb.green, actual.rgb.green, DBS_EXPECTED_DELTA) || 
         !within_delta(expected->rgb.blue, actual.rgb.blue, DBS_EXPECTED_DELTA) ||   
         !within_delta(expected->delta, actual.delta, DBS_EXPECTED_DELTA))           
-    {                                                           
+    {
         Serial.println("Failed");                               
         Serial.print("- Expected: ");                           
         print_rgb_delta(expected);                              
@@ -141,39 +141,89 @@ void test_determin_bounding_sphere()
 
 
 void build_rgb_test(RGB_Test* t, 
-    uint8_t r1, uint8_t g1, uint8_t b1, 
-    uint8_t r2, uint8_t g2, uint8_t b2, 
-    float e, float r)
+    float r1, float g1, float b1, 
+    float r2, float g2, float b2, 
+    float e)
 {
-    t->rgb1 = {r1, g1, b1};
-    t->rgb2 = {r2, g2, b2};
+    t->rgb1[0] = r1;
+    t->rgb1[1] = g1; 
+    t->rgb1[2] = b1;
+    t->rgb2[0] = r2;
+    t->rgb2[1] = g2; 
+    t->rgb2[2] = b2;
     t->approx_expected = e;
-    t->approx_range = r;
 }
 
-#define EUCLID_TEST_SIZE 6
+#define EUCLID_TEST_SIZE 13
 void test_euclidean()
 {
     RGB_Test euclidean_tests[EUCLID_TEST_SIZE];
-    build_rgb_test(&euclidean_tests[0], 0, 0, 0, 0, 0, 0, 0, 0);
-    build_rgb_test(&euclidean_tests[1], 1, 2, 3, 4, 5, 6, 5.1962, 0.01);
-    build_rgb_test(&euclidean_tests[2], 10, 20, 30, 40, 50, 60, 51.962, 0.01);
-    build_rgb_test(&euclidean_tests[3], 255, 255, 255, 0, 0, 0, 441.67, 0.01);
-    build_rgb_test(&euclidean_tests[4], 0, 0, 0, 255, 255, 255, 441.67, 0.01);
-    build_rgb_test(&euclidean_tests[5], 0, 127, 255, 255, 127, 0, 360.62, 0.01);
+    build_rgb_test(&euclidean_tests[0], 
+        0, 0, 0, 
+        0, 0, 0, 
+        0);
+    build_rgb_test(&euclidean_tests[1], 
+        0, 0, 0, 
+        0, 0, USHRT_MAX, 
+        USHRT_MAX);
+    build_rgb_test(&euclidean_tests[2], 
+        0, 0, 0, 
+        0, USHRT_MAX, 0, 
+        USHRT_MAX);
+    build_rgb_test(&euclidean_tests[3], 
+        0, 0, 0, 
+        USHRT_MAX, 0, 0, 
+        USHRT_MAX);
+    build_rgb_test(&euclidean_tests[4], 
+        0, 0, USHRT_MAX, 
+        0, 0, 0, 
+        USHRT_MAX);
+    build_rgb_test(&euclidean_tests[5], 
+        0, USHRT_MAX, 0, 
+        0, 0, 0, 
+        USHRT_MAX);
+    build_rgb_test(&euclidean_tests[6], 
+        USHRT_MAX, 0, 0, 
+        0, 0, 0, 
+        USHRT_MAX);
+
+    build_rgb_test(&euclidean_tests[7], 
+        USHRT_MAX, 0, 0, 
+        0, 0, USHRT_MAX, 
+        92680.4858101208);
+    build_rgb_test(&euclidean_tests[8], 
+        USHRT_MAX, 0, 0, 
+        0, USHRT_MAX, 0, 
+        92680.4858101208);
+    build_rgb_test(&euclidean_tests[9], 
+        USHRT_MAX, 0, 0, 
+        USHRT_MAX, 0, 0, 
+        0);
+    build_rgb_test(&euclidean_tests[10], 
+        USHRT_MAX, 0, USHRT_MAX, 
+        0, 0, 0, 
+        92680.4858101208);
+    build_rgb_test(&euclidean_tests[11], 
+        USHRT_MAX, USHRT_MAX, 0, 
+        0, 0, 0, 
+        92680.4858101208);
+
+    build_rgb_test(&euclidean_tests[12], 
+        0, 0, 0, 
+        USHRT_MAX, USHRT_MAX, USHRT_MAX, 
+        113509.949674026);
 
     for(int i = 0; i < EUCLID_TEST_SIZE; i++)
     {
         float res = euclidean_distance_3d(
-            euclidean_tests[i].rgb1.red, euclidean_tests[i].rgb1.green, euclidean_tests[i].rgb1.blue,
-            euclidean_tests[i].rgb2.red, euclidean_tests[i].rgb2.green, euclidean_tests[i].rgb2.blue);
+            euclidean_tests[i].rgb1[0], euclidean_tests[i].rgb1[1], euclidean_tests[i].rgb1[2],
+            euclidean_tests[i].rgb2[0], euclidean_tests[i].rgb2[1], euclidean_tests[i].rgb2[2]);
 
 
         Serial.print("Euclidean Test: ");
         Serial.print(i);
 
-        if (res <= euclidean_tests[i].approx_expected + euclidean_tests[i].approx_range && 
-            res >= euclidean_tests[i].approx_expected - euclidean_tests[i].approx_range)
+        if (within_delta(res, euclidean_tests[i].approx_expected, DBS_EXPECTED_DELTA))
         {
             Serial.println(" - Success");
         }
@@ -182,7 +232,7 @@ void test_euclidean()
             Serial.print(" - Failed - Expected: ");
             Serial.print(euclidean_tests[i].approx_expected);
             Serial.print(" +/- ");
-            Serial.print(euclidean_tests[i].approx_range);
+            Serial.print(DBS_EXPECTED_DELTA);
             Serial.print(" but got result: ");
             Serial.println(res);
         }

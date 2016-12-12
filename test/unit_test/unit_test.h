@@ -12,22 +12,15 @@
 
 struct RGB_Test
 {
-    RGB rgb1;
-    RGB rgb2;
+    float rgb1[3];
+    float rgb2[3];
     float approx_expected;
-    float approx_range;
 };
 
 void build_rgb_test(RGB_Test* t, 
-    uint8_t r1, uint8_t g1, uint8_t b1, 
-    uint8_t r2, uint8_t g2, uint8_t b2, 
-    float e, float r);
+    float r1, float g1, float b1, 
+    float r2, float g2, float b2, 
+    float e);
 void test_euclidean();
-
-
-
-
-
-
 
 #define DBS_EXPECTED_DELTA 0.001
