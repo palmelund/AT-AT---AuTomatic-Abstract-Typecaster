@@ -12,7 +12,7 @@ using System.Windows;
 
 namespace BmpSort
 {
-    class ImageProperties
+    public class ImageProperties
     {
         #region Properties  
 
@@ -87,7 +87,7 @@ namespace BmpSort
 
             return result;
         }//returns properties for input image, used for model.decide() function
-        private System.Drawing.Image clean_background(System.Drawing.Image inputImage)//removes background and makes black/white
+        public System.Drawing.Image clean_background(System.Drawing.Image inputImage)//removes background and makes black/white
         {
             int i = 0;
             Bitmap bitmap = new Bitmap(inputImage);
@@ -255,7 +255,7 @@ namespace BmpSort
             {
                 return 0;
             }          
-        } 
+        }
         #endregion detectors
     }
 }

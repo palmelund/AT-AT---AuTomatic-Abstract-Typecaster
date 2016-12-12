@@ -398,5 +398,29 @@ namespace BmpSort
             
             AIO.SendByte(msg.ToArray());
         }
+        /*
+         * Har ikke brug for Arduino
+         */
+        private void UnitTestBotton_Click(object sender, RoutedEventArgs e)
+        {
+            kinect = new Kinect();
+
+            BitmapEncoder encoder = new BmpBitmapEncoder();
+
+            //Takes a picture to use for the test, it also chops the image and show it in the Image2 box.
+            takePictureRAM();
+            ImageProperties unitTest = new ImageProperties("backgrounds.txt");
+            System.Drawing.Image choppedImage = IP.ToBitmap(kinect.CroppedBitmap);
+
+            encoder.Frames.Add(BitmapFrame.Create(kinect.CroppedBitmap));
+            this.Image3.Source = encoder.Frames.ElementAt(encoder.Frames.Count - 1);
+
+            //clean background and show it
+            System.Drawing.Image Clean = unitTest.clean_background(choppedImage);
+            //encoder.Frames.Add(BitmapFrame.Create());
+            //this.Image3.Source = encoder.Frames.ElementAt(encoder.Frames.Count - 1);
+
+            int[] results = unitTest.get_properties(choppedImage);
+        }
     }
 }

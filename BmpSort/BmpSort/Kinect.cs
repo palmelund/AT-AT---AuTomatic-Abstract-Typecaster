@@ -16,7 +16,7 @@ using Microsoft.Kinect;
 
 namespace BmpSort
 {
-    class Kinect
+    public class Kinect
     {
         public Kinect()
         {
