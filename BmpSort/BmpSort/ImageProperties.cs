@@ -43,14 +43,14 @@ namespace BmpSort
 
         public ImageProperties(string fileName)//constructor
         {
-            backgrounds.Add(0, 0);
-            load_background_colors_textfile("backgrounds.txt");
+            backgrounds.Add(Color.Black.ToArgb(), Color.Black.ToArgb());
+            load_background_colors_textfile(fileName);
             load_model_from_dat();
         }
 
         private void load_model_from_dat() //loads the model data from .dat file
         {
-            StreamReader incstream = new StreamReader("model3.dat");
+            StreamReader incstream = new StreamReader("bayes.mod");
             List<string> datastrings = new List<string>();
 
             while (!incstream.EndOfStream){
@@ -59,20 +59,25 @@ namespace BmpSort
 
             trainingInput = new int[datastrings.Count()][];
             trainingOutput = new int[datastrings.Count()];
-            string[] temp3long = new string[3];
+            string[] temp5long = new string[5];
             counter = 0;
 
             foreach (string linje in datastrings){
-                temp3long = linje.Split('|');
-                add_training_input(int.Parse(temp3long[0]), int.Parse(temp3long[1]), counter);
-                trainingOutput[counter] = int.Parse(temp3long[3]);
+                temp5long = linje.Split('|');
+                add_training_input(int.Parse(temp5long[0]), int.Parse(temp5long[1]), int.Parse(temp5long[2]), int.Parse(temp5long[3]), counter);
+                trainingOutput[counter] = int.Parse(temp5long[4]);
                 counter++;
             }
             incstream.Close();
         }
-        private void add_training_input(int a, int b, int place)
+        private void add_training_input(int a, int b, int c, int d, int place)
         {
-            int[] temp = new int[] { a, b, };
+            int white = 0;
+            if ((d<3900)&&(d>2700))
+            {
+                white = 1;
+            }
+            int[] temp = new int[] { a, b, c, white};
 
             trainingInput[place] = temp;
         }
@@ -80,47 +85,45 @@ namespace BmpSort
         #region Functions used when classifying an incomming image
         public int[] get_properties(System.Drawing.Image inputImage)
         {
-            int[] result = {0, 0, 0};
-            inputImage = clean_background(inputImage);
-            result[0] = whitePixels;
-            result[1] = blobs;
+            int[] result = {0, 0, 0, 0};
+            clean_background(inputImage);
+            result[0] = blobs;
+            result[1] = isCircle;
             result[2] = squaredetected;
+            result[3] = whitePixels;
 
             return result;
         }//returns properties for input image, used for model.decide() function
         private System.Drawing.Image clean_background(System.Drawing.Image inputImage)//removes background and makes black/white
         {
             int i = 0;
+            blobs = 0;
+            int pixels = 0;
             Bitmap bitmap = new Bitmap(inputImage);
-            Color[] colors = new Color[80000];
-            Color[] newImage = new Color[80000];
+            System.Drawing.Color[] colors = new System.Drawing.Color[22000];
+            System.Drawing.Color[] newImage = new System.Drawing.Color[22000];
 
-            whitePixels = 0;
             arrayMaker.Convert(bitmap, out colors);
 
-            foreach (Color farve in colors)
+            foreach (System.Drawing.Color farve in colors)
             {
                 if (backgrounds.ContainsKey(farve.ToArgb()))
                 {
-                    newImage[i] = Color.Black;
+                    newImage[i] = System.Drawing.Color.Black;
                 }
                 else
                 {
-                    newImage[i] = Color.White;
-                    whitePixels++;
+                    newImage[i] = System.Drawing.Color.White;
+                    pixels++;
                 }
                 i++;
             }
-            if ((whitePixels > 4000) && (whitePixels < 8000))
-                {
-                    whitePixels = 1;
-            }
-            else
+            if ((pixels<3900)&&(pixels>2700))
             {
-                whitePixels = 0;
+                whitePixels = 1;
             }
             imageMaker.Convert(newImage, out currentBitmap);
-            blobs = blobdetect(currentBitmap);
+            blobs = blobdetection(currentBitmap);
             return currentBitmap;
         }
         #endregion Functions used when classifying an incomming image
@@ -181,7 +184,7 @@ namespace BmpSort
                 System.Drawing.Image image = System.Drawing.Image.FromFile(fil);
                 clean_background(image);
                 running[0] = whitePixels;
-                running[1] = blobdetect(currentBitmap);
+                running[1] = blobdetection(currentBitmap);
                 running[2] = squaredetected;
                 arrayCounter++;
             }
@@ -195,7 +198,7 @@ namespace BmpSort
                 System.Drawing.Image image = System.Drawing.Image.FromFile(fil);
                 clean_background(image);
                 running[0] = whitePixels;
-                running[1] = blobdetect(currentBitmap);
+                running[1] = blobdetection(currentBitmap);
                 running[2] = squaredetected;
                 arrayCounter++;
             }
@@ -209,7 +212,7 @@ namespace BmpSort
                 System.Drawing.Image image = System.Drawing.Image.FromFile(fil);
                 clean_background(image);
                 running[0] = whitePixels;
-                running[1] = blobdetect(currentBitmap);
+                running[1] = blobdetection(currentBitmap);
                 running[2] = squaredetected;
                 arrayCounter++;
             }
@@ -218,7 +221,7 @@ namespace BmpSort
 
 
         #region detectors
-        public int blobdetect(Bitmap input)
+        public int blobdetection(Bitmap input)
         {
             SimpleShapeChecker circlechecker = new SimpleShapeChecker();
             SimpleShapeChecker squarechecker = new SimpleShapeChecker();
@@ -259,7 +262,8 @@ namespace BmpSort
                    (int)(radius * 2));
 
                     }
-
+                    #endregion iscircle
+                    #region issquare
                     List<IntPoint> corners = PointsCloud.FindQuadrilateralCorners(edgepoints);
                     if (squarechecker.IsQuadrilateral(edgepoints,out corners))
                     {
@@ -286,6 +290,7 @@ namespace BmpSort
                     squaredetected = 0;
                 }
             }
+            #endregion issquare
             if (blobscounter.ObjectsCount == 1)
             {
                 return 1;

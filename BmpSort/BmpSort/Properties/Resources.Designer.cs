@@ -8,10 +8,10 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace BmpSort.Properties
-{
-
-
+namespace BmpSort.Properties {
+    using System;
+    
+    
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -22,49 +22,110 @@ namespace BmpSort.Properties
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Resources
-    {
-
+    internal class Resources {
+        
         private static global::System.Resources.ResourceManager resourceMan;
-
+        
         private static global::System.Globalization.CultureInfo resourceCulture;
-
+        
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal Resources()
-        {
+        internal Resources() {
         }
-
+        
         /// <summary>
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager
-        {
-            get
-            {
-                if ((resourceMan == null))
-                {
+        internal static global::System.Resources.ResourceManager ResourceManager {
+            get {
+                if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("BmpSort.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
             }
         }
-
+        
         /// <summary>
         ///   Overrides the current thread's CurrentUICulture property for all
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture
-        {
-            get
-            {
+        internal static global::System.Globalization.CultureInfo Culture {
+            get {
                 return resourceCulture;
             }
-            set
-            {
+            set {
                 resourceCulture = value;
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to -16777216
+        ///0
+        ///-1
+        ///-263
+        ///-131084
+        ///-264469
+        ///-723230
+        ///-1121323
+        ///-1974839
+        ///-2764863
+        ///-2961734
+        ///-3160393
+        ///-3554892
+        ///-3950422
+        ///-4476511
+        ///-5004647
+        ///-5793135
+        ///-6580859
+        ///-7303046
+        ///-8027021
+        ///-8619155
+        ///-9146259
+        ///-9082258
+        ///-9015952
+        ///-8949389
+        ///-8883599
+        ///-9210769
+        ///-9474712
+        ///-10067614
+        ///-10657953
+        ///-10592676
+        ///-10462886
+        ///-10660521
+        ///-10857132
+        ///-11119279
+        ///-11381678
+        ///-11381932
+        ///-11382958
+        ///-11515055
+        ///-11580594
+        ///-11580852
+        ///-11581620
+        ///-11713459
+        ///-11778996
+        ///-11910325
+        ///-12041654
+        ///-12238262
+        ///-12369334
+        ///-12434102
+        ///-12435127
+        ///-12435640 [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string backgrounds {
+            get {
+                return ResourceManager.GetString("backgrounds", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] bayes {
+            get {
+                object obj = ResourceManager.GetObject("bayes", resourceCulture);
+                return ((byte[])(obj));
             }
         }
     }
