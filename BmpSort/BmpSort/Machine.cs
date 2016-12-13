@@ -22,7 +22,7 @@ namespace BmpSort
 
         public Machine()
         {
-            properties = new ImageProperties("backgrounds.txt");
+            properties = new ImageProperties(@"Resources\backgrounds.txt");
             train_model();
         }
 

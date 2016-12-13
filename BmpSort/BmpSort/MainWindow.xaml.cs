@@ -42,8 +42,8 @@ namespace BmpSort
             }
         }
 
-        private int _class;
-        public int Class
+        private Shape _class;
+        public Shape Class
         {
             get { return _class; }
             set
@@ -103,55 +103,10 @@ namespace BmpSort
             _m = new Machine();
         }
 
-        public void takePictureSAVE()
-        {
-            //Check access to UI Thread.
-            if (Application.Current.Dispatcher.CheckAccess())
-            {
-                // create a png bitmap encoder which knows how to save a .png file
-                BitmapEncoder encoder = new BmpBitmapEncoder();
-                string time = System.DateTime.Now.ToString("hh'-'mm'-'ss", CultureInfo.CurrentUICulture.DateTimeFormat);
-
-                string myPhotos = Directory.GetCurrentDirectory();
-
-                string path = System.IO.Path.Combine(myPhotos, "picture-" + time + ".bmp");
-
-
-                Dispatcher.Invoke(() =>
-                {
-                    TakenImage = _kinect.TakePicture(new Rectangle(262, 87, 110, 200));
-                    TakenImage.Save(path);
-                    _aio.SendObject(Shape.NotBall, Color.Unknown);
-                });
-            }
-
-            else
-            {
-                //Other wise re-invoke the method with UI thread access
-                Application.Current.Dispatcher.Invoke(takePictureSAVE);
-            }
-
-        }
-        public static BitmapSource GetImageStream(System.Drawing.Image myImage)
-        {
-            Bitmap bitmap = new Bitmap(myImage);
-            IntPtr bmpPt = bitmap.GetHbitmap();
-            BitmapSource bitmapSource =
-             System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
-                   bmpPt,
-                   IntPtr.Zero,
-                   Int32Rect.Empty,
-                   BitmapSizeOptions.FromEmptyOptions());
-
-            //freeze bitmapSource and clear memory to avoid memory leaks
-            bitmapSource.Freeze();
-            return bitmapSource;
-        }
-
         private void ConnectButton_Click(object sender, RoutedEventArgs e)
         {
             _kinect = new Kinect();
-            //_aio = new ArduinoIO(ComPort);
+            _aio = new ArduinoIO(ComPort);
 
             Worker = new BackgroundWorker()
             {
@@ -177,31 +132,35 @@ namespace BmpSort
             var worker = (BackgroundWorker)sender;
             while (!worker.CancellationPending)
             {
-                //Message message;
-                //_aio.AwaitMessage(out message);
+                Message message;
+                _aio.AwaitMessage(out message);
 
-                //if (message?.Type == MessageType.Command &&
-                //    (message as CommandMessage).Command == Command.TakePicture)
+                if (message?.Type == MessageType.Command &&
+                    (message as CommandMessage).Command == Command.TakePicture)
                 {
                     var image = _kinect.TakePicture(new Rectangle(262, 87, 110, 200));
 
                     // Decide on taken picture
-                    var classification = _m.decide(image);
-
-                    //_aio.SendObject(Class == 1 ? Shape.Ball : Shape.NotBall, Color.Unknown);
+                    var classification = _m.decide(image) == 1 ? Shape.Ball : Shape.NotBall;
+                    _aio.SendObject(classification, Color.Unknown);
                     // TODO: Update when the kinect supports color recognition
 
                     worker.ReportProgress(0, image);
                     worker.ReportProgress(1, _m.Currentpicture);
                     worker.ReportProgress(2, classification);
-                }
 
-                Thread.Sleep(1000);
+
+                    //string time = System.DateTime.Now.ToString("hh'-'mm'-'ss", CultureInfo.CurrentUICulture.DateTimeFormat);
+                    //string myPhotos = Directory.GetCurrentDirectory();
+                    //string path = System.IO.Path.Combine(myPhotos, "picture-" + time + ".bmp");
+                    //image.Save(path);
+                }
             }
         }
 
         /// <summary>
-        /// We use this function to update the user interface from the background worker
+        /// We use this function to update the user interface from the background worker.
+        /// This might not be the best solution, but it just works™
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -218,8 +177,8 @@ namespace BmpSort
                     CleanedImage = e.UserState as Bitmap;
                     break;
                 case 2:
-                    if (e.UserState is int)
-                        Class = (int)e.UserState;
+                    if (e.UserState is Shape)
+                        Class = (Shape)e.UserState;
                     break;
             }
         }

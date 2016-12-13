@@ -50,7 +50,7 @@ namespace BmpSort
 
         private void load_model_from_dat() //loads the model data from .dat file
         {
-            StreamReader incstream = new StreamReader("bayes.mod");
+            StreamReader incstream = new StreamReader(@"Resources\bayes.mod");
             List<string> datastrings = new List<string>();
 
             while (!incstream.EndOfStream){
@@ -86,7 +86,13 @@ namespace BmpSort
         public int[] get_properties(System.Drawing.Image inputImage)
         {
             int[] result = {0, 0, 0, 0};
+            blobs = 0;
+            isCircle = 0;
+            squaredetected = 0;
+            whitePixels = 0;
+
             clean_background(inputImage);
+
             result[0] = blobs;
             result[1] = isCircle;
             result[2] = squaredetected;
