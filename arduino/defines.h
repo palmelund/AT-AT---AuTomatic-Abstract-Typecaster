@@ -8,8 +8,9 @@
 #include "Arduino.h"
 
 #define DEBUGGING 0 // TODO: Set to 0 when running release
+#define RELEASEDEBUG 0
 
-#define CALIBRACTION_ITERATIONS 100
+#define CALIBRACTION_ITERATIONS 200
 
 
 #if DEBUGGING
@@ -59,6 +60,16 @@ while (true) \
     delay(500); \
 }   \
 }
+#endif
+
+#if RELEASEDEBUG
+#define BLINK                       \
+pinMode(42, OUTPUT); \
+digitalWrite(42, HIGH); \
+delay(500); \
+digitalWrite(42, LOW)
+#else
+#define BLINK
 #endif
 
 #endif // _DEFINES_H_

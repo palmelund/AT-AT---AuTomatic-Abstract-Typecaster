@@ -26,7 +26,7 @@ int32_t task_calibrate_ultra_sound_sensor(Ultra_Sound_Sensor *distance_sensor)
 void task_calibrate_colors(int32_t *conveyor_target, Motor *conveyor,
                            SFE_ISL29125 *rgb_sensor, Delta_RGB colors[COLOR_COUNT])
 {
-    (*conveyor_target) = SEGMENT_DEGREE_LENGTH * 2;
+    (*conveyor_target) = SEGMENT_DEGREE_LENGTH;
 
     DEBUG_PRINTLN("Calibrating colors...");
     for (uint8_t i = 0; i < COLOR_COUNT; ++i)
@@ -40,6 +40,7 @@ void task_calibrate_colors(int32_t *conveyor_target, Motor *conveyor,
         }
 
         determin_bounding_sphere(samples, CALIBRACTION_ITERATIONS, &colors[i]);
+        colors[i].delta += 100;
 
         DEBUG_PRINT_VAR(colors[i].delta);
         DEBUG_PRINT(" - ");
@@ -47,7 +48,7 @@ void task_calibrate_colors(int32_t *conveyor_target, Motor *conveyor,
 
         while (motor_get_degrees(conveyor) < (*conveyor_target))
             ;
-        (*conveyor_target) += SEGMENT_DEGREE_LENGTH * 2;
+        (*conveyor_target) += SEGMENT_DEGREE_LENGTH;
     }
 
     DEBUG_PRINTLN("Done!");
@@ -73,34 +74,6 @@ void task_check_first_segment(Segment_Queue *segment_queue)
 
     first_segment->object_type = response.object.type;
     first_segment->color = response.object.color;
-
-    /*
-    Segment *first_segment = queue_next(segment_queue);
-
-    // DEBUG
-    first_segment->is_occupied = true;
-    first_segment->object_type = BALL;
-    return;
-
-    for (uint8_t i = 0; i < SENSOR_PINGS; ++i)
-    {
-        int32_t test_dist = distance_sensor_measure_distance(distance_sensor);
-
-        // Tests if a ball is in front of sensor
-        if (test_dist < distance_to_wall)
-        {
-            DEBUG_PRINTLN("Segment was occupied");
-            first_segment->is_occupied = true;
-            first_segment->object_type = BALL;
-            first_segment->color = UNKNOWN;
-            break;
-        }
-        else
-        {
-            first_segment->is_occupied = false;
-        }
-    }
-*/
 }
 
 void task_determin_color(SFE_ISL29125 *color_sensor,
@@ -161,13 +134,14 @@ void task_feed_ball(Motor *feeder)
 
 void task_rotate_seperator(Advanced_Motor *separator, Segment_Queue *queue)
 {
-    static uint8_t last_position = GARBAGE_BUCKET;
+    static uint8_t last_position = UNKNOWN;
     static int16_t bucket_position[BUCKET_COUNT] = {
         RED_BUCKET,
         GREEN_BUCKET,
         BLUE_BUCKET,
         YELLOW_BUCKET,
-        GARBAGE_BUCKET};
+        GARBAGE_BUCKET
+    };
 
     Segment *segment = get_segment(queue, LAST_INDEX);
     uint8_t position;

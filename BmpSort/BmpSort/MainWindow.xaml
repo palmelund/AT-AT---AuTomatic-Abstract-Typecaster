@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:BmpSort"
         xmlns:valueConverters="clr-namespace:BmpSort.ValueConverters"
         mc:Ignorable="d"
-        Title="MainWindow" Height="300" Width="300"
+        Title="MainWindow" Height="600" Width="800"
         DataContext="{Binding RelativeSource={RelativeSource Self}}">
     <Window.Resources>
         <valueConverters:BitmapToImageSource x:Key="bitmapConverter" />
@@ -70,7 +70,8 @@
             <Button Grid.Column="2" Grid.ColumnSpan="1"
                     Grid.Row="4" Grid.RowSpan="1"
                     Content="Send Bytes"
-                    Click="SendByteButton_Click"/>
+                    Click="SendByteButton_Click"
+                    IsEnabled="{Binding Path=ArduinoIO, TargetNullValue=false}"/>
 
             <StackPanel Grid.Column="4" Grid.ColumnSpan="1"
                         Grid.Row="0" Grid.RowSpan="1"
@@ -82,7 +83,8 @@
             <Button Grid.Column="4" Grid.ColumnSpan="1"
                     Grid.Row="4" Grid.RowSpan="1"
                     Content="Start Cmd"
-                    Click="SendStartCommandButton_OnClick"/>
+                    Click="SendStartCommandButton_OnClick"
+                    IsEnabled="{Binding Path=ArduinoIO, TargetNullValue=false}"/>
         </Grid>
     </Grid>
 </Window>

@@ -32,8 +32,9 @@ Delta_RGB colors[COLOR_COUNT] = {
     {{941, 1147, 951}, 204},
     {{699, 1154, 978}, 225},
     {{698, 1122, 1134}, 234},
-    {{1204, 1699, 1099}, 452},
-    {{708, 1087, 940}, 235}};
+    {{1204, 1699, 1099}, 452}
+    //{{708, 1087, 940}, 235}
+};
 
 Segment_Queue segment_queue;
 int32_t conveyor_target;
@@ -101,45 +102,11 @@ void setup()
 
 void loop()
 {
-    /*
-    static bool run = true;
-
-    if (Serial.available() > 0)
-    {
-        uint8_t c = Serial.read();
-        if (c == 'b') // BEGIN
-        {
-            run = true;
-            motor_turn(&motor_conveyor);
-        }
-
-        else if (c == 'e') // END
-        {
-            run = false;
-            motor_stop(&motor_conveyor);
-        }
-    }
-
-    if (run == false)
-        return;
-*/
-
     task_check_first_segment(&segment_queue);
 
     task_determin_color(&rgb_sensor, &segment_queue, colors);
     task_rotate_seperator(&adv_motor_separator, &segment_queue);
-
-    // This ensures that the feeder only turns 90 degrees,
-    // as it otherwise rotate more than that on startup.
-    static bool skip_counter = true;
-    if (skip_counter)
-    {
-        skip_counter = false;
-    }
-    else
-    {
-        task_feed_ball(&motor_feeder);
-    }
+    task_feed_ball(&motor_feeder);
 
     while (motor_get_degrees(&motor_conveyor) < conveyor_target)
         ;

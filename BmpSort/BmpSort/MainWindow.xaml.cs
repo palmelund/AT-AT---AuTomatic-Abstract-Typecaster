@@ -78,7 +78,6 @@ namespace BmpSort
         public bool CanConnect => _worker == null;
 
         private BackgroundWorker _worker;
-
         private BackgroundWorker Worker
         {
             get { return _worker; }
@@ -93,7 +92,18 @@ namespace BmpSort
 
         private Kinect _kinect;
         private Machine _m;
+
         private ArduinoIO _aio;
+
+        public ArduinoIO ArduinoIO
+        {
+            get { return _aio; }
+            set
+            {
+                _aio = value;
+                OnPropertyChanged();
+            }
+        }
 
         private const string BackgroundColors = "colors.txt";
 
@@ -106,7 +116,7 @@ namespace BmpSort
         private void ConnectButton_Click(object sender, RoutedEventArgs e)
         {
             _kinect = new Kinect();
-            _aio = new ArduinoIO(ComPort);
+            ArduinoIO = new ArduinoIO(ComPort);
 
             Worker = new BackgroundWorker()
             {
@@ -133,16 +143,17 @@ namespace BmpSort
             while (!worker.CancellationPending)
             {
                 Message message;
-                _aio.AwaitMessage(out message);
+                ArduinoIO.AwaitMessage(out message);
 
-                if (message?.Type == MessageType.Command &&
+                if (message != null &&
+                    message.Type == MessageType.Command &&
                     (message as CommandMessage).Command == Command.TakePicture)
                 {
                     var image = _kinect.TakePicture(new Rectangle(262, 87, 110, 200));
 
                     // Decide on taken picture
                     var classification = _m.decide(image) == 1 ? Shape.Ball : Shape.NotBall;
-                    _aio.SendObject(classification, Color.Unknown);
+                    ArduinoIO.SendObject(classification, Color.Unknown);
                     // TODO: Update when the kinect supports color recognition
 
                     worker.ReportProgress(0, image);

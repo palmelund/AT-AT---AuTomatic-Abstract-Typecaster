@@ -241,7 +241,7 @@ void advanced_motor_stop(Advanced_Motor *motor)
     else
         advanced_motor_turn(motor, FORWARD);
 
-    delay(50); // 50ms seems like a good delay
+    delay(70); // 60ms seems like a good delay
     digitalWrite(motor->pin1, LOW);
     digitalWrite(motor->pin2, LOW);
     delay(100); // give the motor time to stop coasting
