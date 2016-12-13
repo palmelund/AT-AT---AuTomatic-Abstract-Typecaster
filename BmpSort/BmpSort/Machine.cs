@@ -25,29 +25,12 @@ namespace BmpSort
             properties = new ImageProperties("backgrounds.txt");
             train_model();
         }
-        private Bitmap current;
 
-        public Bitmap currentpicture
-        {
-            get { return current; }
-            set { current = value; }
-        }
+        public Bitmap Currentpicture { get; set; }
 
-        private int[][] _input; //image variables
+        public int[][] TrainerInput { get; set; }
 
-        public int[][] trainerInput
-        {
-            get { return _input; }
-            set { _input = value; }
-        }
-
-        private int[] _output; //class labels
-
-        public int[] trainerOutput
-        {
-            get { return _output; }
-            set { _output = value; }
-        }
+        public int[] TrainerOutput { get; set; }
 
         public void load_model_from_file(string inputfile)
         {
@@ -67,7 +50,7 @@ namespace BmpSort
         public int decide(Image image)
         {
             int result = nb.Decide(properties.get_properties(image));
-            currentpicture = properties.currentBitmap;
+            Currentpicture = properties.currentBitmap;
             return result;
         }
     }

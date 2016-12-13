@@ -28,11 +28,11 @@ namespace BmpSort
         public void generate_arff_file(ref int progress)
         {
            
-            for (int i = 0; i < M.trainerInput.Length; i++)
+            for (int i = 0; i < M.TrainerInput.Length; i++)
             {
-                read_file_data_values(M.trainerInput[i][0], M.trainerInput[i][1], M.trainerInput[i][2],
-                    M.trainerOutput[i]);
-                report_progress(i, M.trainerInput.Length, ref progress);
+                read_file_data_values(M.TrainerInput[i][0], M.TrainerInput[i][1], M.TrainerInput[i][2],
+                    M.TrainerOutput[i]);
+                report_progress(i, M.TrainerInput.Length, ref progress);
             }
             write_arff_file();
         }

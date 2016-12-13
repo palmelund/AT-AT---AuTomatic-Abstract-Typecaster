@@ -35,7 +35,7 @@ namespace BmpSort
         public Bitmap currentBitmap;
         Accord.Imaging.BlobCounter blobscounter = new BlobCounter();
         Accord.Imaging.Converters.ImageToArray arrayMaker = new Accord.Imaging.Converters.ImageToArray();
-        Accord.Imaging.Converters.ArrayToImage imageMaker = new Accord.Imaging.Converters.ArrayToImage(400, 200);
+        Accord.Imaging.Converters.ArrayToImage imageMaker = new Accord.Imaging.Converters.ArrayToImage(110, 200);
 
         Dictionary<int, int> backgrounds = new Dictionary<int, int>();
 

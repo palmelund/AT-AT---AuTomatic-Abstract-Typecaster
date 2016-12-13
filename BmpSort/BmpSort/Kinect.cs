@@ -6,6 +6,7 @@ using System.Globalization;
 using System.IO;
 using System.IO.Ports;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Security.RightsManagement;
 using System.Text;
 using System.Threading.Tasks;
@@ -42,19 +43,9 @@ namespace BmpSort
             {
                 // Turn on the color stream to receive color frames
                 _sensor.ColorStream.Enable(ColorImageFormat.RgbResolution640x480Fps30);
-
-                // Allocate space to put the pixels we'll receive
-                _colorPixels = new byte[_sensor.ColorStream.FramePixelDataLength];
-
-                // This is the bitmap we'll display on-screen
-                ColorBitmap = new WriteableBitmap(_sensor.ColorStream.FrameWidth,
-                    _sensor.ColorStream.FrameHeight, 96.0, 96.0, PixelFormats.Bgr32, null);
-
-                // Start the sensor!
                 try
                 {
                     _sensor.Start();
-                    _sensor.ColorFrameReady += SensorColorPictureFrameReady;
                 }
                 catch (IOException)
                 {
@@ -62,42 +53,31 @@ namespace BmpSort
                 }
             }
         }
-
-
-        public WriteableBitmap ColorBitmap { get; set; }
-        
-        private const string PortName = "COM3";
-        private const int BaudRate = 9600;
-        private SerialPort _sp = new SerialPort(PortName, BaudRate, Parity.None, 8, StopBits.One);
+       
         private readonly KinectSensor _sensor;
-        private readonly byte[] _colorPixels;
 
-        public BitmapSource TakePicture(Int32Rect cropped)
+        public Bitmap TakePicture(Rectangle cropped)
         {
-            WriteableBitmap result = new WriteableBitmap(cropped.Width, cropped.Height, ColorBitmap.DpiX,
-                ColorBitmap.DpiY, ColorBitmap.Format, ColorBitmap.Palette);
-
-            result.WritePixels(cropped,_colorPixels, ColorBitmap.BackBufferStride, 0, 0);
-
-            return result;
-        }
-
-        private void SensorColorPictureFrameReady(object sender, ColorImageFrameReadyEventArgs e)
-        {
-            using (ColorImageFrame colorFrame = e.OpenColorImageFrame())
+            using (var frame = _sensor.ColorStream.OpenNextFrame(10000))
             {
-                if (colorFrame != null)
-                {
-                    // Copy the pixel data from the image to a temporary array
-                    colorFrame.CopyPixelDataTo(_colorPixels);
+                if (frame == null)
+                    throw new NotImplementedException("I don't want this to happen");
 
-                    // Write the pixel data into our bitmap
-                    ColorBitmap.WritePixels(
-                        new Int32Rect(0, 0, ColorBitmap.PixelWidth, ColorBitmap.PixelHeight),
-                        _colorPixels,
-                        ColorBitmap.PixelWidth * sizeof(int),
-                        0);
-                }
+                var raw = frame.GetRawPixelData();
+                var tempBitmap = new Bitmap(frame.Width, frame.Height, PixelFormat.Format32bppRgb);
+                
+                var data = tempBitmap.LockBits(
+                    new Rectangle(0, 0, frame.Width, frame.Height),
+                    ImageLockMode.WriteOnly,
+                    tempBitmap.PixelFormat);
+
+                // This seems to be the best way to copy an array into the pointer for 
+                // the bitmap.
+                Marshal.Copy(raw, 0, data.Scan0, frame.PixelDataLength);
+                tempBitmap.UnlockBits(data);
+
+                var result = tempBitmap.Clone(cropped, PixelFormat.Format32bppRgb);
+                return result;
             }
         }
     }

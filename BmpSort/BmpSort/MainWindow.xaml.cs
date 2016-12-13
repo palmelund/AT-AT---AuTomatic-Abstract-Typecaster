@@ -1,36 +1,17 @@
-﻿//#define BUFFERDEBUG
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
-using System.Drawing.Imaging;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using Microsoft.Kinect;
-using System.IO;
 using System.Globalization;
-using Accord;
-using System.IO.Ports;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Threading;
-using System.Windows.Interop;
-using Accord.IO;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Media.Imaging;
 using SerialIO;
-using Color = SerialIO.Color;
-using PixelFormat = System.Drawing.Imaging.PixelFormat;
 using Shape = SerialIO.Shape;
-
+using Color = SerialIO.Color;
 
 namespace BmpSort
 {
@@ -39,123 +20,89 @@ namespace BmpSort
     /// </summary>
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
-        #region Properties
-
-        private Kinect kinect;
-
-        private ImageProcessing IP;
-
-        private Machine M;
-
-        private int progress = 0;
-
-        private ArduinoIO AIO;
-
-        private Task t;
-
-        private int classification;
-
-        private string backgroundColors = "colors.txt";
-        #endregion Properties
-
-        /// <summary>
-        /// Initializes a new instance of the MainWindow class.
-        /// </summary>
-        public MainWindow()
+        private Bitmap _takenImage;
+        public Bitmap TakenImage
         {
-            InitializeComponent();
-        }
-
-        /// <summary>
-        /// Execute startup tasks
-        /// </summary>
-        /// <param name="sender">object sending the event</param>
-        /// <param name="e">event arguments</param>
-        private void WindowLoaded(object sender, RoutedEventArgs e)
-        {
-            IP = new ImageProcessing();
-            M = new Machine();
-
-
-            ProgressBarARFF.Value = progress;
-        }
-
-        /// <summary>
-        /// Execute shutdown tasks
-        /// </summary>
-        /// <param name="sender">object sending the event</param>
-        /// <param name="e">event arguments</param>
-        private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            //kinect?.Sensor?.Stop();
-            //AIO?.CloseConnection();
-        }
-
-        /*
-        private void portReceiveData(object sender, SerialDataReceivedEventArgs e)
-        {
-            // Serial port from arduino assigned
-            SerialPort portArduino = (SerialPort) sender;
-
-            //Read from arduino
-            string input = portArduino.ReadTo("end");
-            //Split input to get correct command
-            string[] data = input.Split(':');
-            //Switch on command to call correct function
-            switch (data[1].Trim())
+            get { return _takenImage; }
+            set
             {
-                case "1":
-                {
-                    takePictureRAM();
-                    break;
-                }
-                case "2":
-                {
-                    takePictureSAVE();
-                    break;
-                }
-                default:
-                {
-                    //Default something.
-
-                    break;
-                }
-            }
-        }
-*/
-
-        public void takePictureRAM()
-        {
-            //Check access to UI Thread.
-            if (Application.Current.Dispatcher.CheckAccess())
-            {
-                Dispatcher.Invoke(() =>
-                {
-                    BitmapSource image = kinect.TakePicture(new Int32Rect(262, 87, 110, 200));
-                    Image2.Source = image;
-
-
-                    // create frame from the writable bitmap and add to encoder
-                    //encoder.Frames.Add(BitmapFrame.Create(this.colorBitmap));
-
-
-                    // Decide on taken picture
-
-                    classification = M.decide(IP.ToBitmap(image));
-                    cleanedImage.Source = GetImageStream(M.currentpicture);
-                    //classification = 1;
-                    ClassificationLabel.Content = "Class: " + classification;
-
-                    AIO.SendObject(classification == 1 ? Shape.Ball : Shape.NotBall, Color.Unknown); // TODO: Update when the kinect supports color recognition
-                });
-            }
-            else
-            {
-                //Other wise re-invoke the method with UI thread access
-                Application.Current.Dispatcher.Invoke(() => takePictureRAM());
+                _takenImage = value;
+                OnPropertyChanged();
             }
         }
         
+        private Bitmap _cleanedImage;
+        public Bitmap CleanedImage
+        {
+            get { return _cleanedImage; }
+            set
+            {
+                _cleanedImage = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private int _class;
+        public int Class
+        {
+            get { return _class; }
+            set
+            {
+                _class = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private string _comPort;
+        public string ComPort
+        {
+            get { return _comPort; }
+            set
+            {
+                _comPort = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private string _bytes;
+        public string Bytes
+        {
+            get { return _bytes; }
+            set
+            {
+                _bytes = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public bool CanConnect => _worker == null;
+
+        private BackgroundWorker _worker;
+
+        private BackgroundWorker Worker
+        {
+            get { return _worker; }
+            set
+            {
+                _worker = value;
+                OnPropertyChanged();
+                OnPropertyChanged("CanConnect");
+            }
+        }
+
+
+        private Kinect _kinect;
+        private Machine _m;
+        private ArduinoIO _aio;
+
+        private const string BackgroundColors = "colors.txt";
+
+        public MainWindow()
+        {
+            InitializeComponent();
+            _m = new Machine();
+        }
+
         public void takePictureSAVE()
         {
             //Check access to UI Thread.
@@ -172,20 +119,9 @@ namespace BmpSort
 
                 Dispatcher.Invoke(() =>
                 {
-                    BitmapSource image = kinect.TakePicture(new Int32Rect(262, 87, 110, 200));
-                    Image2.Source = image;
-                    
-                    encoder.Frames.Add(BitmapFrame.Create(image));
-                    using (FileStream fs = new FileStream(path, FileMode.Create))
-                    {
-                        encoder.Save(fs);
-                    }
-                    AIO.SendObject(Shape.NotBall, Color.Unknown);
-
-                    //image.Save(path);
-
-                    //Bitmap savableBitmap = IP.ToBitmap(image);
-                    //savableBitmap.Save(path);
+                    TakenImage = _kinect.TakePicture(new Rectangle(262, 87, 110, 200));
+                    TakenImage.Save(path);
+                    _aio.SendObject(Shape.NotBall, Color.Unknown);
                 });
             }
 
@@ -211,17 +147,20 @@ namespace BmpSort
             bitmapSource.Freeze();
             return bitmapSource;
         }
-        private void ARFFbutton_Click(object sender, RoutedEventArgs e)
-        {
-            ARFFGenerator arff = new ARFFGenerator(M);
-            arff.generate_arff_file(ref progress);
-        }
 
         private void ConnectButton_Click(object sender, RoutedEventArgs e)
         {
-            kinect = new Kinect();
-            AIO = new ArduinoIO(SerialPortTextBox.Text);
-            //Lav thread til Serial IO listening.
+            _kinect = new Kinect();
+            //_aio = new ArduinoIO(ComPort);
+
+            Worker = new BackgroundWorker()
+            {
+                WorkerReportsProgress = true,
+                WorkerSupportsCancellation = true
+            };
+            Worker.DoWork += Worker_DoWork;
+            Worker.ProgressChanged += Worker_ProgressChanged;
+            Worker.RunWorkerAsync();
 
 #if (BUFFERDEBUG)
             AIO.DataRecived += (o, args) =>
@@ -229,36 +168,65 @@ namespace BmpSort
                 Console.Write(AIO.ReadExistingBytes());
             };
 #else
-            t = Task.Run(() =>
-            {
-                while (true)
-                {
 
-                    Message message;
-                    AIO.AwaitMessage(out message);
-
-                    if (message?.Type == MessageType.Command &&
-                     (message as CommandMessage).Command == Command.TakePicture)
-                    {
-                        //takePictureRAM();
-                        takePictureSAVE();
-                    }
-
-                    //takePictureRAM();
-                    //Thread.Sleep(1000);
-                }
-            });
 #endif
+        }
 
-            // Set the image we display to point to the bitmap where we'll put the image data
-            Image1.Source = kinect.ColorBitmap;
+        private void Worker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            var worker = (BackgroundWorker)sender;
+            while (!worker.CancellationPending)
+            {
+                //Message message;
+                //_aio.AwaitMessage(out message);
 
+                //if (message?.Type == MessageType.Command &&
+                //    (message as CommandMessage).Command == Command.TakePicture)
+                {
+                    var image = _kinect.TakePicture(new Rectangle(262, 87, 110, 200));
+
+                    // Decide on taken picture
+                    var classification = _m.decide(image);
+
+                    //_aio.SendObject(Class == 1 ? Shape.Ball : Shape.NotBall, Color.Unknown);
+                    // TODO: Update when the kinect supports color recognition
+
+                    worker.ReportProgress(0, image);
+                    worker.ReportProgress(1, _m.Currentpicture);
+                    worker.ReportProgress(2, classification);
+                }
+
+                Thread.Sleep(1000);
+            }
+        }
+
+        /// <summary>
+        /// We use this function to update the user interface from the background worker
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            int percentage = e.ProgressPercentage;
+
+            switch (percentage)
+            {
+                case 0:
+                    TakenImage = e.UserState as Bitmap;
+                    break;
+                case 1:
+                    CleanedImage = e.UserState as Bitmap;
+                    break;
+                case 2:
+                    if (e.UserState is int)
+                        Class = (int)e.UserState;
+                    break;
+            }
         }
 
         private void SendByteButton_Click(object sender, RoutedEventArgs e)
         {
-            string[] input = SerialByteTextBox.Text.Split(' ');
-
+            string[] input = Bytes.Split(' ');
             byte[] bytes = new byte[input.Length];
 
             for (int i = 0; i < input.Length; i++)
@@ -282,7 +250,7 @@ namespace BmpSort
             List<byte> msg = new List<byte> { 0x62, (byte)bytes.Length };
             msg.AddRange(bytes);
 
-            AIO.SendByte(msg.ToArray());
+            _aio.SendByte(msg.ToArray());
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
