@@ -19,8 +19,11 @@ struct Base_Motor
 {
     volatile int32_t degrees;
     volatile int32_t buffer;
+    volatile int8_t direction;
     volatile bool reading;
     float degree_ratio;
+    uint8_t interrupt_pin1;
+    uint8_t interrupt_pin2;
 };
 
 /*
@@ -41,16 +44,14 @@ struct Advanced_Motor
     Base_Motor base;
     uint8_t pin1;
     uint8_t pin2;
-    uint8_t interrupt_pin1;
-    uint8_t interrupt_pin2;
-    volatile int8_t direction;
 };
 
 /*
  * Initializes a standard motor
  */
 void motor_init(Motor* motor, float degree_ratio, uint8_t pin,
-                uint8_t interrupt_pin, void (*interrupt_handler)(void));
+                uint8_t interrupt_pin1, uint8_t interrupt_pin2, 
+                void (*interrupt_handler)(void));
 
 /*
  * Initializes an advanced motor

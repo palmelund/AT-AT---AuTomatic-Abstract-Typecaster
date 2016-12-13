@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
@@ -145,8 +146,10 @@ namespace BmpSort
                 Message message;
                 ArduinoIO.AwaitMessage(out message);
 
-                if (message != null &&
-                    message.Type == MessageType.Command &&
+                if (message == null)
+                    continue;
+
+                if (message.Type == MessageType.Command &&
                     (message as CommandMessage).Command == Command.TakePicture)
                 {
                     var image = _kinect.TakePicture(new Rectangle(262, 87, 110, 200));
@@ -159,7 +162,6 @@ namespace BmpSort
                     worker.ReportProgress(0, image);
                     worker.ReportProgress(1, _m.Currentpicture);
                     worker.ReportProgress(2, classification);
-
 
                     //string time = System.DateTime.Now.ToString("hh'-'mm'-'ss", CultureInfo.CurrentUICulture.DateTimeFormat);
                     //string myPhotos = Directory.GetCurrentDirectory();
@@ -217,7 +219,7 @@ namespace BmpSort
 
         private void SendByteArray(byte[] bytes)
         {
-            List<byte> msg = new List<byte> { 0x62, (byte)bytes.Length };
+            List<byte> msg = new List<byte> { 0xFF, (byte)bytes.Length };
             msg.AddRange(bytes);
 
             _aio.SendByte(msg.ToArray());

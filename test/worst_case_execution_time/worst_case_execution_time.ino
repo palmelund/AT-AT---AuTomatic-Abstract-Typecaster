@@ -43,33 +43,24 @@ void setup()
     while (!Serial)
         ;
 
-#if DEBUGGING
-    DEBUG_PRINTLN("Ready!");
 
-    while (Serial.available() <= 0) ;
-#endif
-
+    Serial.println("Hello World!");
     // Initialize color sensor
 
     RGB_sensor.init();
 
     DEBUG_PRINTLN("Initializing all components...");
-    DEBUG_PRINTLN("- Ultra sound sensor...");
-    distance_sensor_init(&distance_sensor, RANGE_TRIG, RANGE_ECHO);
-
-    DEBUG_PRINTLN("--- Calibrating...");
-    distance_to_wall = task_calibrate_ultra_sound_sensor(&distance_sensor);
-    DEBUG_PRINT("---");
-    DEBUG_PRINTLN_VAR(distance_to_wall);
-
     DEBUG_PRINTLN("- Motors...");
-    motor_init(&motor_conveyor, 0.36, MOTOR_CONVEYOR_PIN, MOTOR_CONVEYOR_INT_PIN,
+    
+    motor_init(&motor_conveyor, 0.20, MOTOR_CONVEYOR_PIN, 
+               MOTOR_CONVEYOR_INT_PIN, MOTOR_CONVEYOR_DATA_PIN,
                motor_conveyor_interrupt);
-    motor_init(&motor_feeder, 1.0, MOTOR_FEEDER_PIN, MOTOR_FEEDER_INT_PIN,
+    motor_init(&motor_feeder, 1.0, MOTOR_FEEDER_PIN, 
+               MOTOR_FEEDER_INT_PIN, MOTOR_FEEDER_DATA_PIN,
                motor_feeder_interrupt);
 
     advanced_motor_init(&adv_motor_separator, 1.0, MOTOR_SEPARATOR_PIN1,
-                        MOTOR_SEPARATOR_PIN2, MOTOR_SEPARATOR_INT_PIN1, MOTOR_SEPARATOR_DATA_PIN,
+                        MOTOR_SEPARATOR_PIN2, MOTOR_SEPARATOR_INT_PIN, MOTOR_SEPARATOR_DATA_PIN,
                         adv_motor_separator_interrupt1);
 
     DEBUG_PRINTLN("- Color sensor...");
@@ -78,35 +69,75 @@ void setup()
            RGB_sensor.readBlue() == 0)
         ;
 
+
+
+#if DEBUGGING
+
+    DEBUG_PRINTLN("Ready!");
+    while (Serial.available() <= 0) ;
+
+#else
+
+    for (;;)
+    {
+        Message message;
+        io_await_message(&message);
+        
+        Serial.println("Hello World.. Again!");
+        
+        if (message.type == MESSAGE_TYPE_COMMAND &&
+            message.command.type == MESSAGE_COMMAND_START)
+        {
+            break;
+        }
+    }
+
+#endif
+
     #ifdef WCE_TEST_CHECK_FIRST_SEGMENT
     wce_task_check_first_segment(&motor_conveyor, &motor_feeder,
         &adv_motor_separator, &distance_sensor, distance_to_wall, 
         &segment_queue);
-    #endif
 
-    #ifdef WCE_TEST_SEND_TAKE_PICTURE
-    wce_task_send_take_picture(&motor_conveyor, &motor_feeder,
-        &adv_motor_separator, &segment_queue);
+    Serial.println();
+    Serial.println();
+    Serial.println();
     #endif
 
     #ifdef WCE_TEST_DETERMIN_COLOR
     wce_determin_color(&motor_conveyor, &motor_feeder,
         &adv_motor_separator, &RGB_sensor, &segment_queue, 
         colors);
+
+    Serial.println();
+    Serial.println();
+    Serial.println();
     #endif
 
     #ifdef WCE_TEST_FEED_BALL
     wce_task_feed_ball(&motor_conveyor, &motor_feeder,
         &adv_motor_separator);
+
+    Serial.println();
+    Serial.println();
+    Serial.println();
     #endif
 
     #ifdef WCE_TEST_ROTATE_SEPERATOR
     wce_task_rotate_seperator(&motor_conveyor, &motor_feeder,
         &adv_motor_separator, &segment_queue);
+
+    Serial.println();
+    Serial.println();
+    Serial.println();
     #endif
 
     #ifdef WCE_TEST_CONVEYOR_SEGMENT_TURN_SPEED
     wce_conveyor_segment_turn_speed(&motor_conveyor);
+
+    Serial.println();
+    Serial.println();
+    Serial.println();
     #endif
 }
 
@@ -130,5 +161,5 @@ void adv_motor_separator_interrupt1()
 
 void loop()
 {
-
+    Serial.println("Done :)");
 }

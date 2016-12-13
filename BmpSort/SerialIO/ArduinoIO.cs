@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO.Ports;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace SerialIO
@@ -12,12 +13,12 @@ namespace SerialIO
     public class ArduinoIO
 	{
 	    // 0x62 is defined as the <start-of-message> byte, and must be present at the beginning of all sent messages
-	    private const byte Begin = 0x62;
+	    private const byte Begin = 0xFF;
 
 		const byte MESSAGE_TYPE_COMMAND = 0x00;
 		const byte MESSAGE_TYPE_OBJECT = 0x01;
 
-		const byte MESSAGE_SIZE_COMMAND = 0x02;
+        const byte MESSAGE_SIZE_COMMAND = 0x02;
 		const byte MESSAGE_SIZE_OBJECT = 0x03;
 	
 
@@ -82,48 +83,39 @@ namespace SerialIO
 		{
 		    message = null;
 
-		    //Console.WriteLine("Awaiting");
-
 		    // Wait until we have a new message and its length in the buffer.
-			while (_port.BytesToRead < 2)
-			{
-			    // Console.WriteLine(_port.BytesToRead);
-			}
+			while (_port.BytesToRead < 1)
+			{ }
 
-		    //Console.WriteLine("Two bytes found");
+		    var startByte = _port.ReadByte();
 
-		    var b = new byte[2];
-			_port.Read (b, 0, 2);
-
-			//Console.WriteLine ("Startbytes: " + b [0] + " " + b [1]);
-
-		    if (b[0] != Begin)
+		    if (startByte != Begin)
 		    {
-				Console.WriteLine ("Byte not start byte");
+                Console.Write(Convert.ToChar(startByte));
 		        return false;
 		    }
+            
+            // Wait until we have a new message and its length in the buffer.
+            while (_port.BytesToRead < 1)
+            { }
 
-		    // Create a new byte array with the length of the message sent
-			var data = new byte[b [1]];
+            var byteCount = _port.ReadByte();
 
-			//Console.WriteLine ("Length: " + data.Length);
+            // Create a new byte array with the length of the message sent
+            var data = new byte[byteCount];
 
 		    // Wait for the entire message to be in the buffer.
 			while (_port.BytesToRead < data.Length)
-			{
-			}
+			{ }
 
 		    _port.Read (data, 0, data.Length);
 
 		    // Return the data as a message of the correct type.
-
-		    //Console.WriteLine("Data[0]:" + data[0] + "\nLength: " + data.Length);
-
 			switch (data [0]) {
 			case MESSAGE_TYPE_COMMAND:
 				message = new CommandMessage (MessageType.Command, (Command)data [1]);
 			    return true;
-			    default:
+            default:
 			    return false;
 			}
 		}

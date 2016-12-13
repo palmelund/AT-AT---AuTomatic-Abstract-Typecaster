@@ -33,7 +33,7 @@ void io_send_message(Message* sending_message)
         Serial.write(sending_message->type);
         Serial.write(sending_message->command.type);
         break;
-
+        
     default:
         ASSERT(false);
         break;

@@ -55,13 +55,16 @@ void setup()
     DEBUG_PRINTLN("Initializing all components...");
 
     DEBUG_PRINTLN("- Motors...");
-    motor_init(&motor_conveyor, 0.20, MOTOR_CONVEYOR_PIN, MOTOR_CONVEYOR_INT_PIN,
+    
+    motor_init(&motor_conveyor, 0.20, MOTOR_CONVEYOR_PIN, 
+               MOTOR_CONVEYOR_INT_PIN, MOTOR_CONVEYOR_DATA_PIN,
                motor_conveyor_interrupt);
-    motor_init(&motor_feeder, 1.0, MOTOR_FEEDER_PIN, MOTOR_FEEDER_INT_PIN,
+    motor_init(&motor_feeder, 1.0, MOTOR_FEEDER_PIN, 
+               MOTOR_FEEDER_INT_PIN, MOTOR_FEEDER_DATA_PIN,
                motor_feeder_interrupt);
 
-    advanced_motor_init(&adv_motor_separator, 1.0, MOTOR_SEPARATOR_PIN1,
-                        MOTOR_SEPARATOR_PIN2, MOTOR_SEPARATOR_INT_PIN1, MOTOR_SEPARATOR_DATA_PIN,
+    advanced_motor_init(&adv_motor_separator, 1.0, MOTOR_SEPARATOR_INT_PIN,
+                        MOTOR_SEPARATOR_PIN2, MOTOR_SEPARATOR_INT_PIN, MOTOR_SEPARATOR_DATA_PIN,
                         adv_motor_separator_interrupt1);
 
     DEBUG_PRINTLN("- Color sensor...");
@@ -108,8 +111,14 @@ void loop()
     task_rotate_seperator(&adv_motor_separator, &segment_queue);
     task_feed_ball(&motor_feeder);
 
+    if (motor_get_degrees(&motor_conveyor) >= conveyor_target)
+    {
+        // This will only happen if a deadline is missed
+        ASSERT(false);
+    }
+
     while (motor_get_degrees(&motor_conveyor) < conveyor_target)
-        ;
+    { }
     conveyor_target += SEGMENT_DEGREE_LENGTH;
 }
 
@@ -130,82 +139,3 @@ void adv_motor_separator_interrupt1()
 {
     advanced_motor_update_degrees(&adv_motor_separator);
 }
-
-/*
-void startup_helper()
-{
-    pinMode(42, OUTPUT);
-    bool start = false;
-    while (!start)
-    {
-        In_Message message;
-        io_await_message(&message);
-
-        switch (message.type)
-        {
-        case IN_MESSAGE_COMMAND:
-            switch (message.command.type)
-            {
-            case IN_COMMAND_CALIBRATE_RED:
-                calibrate_color(&rgb_sensor, &colors[RED]);
-
-                //read_color(&colors[RED].rgb);
-
-                Out_Message out;
-                out.type = OUT_MESSAGE_COLOR;
-                out.color.type = RED;
-
-                out.color.red_value = colors[RED].rgb.red;
-                out.color.green_value = colors[RED].rgb.green;
-                out.color.blue_value = colors[RED].rgb.blue;
-                io_send_message(&out);
-
-                continue;
-            case IN_COMMAND_CALIBRATE_GREEN:
-                calibrate_color(&rgb_sensor, &colors[GREEN]);
-                continue;
-            case IN_COMMAND_CALIBRATE_BLUE:
-                calibrate_color(&rgb_sensor, &colors[BLUE]);
-                continue;
-            case IN_COMMAND_CALIBRATE_DISTANCE:
-                calibrate_color(&rgb_sensor, &colors[YELLOW]);
-                continue;
-            case IN_COMMAND_START:
-                start = true;
-                continue;
-            case IN_COMMAND_STOP:
-            default:
-                abort();
-                continue;
-            }
-        case IN_MESSAGE_OBJECT:
-        case IN_MESSAGE_COLOR:
-        case IN_MESSAGE_DISTANCE:
-        default:
-            continue;
-        }
-    }
-}
-
-void print_queue()
-{
-    for (int8_t i = QUEUE_SIZE - 1; i >= 0; --i)
-    {
-        Serial.print("|");
-        Segment *segment = get_segment(&segment_queue, i);
-
-        if (segment->is_occupied)
-        {
-            if (segment->object_type == BALL)
-                Serial.print(get_color_name(segment->color));
-            else
-                Serial.print("O");
-        }
-        else
-        {
-            Serial.print(" ");
-        }
-    }
-    Serial.println("|");
-}
-*/

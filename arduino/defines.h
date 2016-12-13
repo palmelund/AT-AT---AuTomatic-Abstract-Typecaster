@@ -6,9 +6,9 @@
 #define _DEFINES_H_
 #include <stddef.h>
 #include "Arduino.h"
+#include "io_api.h"
 
 #define DEBUGGING 0 // TODO: Set to 0 when running release
-#define RELEASEDEBUG 0
 
 #define CALIBRACTION_ITERATIONS 200
 
@@ -51,28 +51,17 @@ if (!(logic)) {                                 \
 #else
 #define ASSERT(logic) \
 if (!(logic)) {                                 \
-pinMode(42, OUTPUT); \
-while (true) \
-{ \
-    digitalWrite(42, HIGH); \
-    delay(500); \
-    digitalWrite(42, LOW); \
-    delay(500); \
-}   \
+    pinMode(42, OUTPUT);                        \
+    while (true)                                \
+    {                                           \
+        digitalWrite(42, HIGH);                 \
+        delay(500);                             \   
+        digitalWrite(42, LOW);                  \
+        delay(500);                             \
+    }                                           \
 }
 #endif
 
-#if RELEASEDEBUG
-#define BLINK                       \
-pinMode(42, OUTPUT); \
-digitalWrite(42, HIGH); \
-delay(500); \
-digitalWrite(42, LOW)
-#else
-#define BLINK
-#endif
-
-#endif // _DEFINES_H_
 
 #define DEBUG_PRINT_RGB(var)    \
     DEBUG_PRINT(#var);          \
@@ -82,3 +71,5 @@ digitalWrite(42, LOW)
     DEBUG_PRINT(var.green);     \
     DEBUG_PRINT(" b: ");        \
     DEBUG_PRINTLN(var.blue);
+
+#endif // _DEFINES_H_

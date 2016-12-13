@@ -19,8 +19,10 @@
 #define MOTOR_SEPARATOR_PIN2 23         // Control separator motor direction
 
 #define MOTOR_CONVEYOR_INT_PIN 2        // Interrupt conveyor motor
+#define MOTOR_CONVEYOR_DATA_PIN 49      
 #define MOTOR_FEEDER_INT_PIN 18         // Interrupt feeder motor
-#define MOTOR_SEPARATOR_INT_PIN1 3      // Interrupt separator motor
+#define MOTOR_FEEDER_DATA_PIN 47        
+#define MOTOR_SEPARATOR_INT_PIN 3       // Interrupt separator motor
 #define MOTOR_SEPARATOR_DATA_PIN 51     // Used to read direction, not an actual 
                                         // interrupt
 

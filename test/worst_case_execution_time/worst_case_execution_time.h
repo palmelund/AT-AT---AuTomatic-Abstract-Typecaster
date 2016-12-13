@@ -2,23 +2,16 @@
 
 #include "src.h"
 
-
-//#define WCE_TEST_CHECK_FIRST_SEGMENT
-//#define WCE_TEST_SEND_TAKE_PICTURE
-//#define WCE_TEST_DETERMIN_COLOR
-//#define WCE_TEST_FEED_BALL
-//#define WCE_TEST_ROTATE_SEPERATOR
-//#define WCE_TEST_CONVEYOR_SEGMENT_TURN_SPEED
+#define WCE_TEST_CHECK_FIRST_SEGMENT
+#define WCE_TEST_DETERMIN_COLOR
+#define WCE_TEST_FEED_BALL
+#define WCE_TEST_ROTATE_SEPERATOR
+#define WCE_TEST_CONVEYOR_SEGMENT_TURN_SPEED
 
 #ifdef WCE_TEST_CHECK_FIRST_SEGMENT
 void wce_task_check_first_segment(Motor* conveyor, Motor* feeder,
     Advanced_Motor* seperator, Ultra_Sound_Sensor* distance_sensor,
     uint16_t distance_to_wall, Segment_Queue* segment_queue);
-#endif
-
-#ifdef WCE_TEST_SEND_TAKE_PICTURE
-void wce_task_send_take_picture(Motor* conveyor, Motor* feeder,
-    Advanced_Motor* seperator, Segment_Queue* queue);
 #endif
 
 #ifdef WCE_TEST_DETERMIN_COLOR
