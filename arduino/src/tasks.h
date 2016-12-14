@@ -27,7 +27,7 @@ void task_calibrate_colors(int32_t* conveyor_target, Motor* conveyor,
 void task_check_first_segment(Segment_Queue* segment_queue);
 
 void task_determin_color(SFE_ISL29125* color_sensor,
-    Segment_Queue* segment_queue, Delta_RGB* known_colors);
+    Segment_Queue* segment_queue, Delta_RGB known_colors[COLOR_COUNT]);
 
 void task_feed_ball(Motor* feeder);
 

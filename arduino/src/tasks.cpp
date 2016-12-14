@@ -77,13 +77,14 @@ void task_check_first_segment(Segment_Queue *segment_queue)
 }
 
 void task_determin_color(SFE_ISL29125 *color_sensor,
-                         Segment_Queue *segment_queue, Delta_RGB *known_colors)
+                         Segment_Queue *segment_queue, Delta_RGB known_colors[COLOR_COUNT])
 {
     Segment *segment = get_segment(segment_queue, COLOR_SENSOR_SEGMENT_INDEX);
 
     if (segment->object_type == BALL)
     {
-        int8_t results[COLOR_COUNT + 1] = {0};
+        const uint8_t result_count = COLOR_COUNT + 1;
+        int8_t results[result_count] = {0};
 
         for (uint8_t i = 0; i < SENSOR_PINGS; ++i)
         {
@@ -94,7 +95,7 @@ void task_determin_color(SFE_ISL29125 *color_sensor,
 
         uint8_t determined_color;
         int8_t max = -1;
-        for (uint8_t i = 0; i < COLOR_COUNT + 1; ++i)
+        for (uint8_t i = 0; i < result_count; ++i)
         {
             if (results[i] > max)
             {

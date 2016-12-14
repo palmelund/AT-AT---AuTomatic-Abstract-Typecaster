@@ -106,7 +106,6 @@ void setup()
 void loop()
 {
     task_check_first_segment(&segment_queue);
-
     task_determin_color(&rgb_sensor, &segment_queue, colors);
     task_rotate_seperator(&adv_motor_separator, &segment_queue);
     task_feed_ball(&motor_feeder);

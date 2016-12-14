@@ -11,11 +11,11 @@
 
 #define COLOR_COUNT 4
 
-#define RED 0x00
-#define GREEN 0x01
-#define BLUE 0x02
-#define YELLOW 0x03
-#define UNKNOWN 0x04
+#define RED 0
+#define GREEN 1
+#define BLUE 2
+#define YELLOW 3
+#define UNKNOWN 4
 
 struct RGB
 {
@@ -37,6 +37,6 @@ float euclidean_distance_3d(
     float x2, float y2, float z2);
 void determin_bounding_sphere(RGB* samples, uint8_t sample_count, 
     Delta_RGB *result);
-uint8_t determin_color(Delta_RGB* known_colors, RGB *color);
+uint8_t determin_color(Delta_RGB known_colors[COLOR_COUNT], RGB *color);
 
 //#endif // _COLORS_H_
