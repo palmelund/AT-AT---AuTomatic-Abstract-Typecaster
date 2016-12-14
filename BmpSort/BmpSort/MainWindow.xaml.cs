@@ -404,6 +404,8 @@ namespace BmpSort
         private void UnitTestBotton_Click(object sender, RoutedEventArgs e)
         {
             kinect = new Kinect();
+            kinect.Sensor.ColorFrameReady += SensorColorFrameReady;
+            Image1.Source = kinect.ColorBitmap;
 
             BitmapEncoder encoder = new BmpBitmapEncoder();
 
