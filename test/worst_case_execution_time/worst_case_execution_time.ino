@@ -108,7 +108,7 @@ void setup()
     wce_determin_color(&motor_conveyor, &motor_feeder,
         &adv_motor_separator, &RGB_sensor, &segment_queue, 
         colors);
-
+        
     Serial.println();
     Serial.println();
     Serial.println();
@@ -161,5 +161,5 @@ void adv_motor_separator_interrupt1()
 
 void loop()
 {
-    Serial.println("Done :)");
+
 }

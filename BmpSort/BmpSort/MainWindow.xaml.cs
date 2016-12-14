@@ -159,14 +159,14 @@ namespace BmpSort
                     ArduinoIO.SendObject(classification, Color.Unknown);
                     // TODO: Update when the kinect supports color recognition
 
+                    var time = DateTime.Now.ToString("hh'-'mm'-'ss", CultureInfo.CurrentUICulture.DateTimeFormat);
+                    var myPhotos = Directory.GetCurrentDirectory();
+                    var path = Path.Combine(myPhotos, classification + "-" + time + ".bmp");
+                    image.Save(path);
+
                     worker.ReportProgress(0, image);
                     worker.ReportProgress(1, _m.Currentpicture);
                     worker.ReportProgress(2, classification);
-
-                    //string time = System.DateTime.Now.ToString("hh'-'mm'-'ss", CultureInfo.CurrentUICulture.DateTimeFormat);
-                    //string myPhotos = Directory.GetCurrentDirectory();
-                    //string path = System.IO.Path.Combine(myPhotos, "picture-" + time + ".bmp");
-                    //image.Save(path);
                 }
             }
         }

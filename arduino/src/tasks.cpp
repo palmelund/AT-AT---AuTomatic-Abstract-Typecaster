@@ -83,7 +83,7 @@ void task_determin_color(SFE_ISL29125 *color_sensor,
 
     if (segment->object_type == BALL)
     {
-        uint8_t results[COLOR_COUNT] = {0};
+        int8_t results[COLOR_COUNT + 1] = {0};
 
         for (uint8_t i = 0; i < SENSOR_PINGS; ++i)
         {
@@ -94,7 +94,7 @@ void task_determin_color(SFE_ISL29125 *color_sensor,
 
         uint8_t determined_color;
         int8_t max = -1;
-        for (uint8_t i = 0; i < COLOR_COUNT; ++i)
+        for (uint8_t i = 0; i < COLOR_COUNT + 1; ++i)
         {
             if (results[i] > max)
             {

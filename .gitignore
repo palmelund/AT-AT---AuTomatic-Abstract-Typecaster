@@ -258,3 +258,4 @@ paket-files/
 arduino/build
 test/unit_test/build
 test/component_tests/build
+test/worst_case_execution_time/build/

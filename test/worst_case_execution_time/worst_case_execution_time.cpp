@@ -16,7 +16,7 @@ void wce_task_check_first_segment(Motor* conveyor, Motor* feeder,
     {
         time_start = micros();
 
-        task_check_first_segment(segment_queue);
+        //task_check_first_segment(segment_queue);
 
         time_end = micros();
 
@@ -79,7 +79,6 @@ void wce_task_feed_ball(Motor* conveyor, Motor* feeder,
     feeder->base.degrees = 0;
     feeder->base.buffer = 0;
     motor_turn(conveyor);
-    motor_turn(feeder);
 
     delay(1000);
 
@@ -111,7 +110,8 @@ void wce_task_rotate_seperator(Motor* conveyor, Motor* feeder,
 {
     Serial.println("wce_task_rotate_seperator");
     motor_turn(conveyor);
-    advanced_motor_turn(seperator, FORWARD);
+    motor_turn(feeder);
+    //advanced_motor_turn(seperator, FORWARD);
 
     Segment* segment = get_segment(queue, LAST_INDEX);
     segment->object_type = BALL;
@@ -124,7 +124,7 @@ void wce_task_rotate_seperator(Motor* conveyor, Motor* feeder,
     uint32_t time_start, time_end;
     for (uint8_t i = 0; i < CALIBRACTION_ITERATIONS; ++i)
     {
-        segment->color = i % 2 == 0 ? GARBAGE : YELLOW;
+        segment->color = i % 2 == 0 ? RED : YELLOW;
 
         time_start = micros();
 
@@ -140,8 +140,8 @@ void wce_task_rotate_seperator(Motor* conveyor, Motor* feeder,
         delay(1000);
     }
 
+    motor_stop(feeder);
     motor_stop(conveyor);
-    advanced_motor_stop(seperator);
 }
 
 void wce_conveyor_segment_turn_speed(Motor* conveyor)
