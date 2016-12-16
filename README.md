@@ -24,6 +24,7 @@ The project has the following overall structure to help organising files and sou
   * This is where schematics for the construction are located. There are currently two.
   * A wire schematic showing how the hardware is wired up. This can be opened using Fritzinf.
   * A digital model of the machine. This can be opened using LEGO Digital Designer.
+  * A fault tree conducted from a fault tree analysis.
 * test
   * This is where the code for unit testing, component testing and worst case execution time are located
   
