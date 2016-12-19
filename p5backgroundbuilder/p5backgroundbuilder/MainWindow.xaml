@@ -1,0 +1,31 @@
+﻿<Window x:Class="p5backgroundbuilder.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:p5backgroundbuilder"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="680" Width="900">
+    <Grid>
+        <Image x:Name="originalBallImage" HorizontalAlignment="Left" Height="200" Margin="10,10,0,0" VerticalAlignment="Top" Width="400"/>
+        <Image x:Name="cleanedBallImage" HorizontalAlignment="Left" Height="200" Margin="480,10,0,0" VerticalAlignment="Top" Width="400"/>
+        <Image x:Name="originalDiceImage" HorizontalAlignment="Left" Height="200" Margin="10,235,0,0" VerticalAlignment="Top" Width="400"/>
+        <Image x:Name="cleanedDiceImage" HorizontalAlignment="Left" Height="200" Margin="480,235,0,0" VerticalAlignment="Top" Width="400"/>
+        <Image x:Name="nextBackgroundImage" HorizontalAlignment="Left" Height="200" Margin="480,440,0,0" VerticalAlignment="Top" Width="400"/>
+        <Button x:Name="buttonLoadFiles" Content="Load Files" HorizontalAlignment="Left" Margin="10,440,0,0" VerticalAlignment="Top" Width="60" Click="load_files_button"/>
+        <Button x:Name="buttonNextBall" Content="Next Ball" HorizontalAlignment="Left" Margin="80,440,0,0" VerticalAlignment="Top" Width="60" Click="next_ball_button"/>
+        <Button x:Name="buttonPrevBall" Content="Prev Ball" HorizontalAlignment="Left" Margin="150,440,0,0" VerticalAlignment="Top" Width="60" Click="prev_ball_button"/>
+        <Button x:Name="buttonNextDice" Content="Next Dice" HorizontalAlignment="Left" Margin="220,440,0,0" VerticalAlignment="Top" Width="60" Click="next_dice_button"/>
+        <Button x:Name="buttonPrevDice" Content="Prev Dice" HorizontalAlignment="Left" Margin="290,440,0,0" VerticalAlignment="Top" Width="60" Click="prev_dice_button"/>
+        <Button x:Name="buttonNextBack" Content="Next Back" HorizontalAlignment="Left" Margin="360,440,0,0" VerticalAlignment="Top" Width="60" Click="next_back"/>
+        <Button x:Name="buttonAddBack" Content="add Back" HorizontalAlignment="Left" Margin="360,465,0,0" VerticalAlignment="Top" Width="60" Click="add_next_back"/>
+        <Button x:Name="buttonAddAllBack" Content="add All Back" HorizontalAlignment="Left" Margin="290,465,0,0" VerticalAlignment="Top" Width="60" Click="add_all_back"/>
+        <Button x:Name="buttonarff" Content="Build Arff" HorizontalAlignment="Left" Margin="220,465,0,0" VerticalAlignment="Top" Width="60" Click="build_arff"/>
+        <Label x:Name="countlabel" Content="count" HorizontalAlignment="Left" Margin="430,440,0,-0.333" VerticalAlignment="Top"/>
+        <Label x:Name="Ballcountlabel" Content="Ball" HorizontalAlignment="Left" Margin="50,210,0,-0.333" VerticalAlignment="Top"/>
+        <Label x:Name="Dicelabel" Content="Dice" HorizontalAlignment="Left" Margin="125,210,0,-0.333" VerticalAlignment="Top"/>
+        <Label x:Name="BackCountlabel" Content="Background" HorizontalAlignment="Left" Margin="200,210,0,-0.333" VerticalAlignment="Top"/>
+        <Button x:Name="outputbutton" Content="output" HorizontalAlignment="Left" Margin="150,465,0,0" VerticalAlignment="Top" Width="60" Click="output_button"/>
+
+    </Grid>
+</Window>
