@@ -186,7 +186,7 @@ uint8_t determin_color(Delta_RGB known_colors[COLOR_COUNT], RGB *color)
 {
     uint8_t closest_color = UNKNOWN;
     float closest_distance = USHRT_MAX;
-    for (uint8_t i = 0; i < sizeof(known_colors) / sizeof(Delta_RGB); ++i)
+    for (uint8_t i = 0; i < COLOR_COUNT; ++i)
     {
         float distance = euclidean_distance_3d(
             color->red, color->green, color->blue, known_colors[i].rgb.red, 
