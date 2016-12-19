@@ -63,7 +63,7 @@ void setup()
                MOTOR_FEEDER_INT_PIN, MOTOR_FEEDER_DATA_PIN,
                motor_feeder_interrupt);
 
-    advanced_motor_init(&adv_motor_separator, 1.0, MOTOR_SEPARATOR_INT_PIN,
+    advanced_motor_init(&adv_motor_separator, 1.0, MOTOR_SEPARATOR_PIN1,
                         MOTOR_SEPARATOR_PIN2, MOTOR_SEPARATOR_INT_PIN, MOTOR_SEPARATOR_DATA_PIN,
                         adv_motor_separator_interrupt1);
 
@@ -74,14 +74,6 @@ void setup()
         ;
     motor_stop(&motor_conveyor);
 
-#if DEBUGGING
-
-    DEBUG_PRINTLN("Ready!");
-
-    while (Serial.available() <= 0)
-        ;
-    Serial.read();
-#else
     for (;;)
     {
         Message message;
@@ -92,7 +84,6 @@ void setup()
             break;
         }
     }
-#endif
 
     motor_turn(&motor_conveyor);
     advanced_motor_turn_to_degree(&adv_motor_separator, GARBAGE_BUCKET);

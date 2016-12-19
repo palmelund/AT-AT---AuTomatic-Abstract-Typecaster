@@ -84,14 +84,16 @@ void task_determin_color(SFE_ISL29125 *color_sensor,
     if (segment->object_type == BALL)
     {
         const uint8_t result_count = COLOR_COUNT + 1;
-        int8_t results[result_count] = {0};
+        int8_t results[result_count] = {0, 0, 0, 0, 0};
 
+        DEBUG_PRINTLN("B");
         for (uint8_t i = 0; i < SENSOR_PINGS; ++i)
         {
             RGB color;
             read_color(color_sensor, &color);
             results[determin_color(known_colors, &color)] += 1;
         }
+        DEBUG_PRINTLN("E");
 
         uint8_t determined_color;
         int8_t max = -1;
@@ -158,6 +160,7 @@ void task_rotate_seperator(Advanced_Motor *separator, Segment_Queue *queue)
 
     if (position != last_position)
     {
+        DEBUG_PRINTLN_VAR(bucket_position[position]);
         advanced_motor_turn_to_degree(separator, bucket_position[position]);
         last_position = position;
     }
